@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PhotoTracker</string>
+    <string name="start">Start tracking...</string>
+    <string name="action_settings">Settings</string>
+</resources>
