@@ -9,9 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-
 public class PhotoTrackerActivity extends SingleFragmentActivity {
     private static final String TAG = "PhotoTracker";
     private static final int REQUEST_ERROR = 0;
@@ -25,6 +22,7 @@ public class PhotoTrackerActivity extends SingleFragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        /*
         int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
         if (errorCode != ConnectionResult.SUCCESS){
@@ -38,6 +36,7 @@ public class PhotoTrackerActivity extends SingleFragmentActivity {
                     });
             errorDialog.show();
         }
+        */
     }
 
     @Override

@@ -18,10 +18,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,20 +40,17 @@ import java.util.TimerTask;
  * Created by Vitaly on 29.08.2017.
  */
 
-public class PhotoTrackerFragment extends Fragment {
+public class PhotoTrackerFragment extends SupportMapFragment {
     private static final String TAG = "PhotoTracker";
     private static final int GPS_TIMER_DELAY = 1000;
     private static final int GPS_TIMER_INTERVAL = 10*1000;
-    private GoogleApiClient mClient;
-    //private GoogleMap mMap;
-    private ProgressDialog mProgressDialog;
-    private Bitmap mMapImage;
-    //private GalleryItem mMapItem;
     private Location mCurrentLocation;
     GPSTracker gps;
     Timer timer;
     TimerTask mTimerTask;
     private List<Location> mCurrentTrack = new ArrayList<>();
+    private Bitmap mMapImage;
+    private GoogleMap mMap;
 
     public static PhotoTrackerFragment newInstance() {
         return new PhotoTrackerFragment();
@@ -57,6 +61,7 @@ public class PhotoTrackerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        /*
         mClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -72,7 +77,8 @@ public class PhotoTrackerFragment extends Fragment {
                     }
                 })
                 .build();
-        /*
+        */
+
         getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
@@ -80,7 +86,6 @@ public class PhotoTrackerFragment extends Fragment {
                 updateUI();
             }
         });
-        */
         //mProgressDialog = new ProgressDialog(getActivity());
         //mProgressDialog.setTitle(R.string.search_progress);
 
@@ -90,13 +95,13 @@ public class PhotoTrackerFragment extends Fragment {
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
-        mClient.connect();
+        //mClient.connect();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mClient.disconnect();
+       // mClient.disconnect();
     }
 
     @Override
@@ -104,8 +109,8 @@ public class PhotoTrackerFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_phototracker, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.action_start);
-        searchItem.setEnabled(mClient.isConnected());
+        //MenuItem searchItem = menu.findItem(R.id.action_start);
+        //searchItem.setEnabled(mClient.isConnected());
     }
 
     @Override
@@ -118,7 +123,7 @@ public class PhotoTrackerFragment extends Fragment {
                 stopTrack();
                 return true;
             case R.id.action_current_location:
-                updateLocation();
+                updateUI();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -130,6 +135,9 @@ public class PhotoTrackerFragment extends Fragment {
      * Start recording track
      */
     private void startTrack() {
+        // clear all saved tracking data
+        mCurrentTrack.clear();
+
         if(timer != null){
             timer.cancel();
         }
@@ -148,8 +156,6 @@ public class PhotoTrackerFragment extends Fragment {
             timer.cancel();
             timer = null;
         }
-        // clear all saved tracking data
-        mCurrentTrack.clear();
     }
 
     private void updateLocation(){
@@ -159,13 +165,30 @@ public class PhotoTrackerFragment extends Fragment {
         // check if GPS enabled
         if(gps.canGetLocation()){
 
-            Location location = gps.getLocation();
+            Location lastLocation = null;
+            Location currLocation = gps.getLocation();
+            if (currLocation==null){
+                Toast.makeText(getActivity().getApplicationContext(), "GPS signal is not too good on your current position, please get better location.", Toast.LENGTH_LONG).show();
+                return;
+            }
             // add gps location to current track
-            mCurrentTrack.add(location);
+            if (mCurrentTrack != null && !mCurrentTrack.isEmpty()) {
+                lastLocation = mCurrentTrack.get(mCurrentTrack.size()-1);
+            }
+
+            if (lastLocation!= null){
+                // add only if differ against last stored location
+                if (lastLocation.getLatitude() != currLocation.getLatitude() || lastLocation.getLongitude() != currLocation.getLongitude()){
+                    mCurrentTrack.add(currLocation);
+                }
+            } else {
+                // first location in track
+                mCurrentTrack.add(currLocation);
+            }
 
             // show current location
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
+            double latitude = currLocation.getLatitude();
+            double longitude = currLocation.getLongitude();
             // \n is for new line
             Toast.makeText(getActivity().getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
 
@@ -175,6 +198,44 @@ public class PhotoTrackerFragment extends Fragment {
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
+    }
+
+    private void updateUI(){
+        if (mMap == null ){
+            return;
+        }
+
+        if (mCurrentTrack == null || mCurrentTrack.isEmpty()) {
+            return;
+        }
+        LatLng itemPoint = new LatLng(
+                Lists.getFirst(mCurrentTrack).getLatitude(), Lists.getFirst(mCurrentTrack).getLongitude());
+        LatLng myPoint = new LatLng(
+                Lists.getLast(mCurrentTrack).getLatitude(), Lists.getLast(mCurrentTrack).getLongitude());
+
+        //BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(mMapImage);
+        MarkerOptions itemMarker = new MarkerOptions()
+                .position(itemPoint);
+        MarkerOptions myMarker = new MarkerOptions()
+                .position(myPoint);
+        mMap.clear();
+        mMap.addMarker(itemMarker);
+        mMap.addMarker(myMarker);
+
+        PolylineOptions lines = new PolylineOptions();
+        for(Location loc : mCurrentTrack){
+            lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
+        }
+        mMap.addPolyline(lines);
+
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(itemPoint)
+                .include(myPoint)
+                .build();
+        int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
+        mMap.animateCamera(update);
+
     }
 
     /**
