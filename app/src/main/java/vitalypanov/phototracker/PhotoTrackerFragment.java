@@ -51,15 +51,31 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     private List<Location> mCurrentTrack = new ArrayList<>();
     private Bitmap mMapImage;
     private GoogleMap mMap;
+    private static final int LOCATION_REQUEST = 1;
+    private static String[] LOCATION_PERMISSIONS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    };
 
     public static PhotoTrackerFragment newInstance() {
         return new PhotoTrackerFragment();
+    }
+
+    private boolean hasPermisson (String perm){
+        return (PackageManager.PERMISSION_GRANTED == getActivity().checkSelfPermission(perm));
+    }
+
+    private  boolean canAccessLocation(){
+        return (hasPermisson(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        if (!canAccessLocation()){
+            requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
+        }
 
         /*
         mClient = new GoogleApiClient.Builder(getActivity())
@@ -168,7 +184,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
             Location lastLocation = null;
             Location currLocation = gps.getLocation();
             if (currLocation==null){
-                Toast.makeText(getActivity().getApplicationContext(), "GPS signal is not too good on your current position, please get better location.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity().getApplicationContext(), "No position.", Toast.LENGTH_LONG).show();
                 return;
             }
             // add gps location to current track
