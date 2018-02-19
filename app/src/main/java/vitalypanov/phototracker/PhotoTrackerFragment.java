@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -23,7 +24,10 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Vitaly on 29.08.2017.
@@ -31,12 +35,18 @@ import java.util.List;
 
 public class PhotoTrackerFragment extends Fragment {
     private static final String TAG = "PhotoTracker";
+    private static final int GPS_TIMER_DELAY = 1000;
+    private static final int GPS_TIMER_INTERVAL = 10*1000;
     private GoogleApiClient mClient;
     //private GoogleMap mMap;
     private ProgressDialog mProgressDialog;
     private Bitmap mMapImage;
     //private GalleryItem mMapItem;
     private Location mCurrentLocation;
+    GPSTracker gps;
+    Timer timer;
+    TimerTask mTimerTask;
+    private List<Location> mCurrentTrack = new ArrayList<>();
 
     public static PhotoTrackerFragment newInstance() {
         return new PhotoTrackerFragment();
@@ -104,39 +114,84 @@ public class PhotoTrackerFragment extends Fragment {
             case R.id.action_start:
                 startTrack();
                 return true;
+            case R.id.action_stop:
+                stopTrack();
+                return true;
+            case R.id.action_current_location:
+                updateLocation();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
 
+    /**
+     * Start recording track
+     */
     private void startTrack() {
-        //mProgressDialog.show();
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        PhotoTrackerActivity.MY_PERMISSION_REQUEST_READ_FINE_LOCATION);
-            return; // user should start the process again after granted permissions
+        if(timer != null){
+            timer.cancel();
         }
-        LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        //request.setNumUpdates(1);
-        request.setInterval(5000);
-        // permission was granted, yay! Do the contacts-related task you need to do.
-        try {
-            LocationServices.FusedLocationApi
-                    .requestLocationUpdates(mClient, request, new LocationListener() {
-                        @Override
-                        public void onLocationChanged(Location location) {
-                            Log.i(TAG, "Got a fix:" + location);
-                        }
-                    });
-        } catch (SecurityException ex) {
-            Log.i(TAG, "SecurityException: " + ex);
+
+        timer = new Timer();
+        mTimerTask = new PhotoTrackerTimerTask();
+
+        timer.schedule(mTimerTask, GPS_TIMER_DELAY, GPS_TIMER_INTERVAL);
+    }
+
+    /**
+     * Stop recording track
+     */
+    private void stopTrack(){
+        if (timer!=null){
+            timer.cancel();
+            timer = null;
+        }
+        // clear all saved tracking data
+        mCurrentTrack.clear();
+    }
+
+    private void updateLocation(){
+        // create class object
+        gps = new GPSTracker(getActivity());
+
+        // check if GPS enabled
+        if(gps.canGetLocation()){
+
+            Location location = gps.getLocation();
+            // add gps location to current track
+            mCurrentTrack.add(location);
+
+            // show current location
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            // \n is for new line
+            Toast.makeText(getActivity().getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+
+        }else{
+            // can't get location
+            // GPS or Network is not enabled
+            // Ask user to enable GPS/network in settings
+            gps.showSettingsAlert();
         }
     }
 
+    /**
+     * Timer for gps tracking
+     */
+    class PhotoTrackerTimerTask extends TimerTask {
+        @Override
+        public void run() {
+
+            getActivity().runOnUiThread (new Runnable(){
+
+                @Override
+                public void run() {
+                    updateLocation();
+                }});
+        }
+    }
 
 }
 

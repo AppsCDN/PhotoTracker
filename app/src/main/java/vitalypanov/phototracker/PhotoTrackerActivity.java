@@ -50,7 +50,7 @@ public class PhotoTrackerActivity extends SingleFragmentActivity {
                     Log.i(TAG, "permission granted");
 
                 } else {
-                    Log.i(TAG, "permission denied, boo! Disable functionality");
+                    Log.i(TAG, "permission denied");
                 }
                 return;
             }
