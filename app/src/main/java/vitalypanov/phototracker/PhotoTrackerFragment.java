@@ -1,13 +1,20 @@
 package vitalypanov.phototracker;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +24,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.content.Context;
+import android.content.ServiceConnection;
+import android.os.Binder;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,19 +52,31 @@ import java.util.TimerTask;
 
 public class PhotoTrackerFragment extends SupportMapFragment {
     private static final String TAG = "PhotoTracker";
-    private static final int GPS_TIMER_DELAY = 1000;
-    private static final int GPS_TIMER_INTERVAL = 10*1000;
-    private Location mCurrentLocation;
-    GPSTracker gps;
-    Timer timer;
-    TimerTask mTimerTask;
-    private List<Location> mCurrentTrack = new ArrayList<>();
     private Bitmap mMapImage;
     private GoogleMap mMap;
     private static final int LOCATION_REQUEST = 1;
     private static String[] LOCATION_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
+    };
+    PhotoTrackerGPSService mService;
+    boolean mBound = false;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
     };
 
     public static PhotoTrackerFragment newInstance() {
@@ -72,39 +94,18 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         setHasOptionsMenu(true);
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
         }
-
-        /*
-        mClient = new GoogleApiClient.Builder(getActivity())
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-
-                    @Override
-                    public void onConnected(@Nullable Bundle bundle) {
-                        getActivity().invalidateOptionsMenu();
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-
-                    }
-                })
-                .build();
-        */
-
         getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
-                updateUI();
+                updateGoogleMapUI();
             }
         });
-        //mProgressDialog = new ProgressDialog(getActivity());
-        //mProgressDialog.setTitle(R.string.search_progress);
-
     }
 
     @Override
@@ -139,7 +140,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
                 stopTrack();
                 return true;
             case R.id.action_current_location:
-                updateUI();
+                updateGoogleMapUI();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -151,83 +152,85 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      * Start recording track
      */
     private void startTrack() {
-        // clear all saved tracking data
-        mCurrentTrack.clear();
-
-        if(timer != null){
-            timer.cancel();
-        }
-
-        timer = new Timer();
-        mTimerTask = new PhotoTrackerTimerTask();
-
-        timer.schedule(mTimerTask, GPS_TIMER_DELAY, GPS_TIMER_INTERVAL);
+        checkPermissions();
+        boolean shouldStartAlarm = !PhotoTrackerGPSService.isServiceAlarmOn(getActivity());
+        PhotoTrackerGPSService.setServiceAlarm(getActivity(),shouldStartAlarm, mConnection);
     }
 
     /**
      * Stop recording track
      */
     private void stopTrack(){
-        if (timer!=null){
-            timer.cancel();
-            timer = null;
-        }
+        PhotoTrackerGPSService.setServiceAlarm(getActivity(), false, mConnection);
     }
 
-    private void updateLocation(){
-        // create class object
-        gps = new GPSTracker(getActivity());
+    private void checkPermissions(){
+        LocationManager locationManager = (LocationManager) getActivity()
+                .getSystemService(Context.LOCATION_SERVICE);
 
-        // check if GPS enabled
-        if(gps.canGetLocation()){
-
-            Location lastLocation = null;
-            Location currLocation = gps.getLocation();
-            if (currLocation==null){
-                Toast.makeText(getActivity().getApplicationContext(), "No position.", Toast.LENGTH_LONG).show();
-                return;
-            }
-            // add gps location to current track
-            if (mCurrentTrack != null && !mCurrentTrack.isEmpty()) {
-                lastLocation = mCurrentTrack.get(mCurrentTrack.size()-1);
-            }
-
-            if (lastLocation!= null){
-                // add only if differ against last stored location
-                if (lastLocation.getLatitude() != currLocation.getLatitude() || lastLocation.getLongitude() != currLocation.getLongitude()){
-                    mCurrentTrack.add(currLocation);
-                }
-            } else {
-                // first location in track
-                mCurrentTrack.add(currLocation);
-            }
-
-            // show current location
-            double latitude = currLocation.getLatitude();
-            double longitude = currLocation.getLongitude();
-            // \n is for new line
-            Toast.makeText(getActivity().getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-
-        }else{
+        // getting GPS status
+        if (!locationManager
+                .isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+            !locationManager
+                .isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
             // can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
-            gps.showSettingsAlert();
+            showSettingsAlert();
         }
     }
 
-    private void updateUI(){
+    /**
+     * Function to show settings alert dialog
+     * On pressing Settings button will lauch Settings Options
+     * */
+    private void showSettingsAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+
+        // Setting Dialog Title
+        alertDialog.setTitle("GPS is settings");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
+
+    private void updateGoogleMapUI(){
         if (mMap == null ){
             return;
         }
 
-        if (mCurrentTrack == null || mCurrentTrack.isEmpty()) {
+        // service which holds track data should be not empty
+        if (mService == null){
+            return;
+        }
+
+        // getting current gps track from service
+        List<Location> currentTrack = mService.getCurrentTrack();
+        if (currentTrack == null || currentTrack.isEmpty()) {
             return;
         }
         LatLng itemPoint = new LatLng(
-                Lists.getFirst(mCurrentTrack).getLatitude(), Lists.getFirst(mCurrentTrack).getLongitude());
+                Lists.getFirst(currentTrack).getLatitude(), Lists.getFirst(currentTrack).getLongitude());
         LatLng myPoint = new LatLng(
-                Lists.getLast(mCurrentTrack).getLatitude(), Lists.getLast(mCurrentTrack).getLongitude());
+                Lists.getLast(currentTrack).getLatitude(), Lists.getLast(currentTrack).getLongitude());
 
         //BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(mMapImage);
         MarkerOptions itemMarker = new MarkerOptions()
@@ -239,7 +242,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         mMap.addMarker(myMarker);
 
         PolylineOptions lines = new PolylineOptions();
-        for(Location loc : mCurrentTrack){
+        for(Location loc : currentTrack){
             lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
         }
         mMap.addPolyline(lines);
@@ -253,22 +256,5 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         mMap.animateCamera(update);
 
     }
-
-    /**
-     * Timer for gps tracking
-     */
-    class PhotoTrackerTimerTask extends TimerTask {
-        @Override
-        public void run() {
-
-            getActivity().runOnUiThread (new Runnable(){
-
-                @Override
-                public void run() {
-                    updateLocation();
-                }});
-        }
-    }
-
 }
 

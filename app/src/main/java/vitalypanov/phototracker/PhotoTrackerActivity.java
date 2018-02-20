@@ -1,7 +1,9 @@
 package vitalypanov.phototracker;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -13,6 +15,10 @@ public class PhotoTrackerActivity extends SingleFragmentActivity {
     private static final String TAG = "PhotoTracker";
     private static final int REQUEST_ERROR = 0;
     public static final int MY_PERMISSION_REQUEST_READ_FINE_LOCATION = 1;
+
+    public static Intent newIntent(Context context){
+        return new Intent(context, PhotoTrackerActivity.class);
+    }
 
     @Override
     protected Fragment createFragment() {
