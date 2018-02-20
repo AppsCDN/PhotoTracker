@@ -37,7 +37,7 @@ import android.content.ServiceConnection;
 
 public class PhotoTrackerGPSService extends IntentService  implements LocationListener {
     private static final String TAG = "PhotoTrackerGPSService";
-    private static final int POLL_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
+    private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
     public static final String REQUEST_CODE = "REQUEST_CODE";
@@ -104,7 +104,7 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         if (isOn){
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime(), POLL_INTERVAL, pi);
+                    SystemClock.elapsedRealtime(), UPDATE_INTERVAL, pi);
         }else {
             alarmManager.cancel(pi);
             pi.cancel();
@@ -168,7 +168,16 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
             return;
         }
         showNotification();
-        putCurrentGPSLocation();
+
+        while(true){
+            putCurrentGPSLocation();
+            try {
+                Thread.sleep(UPDATE_INTERVAL);
+            } catch (InterruptedException ex) {
+                Log.i("Failed", "", ex);
+            }
+        }
+
     }
 
     private void showNotification(){

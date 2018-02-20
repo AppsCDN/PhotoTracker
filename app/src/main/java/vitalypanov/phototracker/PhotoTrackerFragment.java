@@ -167,9 +167,10 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         checkPermissions();
         boolean shouldStartAlarm = !PhotoTrackerGPSService.isServiceAlarmOn(getActivity());
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
-        //getActivity().startService(i);
-        PhotoTrackerGPSService.setServiceAlarm(getActivity(),shouldStartAlarm, i);
         getActivity().bindService(i, mConnection, 0);
+        getActivity().startService(i);
+        //PhotoTrackerGPSService.setServiceAlarm(getActivity(),shouldStartAlarm, i);
+
     }
 
     /**
@@ -177,8 +178,8 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void stopTrack(){
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
-        PhotoTrackerGPSService.setServiceAlarm(getActivity(), false, i);
-        //getActivity().stopService(i);
+        //PhotoTrackerGPSService.setServiceAlarm(getActivity(), false, i);
+        getActivity().stopService(i);
     }
 
     private void checkPermissions(){
