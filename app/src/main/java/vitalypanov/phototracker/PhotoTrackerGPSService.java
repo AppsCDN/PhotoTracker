@@ -92,6 +92,11 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         return new Intent(context, PhotoTrackerGPSService.class);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     public static void setServiceAlarm(Context context, boolean isOn, Intent i){
         //Intent i = PhotoTrackerGPSService.newIntent(context);
         //context.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
