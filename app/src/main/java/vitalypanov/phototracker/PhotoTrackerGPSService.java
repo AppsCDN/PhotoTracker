@@ -92,9 +92,9 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         return new Intent(context, PhotoTrackerGPSService.class);
     }
 
-    public static void setServiceAlarm(Context context, boolean isOn, ServiceConnection serviceConnection){
-        Intent i = PhotoTrackerGPSService.newIntent(context);
-        context.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+    public static void setServiceAlarm(Context context, boolean isOn, Intent i){
+        //Intent i = PhotoTrackerGPSService.newIntent(context);
+        //context.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
         PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         if (isOn){
