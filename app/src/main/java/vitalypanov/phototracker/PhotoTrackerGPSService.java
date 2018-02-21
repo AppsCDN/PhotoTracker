@@ -26,16 +26,22 @@ import android.support.v7.app.NotificationCompat;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.app.Service;
+import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import android.os.AsyncTask;
+
 import android.content.ServiceConnection;
 
 /**
  * Created by Vitaly on 25.08.2017.
  */
 
-public class PhotoTrackerGPSService extends IntentService  implements LocationListener {
+public class PhotoTrackerGPSService extends Service  implements LocationListener {
     private static final String TAG = "PhotoTrackerGPSService";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
@@ -58,8 +64,12 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
     // flag for GPS status
     boolean canGetLocation = false;
 
-    boolean startTrackingNotified =false;
+    public void setManualClose(boolean manualClose) {
+        this.manualClose = manualClose;
+    }
 
+    // to close service from UI
+    boolean manualClose = false;
 
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; //  meters
@@ -72,6 +82,67 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
+
+    private Timer timer;
+    private TimerTask timerTask;
+    public void startTimer() {
+        //set a new Timer
+        timer = new Timer();
+
+        //initialize the TimerTask's job
+        initializeTimerTask();
+
+        //schedule the timer, to wake up every 1 second
+        timer.schedule(timerTask, 1000, UPDATE_INTERVAL); //
+    }
+
+    public void initializeTimerTask() {
+        buildStubNotification();
+        timerTask = new TimerTask() {
+            public void run() {
+                //showNotification();
+                startForeground(1, stubNotification);
+                putCurrentGPSLocation();
+                //stopForeground(false);
+                /*
+                if (!isNetworkAvailableAndConnected()){
+                    return;
+                }
+                //showNotification();
+                buildStubNotification();
+
+                while(true){
+                    startForeground(1, stubNotification);
+                    putCurrentGPSLocation();
+                    stopForeground(false);
+                    try {
+                        Thread.sleep(UPDATE_INTERVAL);
+                    } catch (InterruptedException ex) {
+                        Log.i("Failed", "", ex);
+                    }
+                }*/
+            }
+        };
+    }
+
+    public void stoptimertask() {
+        //stop the timer, if it's not already null
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        startTimer();
+        return START_STICKY;
+    }
+
+    // stub notification for temporary returning into foreground to prevent ActivityManager to stop our service
+    Notification stubNotification;
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -94,9 +165,21 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
 
     @Override
     public void onDestroy() {
+
+
         super.onDestroy();
+        /*
+        // code below works only when user cancel the process
+        Log.i("EXIT", "ondestroy!");
+        if (!manualClose) { // if not user stopped the proces - restart
+            Intent broadcastIntent = new Intent(".RestartPhotoTracker");
+            sendBroadcast(broadcastIntent);
+            stoptimertask();
+        }
+        */
     }
 
+    /*
     public static void setServiceAlarm(Context context, boolean isOn, Intent i){
         //Intent i = PhotoTrackerGPSService.newIntent(context);
         //context.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -111,15 +194,17 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         }
         PhotoTrackerPrefernces.setAlarmOn(context, isOn);
     }
-
+    */
     public static boolean isServiceAlarmOn(Context context){
         Intent i = PhotoTrackerGPSService.newIntent(context);
         PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         return pi != null;
     }
 
+
     public PhotoTrackerGPSService() {
-        super(TAG);
+        super();
+        //super(TAG);
     }
 
     /**
@@ -162,15 +247,24 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         alertDialog.show();
     }
 
+
+    /*
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         if (!isNetworkAvailableAndConnected()){
             return;
         }
-        showNotification();
+        //showNotification();
+        buildStubNotification();
+
+        startTimer();
+
+
 
         while(true){
+            startForeground(1, stubNotification);
             putCurrentGPSLocation();
+            stopForeground(false);
             try {
                 Thread.sleep(UPDATE_INTERVAL);
             } catch (InterruptedException ex) {
@@ -179,16 +273,14 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
         }
 
     }
+*/
 
     private void showNotification(){
-        if (startTrackingNotified){
-            return;
-        }
         Resources resources = getResources();
         Intent i = PhotoTrackerActivity.newIntent(this);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
         Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        Notification notification = new NotificationCompat.Builder(this)
+        Notification notification= new NotificationCompat.Builder(this)
                 .setTicker(resources.getString(R.string.photo_tracker_process_title))
                 .setSmallIcon(android.R.drawable.ic_menu_camera)
                 .setLargeIcon(appBitmap)
@@ -197,11 +289,31 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .build();
-
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
         notificationManagerCompat.notify(0, notification);
         sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
-        startTrackingNotified = true;
+    }
+
+    private void buildStubNotification(){
+        Resources resources = getResources();
+        Intent i = PhotoTrackerActivity.newIntent(this);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        stubNotification = new NotificationCompat.Builder(this)
+                .setTicker(resources.getString(R.string.photo_tracker_process_title))
+                .setSmallIcon(R.mipmap.ic_walk)
+                .setLargeIcon(appBitmap)
+                .setContentTitle(resources.getString(R.string.photo_tracker_process_title))
+                .setContentText(resources.getString(R.string.photo_tracker_process_text))
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .build();
+
+        /*
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.notify(0, notification);
+        sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
+        */
     }
 
     private void showBackgroundNotification(int requestCode, Notification notification){
@@ -251,7 +363,9 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                                this,
+                                Looper.getMainLooper());
                         Log.d("GPS Enabled", "GPS Enabled");
                         if (locationManager != null) {
                             location = locationManager
@@ -270,7 +384,9 @@ public class PhotoTrackerGPSService extends IntentService  implements LocationLi
                         locationManager.requestLocationUpdates(
                                 LocationManager.NETWORK_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                                this,
+                                Looper.getMainLooper());
                         Log.d("Network", "Network");
                         if (locationManager != null) {
                             location = locationManager

@@ -63,7 +63,8 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     boolean mBound = false;
 
     /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection mConnection ;
+    /*= new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -78,6 +79,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
             mBound = false;
         }
     };
+    */
 
     public static PhotoTrackerFragment newInstance() {
         return new PhotoTrackerFragment();
@@ -117,7 +119,24 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
+        //Intent i = PhotoTrackerGPSService.newIntent(context);
+        //PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
+        mConnection = new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder service) {
+                // We've bound to LocalService, cast the IBinder and get LocalService instance
+                PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
+                mService = binder.getService();
+                mBound = true;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                mBound = false;
+            }
+        };
         getActivity().bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
     }
 
@@ -165,10 +184,10 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void startTrack() {
         checkPermissions();
-        boolean shouldStartAlarm = !PhotoTrackerGPSService.isServiceAlarmOn(getActivity());
+        //boolean shouldStartAlarm = !PhotoTrackerGPSService.isServiceAlarmOn(getActivity());
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
-        getActivity().bindService(i, mConnection, 0);
         getActivity().startService(i);
+        getActivity().bindService(i, mConnection, 0);
         //PhotoTrackerGPSService.setServiceAlarm(getActivity(),shouldStartAlarm, i);
 
     }
@@ -178,6 +197,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void stopTrack(){
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
+        mService.setManualClose(true);
         //PhotoTrackerGPSService.setServiceAlarm(getActivity(), false, i);
         getActivity().stopService(i);
     }

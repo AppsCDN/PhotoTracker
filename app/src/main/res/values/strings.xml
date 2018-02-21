@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PhotoTracker beta</string>
+    <string name="app_name">Photo Tracker (beta)</string>
     <string name="action_start">Start tracking...</string>
     <string name="action_stop">Stop</string>
     <string name="action_settings">Settings</string>
