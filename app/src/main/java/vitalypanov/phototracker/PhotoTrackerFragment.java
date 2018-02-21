@@ -20,9 +20,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 import android.content.Context;
 import android.content.ServiceConnection;
@@ -64,22 +67,6 @@ public class PhotoTrackerFragment extends SupportMapFragment {
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
-    /*= new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
-    */
 
     public static PhotoTrackerFragment newInstance() {
         return new PhotoTrackerFragment();
@@ -96,7 +83,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        //setRetainInstance(true);
         setHasOptionsMenu(true);
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
@@ -119,8 +106,6 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
-        //Intent i = PhotoTrackerGPSService.newIntent(context);
-        //PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
         mConnection = new ServiceConnection() {
 
@@ -130,12 +115,26 @@ public class PhotoTrackerFragment extends SupportMapFragment {
                 PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
                 mService = binder.getService();
                 mBound = true;
+
+                // after service bound we can update map
+                //updateGoogleMapUI() - now this crashed :((
+                /*
+                getActivity().runOnUiThread (new Thread(new Runnable() {
+                    public void run() {
+                        updateGoogleMapUI();
+                    }
+                }));
+                //UpdateGoogleMapTask mapUpdate = new UpdateGoogleMapTask();
+                //mapUpdate.execute();
+                */
             }
 
             @Override
             public void onServiceDisconnected(ComponentName arg0) {
                 mBound = false;
             }
+
+
         };
         getActivity().bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
     }
@@ -147,18 +146,9 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-       // mClient.disconnect();
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_phototracker, menu);
-
-        //MenuItem searchItem = menu.findItem(R.id.action_start);
-        //searchItem.setEnabled(mClient.isConnected());
     }
 
     @Override
@@ -184,12 +174,9 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void startTrack() {
         checkPermissions();
-        //boolean shouldStartAlarm = !PhotoTrackerGPSService.isServiceAlarmOn(getActivity());
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
         getActivity().startService(i);
         getActivity().bindService(i, mConnection, 0);
-        //PhotoTrackerGPSService.setServiceAlarm(getActivity(),shouldStartAlarm, i);
-
     }
 
     /**
@@ -198,7 +185,6 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     private void stopTrack(){
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
         mService.setManualClose(true);
-        //PhotoTrackerGPSService.setServiceAlarm(getActivity(), false, i);
         getActivity().stopService(i);
     }
 
@@ -291,8 +277,23 @@ public class PhotoTrackerFragment extends SupportMapFragment {
                 .build();
         int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
         CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
+
+        /*
+        UpdateGoogleMapTask mapUpdate = new UpdateGoogleMapTask();
+        mapUpdate.execute(update);
+        */
         mMap.animateCamera(update);
 
     }
+
+    class UpdateGoogleMapTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            updateGoogleMapUI();
+            return null;
+        }
+    }
+
 }
 

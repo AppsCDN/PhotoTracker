@@ -100,27 +100,12 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         buildStubNotification();
         timerTask = new TimerTask() {
             public void run() {
-                //showNotification();
+                // This line is the main line of the srvice.
+                // Foreground mode should be set for the service mandatory!!!
                 startForeground(1, stubNotification);
                 putCurrentGPSLocation();
+                // stay in foreground to prevent service from closing by Android system
                 //stopForeground(false);
-                /*
-                if (!isNetworkAvailableAndConnected()){
-                    return;
-                }
-                //showNotification();
-                buildStubNotification();
-
-                while(true){
-                    startForeground(1, stubNotification);
-                    putCurrentGPSLocation();
-                    stopForeground(false);
-                    try {
-                        Thread.sleep(UPDATE_INTERVAL);
-                    } catch (InterruptedException ex) {
-                        Log.i("Failed", "", ex);
-                    }
-                }*/
             }
         };
     }
@@ -141,7 +126,7 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         return START_STICKY;
     }
 
-    // stub notification for temporary returning into foreground to prevent ActivityManager to stop our service
+    // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
     Notification stubNotification;
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -163,38 +148,6 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         return new Intent(context, PhotoTrackerGPSService.class);
     }
 
-    @Override
-    public void onDestroy() {
-
-
-        super.onDestroy();
-        /*
-        // code below works only when user cancel the process
-        Log.i("EXIT", "ondestroy!");
-        if (!manualClose) { // if not user stopped the proces - restart
-            Intent broadcastIntent = new Intent(".RestartPhotoTracker");
-            sendBroadcast(broadcastIntent);
-            stoptimertask();
-        }
-        */
-    }
-
-    /*
-    public static void setServiceAlarm(Context context, boolean isOn, Intent i){
-        //Intent i = PhotoTrackerGPSService.newIntent(context);
-        //context.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        if (isOn){
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime(), UPDATE_INTERVAL, pi);
-        }else {
-            alarmManager.cancel(pi);
-            pi.cancel();
-        }
-        PhotoTrackerPrefernces.setAlarmOn(context, isOn);
-    }
-    */
     public static boolean isServiceAlarmOn(Context context){
         Intent i = PhotoTrackerGPSService.newIntent(context);
         PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
@@ -247,34 +200,6 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         alertDialog.show();
     }
 
-
-    /*
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        if (!isNetworkAvailableAndConnected()){
-            return;
-        }
-        //showNotification();
-        buildStubNotification();
-
-        startTimer();
-
-
-
-        while(true){
-            startForeground(1, stubNotification);
-            putCurrentGPSLocation();
-            stopForeground(false);
-            try {
-                Thread.sleep(UPDATE_INTERVAL);
-            } catch (InterruptedException ex) {
-                Log.i("Failed", "", ex);
-            }
-        }
-
-    }
-*/
-
     private void showNotification(){
         Resources resources = getResources();
         Intent i = PhotoTrackerActivity.newIntent(this);
@@ -294,6 +219,9 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
     }
 
+    /**
+     * Build notification object for setForeground() function
+     */
     private void buildStubNotification(){
         Resources resources = getResources();
         Intent i = PhotoTrackerActivity.newIntent(this);
@@ -308,20 +236,6 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .build();
-
-        /*
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-        notificationManagerCompat.notify(0, notification);
-        sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
-        */
-    }
-
-    private void showBackgroundNotification(int requestCode, Notification notification){
-        Intent i = new Intent(ACTION_SHOW_NOTIFICATION);
-        i.putExtra(REQUEST_CODE, requestCode);
-        i.putExtra(NOTIFICATION, notification);
-        sendOrderedBroadcast(i, PERM_PRIVATE, null, null,
-                Activity.RESULT_OK, null, null);
     }
 
     private boolean isNetworkAvailableAndConnected(){
