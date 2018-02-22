@@ -17,7 +17,7 @@
           app:showAsAction="never"/>
     <item android:id="@+id/action_current_location"
           android:icon="@android:drawable/ic_menu_compass"
-          android:title="@string/action_start"
+          android:title="@string/action_refresh"
           android:orderInCategory="100"
           android:enabled="true"
           app:showAsAction="ifRoom"/>

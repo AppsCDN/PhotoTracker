@@ -275,7 +275,8 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
         CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
 
-        mMap.animateCamera(update);
+        //mMap.animateCamera(update);
+        mMap.moveCamera(update);
 
     }
 }
