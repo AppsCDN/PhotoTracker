@@ -64,13 +64,6 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
     // flag for GPS status
     boolean canGetLocation = false;
 
-    public void setManualClose(boolean manualClose) {
-        this.manualClose = manualClose;
-    }
-
-    // to close service from UI
-    boolean manualClose = false;
-
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; //  meters
 

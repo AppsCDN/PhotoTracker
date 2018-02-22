@@ -168,7 +168,6 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void stopTrack(){
         Intent i = PhotoTrackerGPSService.newIntent(getActivity());
-        mService.setManualClose(true);
         getActivity().stopService(i);
     }
 

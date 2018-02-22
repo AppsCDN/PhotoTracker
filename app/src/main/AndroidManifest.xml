@@ -28,15 +28,6 @@
         <service android:name=".PhotoTrackerGPSService"
                  android:enabled="true" >
         </service>
-        <receiver
-            android:name=".PhotoTrackerRestarterBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped">
-            <intent-filter>
-                <action android:name=".RestartPhotoTracker"/>
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
