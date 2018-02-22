@@ -200,25 +200,6 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         alertDialog.show();
     }
 
-    private void showNotification(){
-        Resources resources = getResources();
-        Intent i = PhotoTrackerActivity.newIntent(this);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        Notification notification= new NotificationCompat.Builder(this)
-                .setTicker(resources.getString(R.string.photo_tracker_process_title))
-                .setSmallIcon(android.R.drawable.ic_menu_camera)
-                .setLargeIcon(appBitmap)
-                .setContentTitle(resources.getString(R.string.photo_tracker_process_title))
-                .setContentText(resources.getString(R.string.photo_tracker_process_text))
-                .setContentIntent(pi)
-                .setAutoCancel(true)
-                .build();
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-        notificationManagerCompat.notify(0, notification);
-        sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
-    }
-
     /**
      * Build notification object for setForeground() function
      */
@@ -228,14 +209,19 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
         Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         stubNotification = new NotificationCompat.Builder(this)
-                .setTicker(resources.getString(R.string.photo_tracker_process_title))
+                .setTicker(resources.getString(R.string.app_name))
                 .setSmallIcon(R.mipmap.ic_walk)
                 .setLargeIcon(appBitmap)
-                .setContentTitle(resources.getString(R.string.photo_tracker_process_title))
+                .setContentTitle(resources.getString(R.string.app_name))
                 .setContentText(resources.getString(R.string.photo_tracker_process_text))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .build();
+        /*
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.notify(0, notification);
+        sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
+        */
     }
 
     private boolean isNetworkAvailableAndConnected(){

@@ -88,13 +88,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
         }
-        getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                updateGoogleMapUI();
-            }
-        });
+        updatMapAsync();;
     }
 
     @Override
@@ -115,18 +109,8 @@ public class PhotoTrackerFragment extends SupportMapFragment {
                 PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
                 mService = binder.getService();
                 mBound = true;
-
                 // after service bound we can update map
-                //updateGoogleMapUI() - now this crashed :((
-                /*
-                getActivity().runOnUiThread (new Thread(new Runnable() {
-                    public void run() {
-                        updateGoogleMapUI();
-                    }
-                }));
-                //UpdateGoogleMapTask mapUpdate = new UpdateGoogleMapTask();
-                //mapUpdate.execute();
-                */
+                updatMapAsync();
             }
 
             @Override
@@ -191,15 +175,12 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     private void checkPermissions(){
         LocationManager locationManager = (LocationManager) getActivity()
                 .getSystemService(Context.LOCATION_SERVICE);
-
         // getting GPS status
         if (!locationManager
                 .isProviderEnabled(LocationManager.GPS_PROVIDER) &&
             !locationManager
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
+            // GPS or Network is not enabled. Ask user to enable GPS/network in settings
             showSettingsAlert();
         }
     }
@@ -236,6 +217,23 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         alertDialog.show();
     }
 
+    /**
+     * Updating assync google map and save map object into local variable
+     * for future drawing
+     */
+    private void updatMapAsync(){
+        getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+                updateGoogleMapUI();
+            }
+        });
+    }
+
+    /**
+       Draw on google map
+     */
     private void updateGoogleMapUI(){
         if (mMap == null ){
             return;
@@ -278,22 +276,8 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
         CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
 
-        /*
-        UpdateGoogleMapTask mapUpdate = new UpdateGoogleMapTask();
-        mapUpdate.execute(update);
-        */
         mMap.animateCamera(update);
 
     }
-
-    class UpdateGoogleMapTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            updateGoogleMapUI();
-            return null;
-        }
-    }
-
 }
 
