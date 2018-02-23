@@ -2,74 +2,47 @@ package vitalypanov.phototracker;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.os.Binder;
-
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import android.widget.ImageButton;
 
 /**
  * Created by Vitaly on 29.08.2017.
  */
 
-public class PhotoTrackerFragment extends SupportMapFragment {
+public class StartScreenFragment extends Fragment {
     private static final String TAG = "PhotoTracker";
-    private Bitmap mMapImage;
-    private GoogleMap mMap;
     private static final int LOCATION_REQUEST = 1;
     private static String[] LOCATION_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
     };
-    PhotoTrackerGPSService mService;
+    TrackerGPSService mService;
     boolean mBound = false;
+
+    private ImageButton mTrackStart;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
 
-    public static PhotoTrackerFragment newInstance() {
-        return new PhotoTrackerFragment();
+    public static StartScreenFragment newInstance() {
+        return new StartScreenFragment();
     }
 
     private boolean hasPermisson (String perm){
@@ -88,29 +61,37 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
         }
-        updatMapAsync();;
     }
 
+    @Nullable
     @Override
-    public void onResume() {
-        super.onResume();
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_start_screen, container, false);
+
+        mTrackStart =  (ImageButton) view.findViewById(R.id.track_start);
+        mTrackStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startTrack();
+            }
+        });
+
+        return view;
     }
 
-    @Override
+      @Override
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
-        Intent i = PhotoTrackerGPSService.newIntent(getActivity());
+        Intent i = TrackerGPSService.newIntent(getActivity());
         mConnection = new ServiceConnection() {
 
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder service) {
                 // We've bound to LocalService, cast the IBinder and get LocalService instance
-                PhotoTrackerGPSService.LocalBinder binder = (PhotoTrackerGPSService.LocalBinder) service;
+                TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
                 mService = binder.getService();
                 mBound = true;
-                // after service bound we can update map
-                updatMapAsync();
             }
 
             @Override
@@ -132,7 +113,7 @@ public class PhotoTrackerFragment extends SupportMapFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_phototracker, menu);
+        inflater.inflate(R.menu.startscreen_menu, menu);
     }
 
     @Override
@@ -140,12 +121,6 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         switch (item.getItemId()){
             case R.id.action_start:
                 startTrack();
-                return true;
-            case R.id.action_stop:
-                stopTrack();
-                return true;
-            case R.id.action_current_location:
-                updateGoogleMapUI();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -158,17 +133,11 @@ public class PhotoTrackerFragment extends SupportMapFragment {
      */
     private void startTrack() {
         checkPermissions();
-        Intent i = PhotoTrackerGPSService.newIntent(getActivity());
+        Intent i = TrackerGPSService.newIntent(getActivity());
         getActivity().startService(i);
         getActivity().bindService(i, mConnection, 0);
-    }
-
-    /**
-     * Stop recording track
-     */
-    private void stopTrack(){
-        Intent i = PhotoTrackerGPSService.newIntent(getActivity());
-        getActivity().stopService(i);
+        Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
+        startActivity(intent);
     }
 
     private void checkPermissions(){
@@ -216,68 +185,5 @@ public class PhotoTrackerFragment extends SupportMapFragment {
         alertDialog.show();
     }
 
-    /**
-     * Updating assync google map and save map object into local variable
-     * for future drawing
-     */
-    private void updatMapAsync(){
-        getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                updateGoogleMapUI();
-            }
-        });
-    }
-
-    /**
-       Draw on google map
-     */
-    private void updateGoogleMapUI(){
-        if (mMap == null ){
-            return;
-        }
-
-        // service which holds track data should be not empty
-        if (mService == null){
-            return;
-        }
-
-        // getting current gps track from service
-        List<Location> currentTrack = mService.getCurrentTrack();
-        if (currentTrack == null || currentTrack.isEmpty()) {
-            return;
-        }
-        LatLng itemPoint = new LatLng(
-                Lists.getFirst(currentTrack).getLatitude(), Lists.getFirst(currentTrack).getLongitude());
-        LatLng myPoint = new LatLng(
-                Lists.getLast(currentTrack).getLatitude(), Lists.getLast(currentTrack).getLongitude());
-
-        //BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(mMapImage);
-        MarkerOptions itemMarker = new MarkerOptions()
-                .position(itemPoint);
-        MarkerOptions myMarker = new MarkerOptions()
-                .position(myPoint);
-        mMap.clear();
-        mMap.addMarker(itemMarker);
-        mMap.addMarker(myMarker);
-
-        PolylineOptions lines = new PolylineOptions();
-        for(Location loc : currentTrack){
-            lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
-        }
-        mMap.addPolyline(lines);
-
-        LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(itemPoint)
-                .include(myPoint)
-                .build();
-        int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
-
-        //mMap.animateCamera(update);
-        mMap.moveCamera(update);
-
-    }
 }
 

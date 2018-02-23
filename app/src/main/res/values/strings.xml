@@ -5,4 +5,9 @@
     <string name="action_stop">Stop</string>
     <string name="action_settings">Settings</string>
     <string name="photo_tracker_process_text">Photo tracker are recording your track.</string>
+    <string name="track_start_time">Start time</string>
+    <string name="track_time">Duration time</string>
+    <string name="track_distance">Distance covered</string>
+    <string name="track_images">Images</string>
+    <string name="track_start_tooltip">Start recording track...</string>
 </resources>

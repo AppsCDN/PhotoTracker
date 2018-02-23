@@ -11,22 +11,22 @@ import java.util.Calendar;
  * Created by Vitaly on 22.02.2018.
  */
 
-public class PhotoTrackContainer {
-    private static PhotoTrackContainer mContainer;
+public class TrackContainer {
+    private static TrackContainer mContainer;
     private Context mContext;
-    private List<PhotoTrack> mTracks;
+    private List<Track> mTracks;
 
 
-    public static PhotoTrackContainer get(Context context){
+    public static TrackContainer get(Context context){
         if (mContainer == null) {
-            mContainer = new PhotoTrackContainer(context);
+            mContainer = new TrackContainer(context);
         }
         return mContainer;
     }
 
-    private PhotoTrackContainer(Context context){
+    private TrackContainer(Context context){
         mContext = context.getApplicationContext();
-        mTracks = new ArrayList<PhotoTrack>();
+        mTracks = new ArrayList<Track>();
         generateTestArray();
     }
 
@@ -35,7 +35,7 @@ public class PhotoTrackContainer {
      */
     private void generateTestArray(){
         for (int i=0; i< 10; i++){
-            PhotoTrack track = new PhotoTrack();
+            Track track = new Track();
             track.setStartTime(Calendar.getInstance().getTime());
             mTracks.add(track);
         }

@@ -5,11 +5,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="vitalypanov.phototracker.PhotoTrackerActivity">
+    tools:context="vitalypanov.phototracker.StartScreenActivity">
     <ImageView
         android:id="@+id/image"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:background="@android:color/white"
         android:layout_centerInParent="true"/>
+
 </android.support.constraint.ConstraintLayout>

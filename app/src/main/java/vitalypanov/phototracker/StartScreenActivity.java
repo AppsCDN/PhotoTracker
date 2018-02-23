@@ -1,48 +1,24 @@
 package vitalypanov.phototracker;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
-public class PhotoTrackerActivity extends SingleFragmentActivity {
+public class StartScreenActivity extends SingleFragmentActivity {
     private static final String TAG = "PhotoTracker";
     private static final int REQUEST_ERROR = 0;
     public static final int MY_PERMISSION_REQUEST_READ_FINE_LOCATION = 1;
 
     public static Intent newIntent(Context context){
-        return new Intent(context, PhotoTrackerActivity.class);
+        return new Intent(context, StartScreenActivity.class);
     }
 
     @Override
     protected Fragment createFragment() {
-        return PhotoTrackerFragment.newInstance();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        /*
-        int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-        if (errorCode != ConnectionResult.SUCCESS){
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errorCode, this, REQUEST_ERROR,
-                    new DialogInterface.OnCancelListener(){
-
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            finish();
-                        }
-                    });
-            errorDialog.show();
-        }
-        */
+        return StartScreenFragment.newInstance();
     }
 
     @Override

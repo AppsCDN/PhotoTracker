@@ -1,59 +1,48 @@
 package vitalypanov.phototracker;
 
-import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.IntentService;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.os.Binder;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.util.Log;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.NotificationCompat;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.app.Service;
 import android.os.Looper;
+import android.provider.Settings;
+import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
-import android.os.AsyncTask;
-
-import android.content.ServiceConnection;
 
 /**
  * Created by Vitaly on 25.08.2017.
  */
 
-public class PhotoTrackerGPSService extends Service  implements LocationListener {
-    private static final String TAG = "PhotoTrackerGPSService";
+public class TrackerGPSService extends Service  implements LocationListener {
+    private static final String TAG = "TrackerGPSService";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
     public static final String REQUEST_CODE = "REQUEST_CODE";
     public static final String NOTIFICATION = "NOTIFICATION";
 
-    public List<Location> getCurrentTrack() {
+    public Track getCurrentTrack() {
         return currentTrack;
     }
 
-    private List<Location> currentTrack = new ArrayList<>();
+    private Track currentTrack;
 
     // flag for GPS status
     boolean isGPSEnabled = false;
@@ -115,6 +104,8 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+        currentTrack = new Track();
+        currentTrack.setStartTime(Calendar.getInstance().getTime());
         startTimer();
         return START_STICKY;
     }
@@ -126,9 +117,9 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        PhotoTrackerGPSService getService() {
+        TrackerGPSService getService() {
             // Return this instance of LocalService so clients can call public methods
-            return PhotoTrackerGPSService.this;
+            return TrackerGPSService.this;
         }
     }
 
@@ -138,19 +129,12 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
     }
 
     public static Intent newIntent(Context context){
-        return new Intent(context, PhotoTrackerGPSService.class);
+        return new Intent(context, TrackerGPSService.class);
     }
 
-    public static boolean isServiceAlarmOn(Context context){
-        Intent i = PhotoTrackerGPSService.newIntent(context);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
-        return pi != null;
-    }
-
-
-    public PhotoTrackerGPSService() {
+    public TrackerGPSService() {
         super();
-        //super(TAG);
+        currentTrack = new Track();
     }
 
     /**
@@ -198,7 +182,7 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
      */
     private void buildStubNotification(){
         Resources resources = getResources();
-        Intent i = PhotoTrackerActivity.newIntent(this);
+        Intent i = RunningTrackPagerActivity.newIntent(this);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
         Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         stubNotification = new NotificationCompat.Builder(this)
@@ -312,18 +296,18 @@ public class PhotoTrackerGPSService extends Service  implements LocationListener
         }
         // getting last already stored location in list
         Location lastLocation = null;
-        if (currentTrack != null && !currentTrack.isEmpty()) {
-            lastLocation = currentTrack.get(currentTrack.size()-1);
+        if (currentTrack != null && !currentTrack.getTrackData().isEmpty()) {
+            lastLocation = currentTrack.getLastTrackItem();
         }
         // last location is empty - it's the first location in track - store it
         if (lastLocation == null) {
-            currentTrack.add(location);
+            currentTrack.addTrackItem(location);
             return;
         }
         // not the first location in track
         // add gps location to current track if it differ from last already stored value
         if (lastLocation.getLatitude() != location.getLatitude() || lastLocation.getLongitude() != location.getLongitude()) {
-            currentTrack.add(location);
+            currentTrack.addTrackItem(location);
         }
     }
 
