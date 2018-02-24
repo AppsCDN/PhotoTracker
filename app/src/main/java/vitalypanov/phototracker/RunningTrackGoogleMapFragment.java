@@ -24,6 +24,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
+import vitalypanov.phototracker.utilities.Lists;
+
 /**
  * Created by Vitaly on 23.02.2018.
  */

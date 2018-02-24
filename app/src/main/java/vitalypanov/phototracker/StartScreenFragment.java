@@ -61,7 +61,6 @@ public class StartScreenFragment extends Fragment {
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
         }
-        TrackContainer.get(getContext());
     }
 
     @Nullable

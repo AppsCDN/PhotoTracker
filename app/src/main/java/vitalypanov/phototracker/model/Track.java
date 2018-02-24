@@ -1,4 +1,4 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.model;
 
 import android.location.Location;
 
@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import vitalypanov.phototracker.utilities.Lists;
 
 /**
  * Track class
@@ -13,12 +16,35 @@ import java.util.List;
  */
 
 public class Track {
+    private UUID mId;       // unique id of the track
+    private Date mStartTime;// start time when track was started
+    private Date mEndTime;  //... when finished recording
+    private String mComment;// user comment if provided
+    private List<Location> trackData = new ArrayList<>(); // gps locations data of the track
+
+    // Format constants
     private final String LEAD_ZEROS_TIME_FORMAT = "%02d";
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
-    private Date mStartTime;
-    private Date mEndTime;
-    private String mComment;
-    private List<Location> trackData = new ArrayList<>();
+
+    /**
+     * For newlly created tracks - generate Id
+     */
+    public Track() {
+        this(UUID.randomUUID());
+    }
+
+    /**
+     * For already exists tracks - provide Id in parameter
+     * @param id - track id in database
+     */
+    public Track(UUID id) {
+        mId = id;
+        mStartTime = new Date();
+        mEndTime = new Date();
+        trackData = new ArrayList<>();
+    }
+
+    public UUID getId() { return mId;}
 
     public Date getStartTime() {
         return mStartTime;
@@ -56,7 +82,7 @@ public class Track {
         return Lists.getLast(trackData);
     }
 
-    void addTrackItem(Location locationItem) {
+    public void addTrackItem(Location locationItem) {
         trackData.add(locationItem);
     }
 

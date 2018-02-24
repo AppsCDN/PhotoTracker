@@ -26,6 +26,9 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.model.Track;
+
 /**
  * Created by Vitaly on 25.08.2017.
  */
@@ -33,6 +36,7 @@ import java.util.TimerTask;
 public class TrackerGPSService extends Service  implements LocationListener {
     private static final String TAG = "TrackerGPSService";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
+    private static final int UPDATE_DB_INTERVAL = 1000*20;// 60*5 is 5 minutes interval for updating in Db
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
     public static final String REQUEST_CODE = "REQUEST_CODE";
@@ -65,8 +69,14 @@ public class TrackerGPSService extends Service  implements LocationListener {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
+    // Timer for getting GPS coordinates
     private Timer timer;
     private TimerTask timerTask;
+
+    // Timer for updating data in database
+    private Timer dbTimer;
+    private TimerTask dbTimerTask;
+
     public void startTimer() {
         //set a new Timer
         timer = new Timer();
@@ -75,7 +85,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
         initializeTimerTask();
 
         //schedule the timer, to wake up every 1 second
-        timer.schedule(timerTask, 1000, UPDATE_INTERVAL); //
+        timer.schedule(timerTask, 0, UPDATE_INTERVAL); //
     }
 
     public void initializeTimerTask() {
@@ -92,23 +102,43 @@ public class TrackerGPSService extends Service  implements LocationListener {
         };
     }
 
-    public void stoptimertask() {
-        //stop the timer, if it's not already null
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
+    public void startDbTimer() {
+        //set a new Timer
+        dbTimer = new Timer();
+        initializeDbTimerTask();
+        dbTimer.schedule(dbTimerTask, UPDATE_DB_INTERVAL, UPDATE_DB_INTERVAL);
     }
 
+    public void initializeDbTimerTask() {
+        buildStubNotification();
+        dbTimerTask = new TimerTask() {
+            public void run() {
+                TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
+            }
+        };
+    }
+
+    /*
+    public void stopDbTimerTask() {
+        if (dbTimer != null) {
+            dbTimer.cancel();
+            dbTimer = null;
+        }
+    }
+    */
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         currentTrack = new Track();
         currentTrack.setStartTime(Calendar.getInstance().getTime());
+        TrackDbHelper.get(getApplicationContext()).insertTrack(currentTrack);
         startTimer();
+        startDbTimer();
         return START_STICKY;
     }
+
+
 
     // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
     Notification stubNotification;
