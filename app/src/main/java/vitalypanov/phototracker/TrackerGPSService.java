@@ -36,7 +36,7 @@ import vitalypanov.phototracker.model.Track;
 public class TrackerGPSService extends Service  implements LocationListener {
     private static final String TAG = "TrackerGPSService";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
-    private static final int UPDATE_DB_INTERVAL = 1000*20;// 60*5 is 5 minutes interval for updating in Db
+    private static final int UPDATE_DB_INTERVAL = 1000*60*5;// is 5 minutes interval for updating in Db
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
     public static final String REQUEST_CODE = "REQUEST_CODE";
@@ -92,12 +92,10 @@ public class TrackerGPSService extends Service  implements LocationListener {
         buildStubNotification();
         timerTask = new TimerTask() {
             public void run() {
-                // This line is the main line of the srvice.
-                // Foreground mode should be set for the service mandatory!!!
+                // Foreground mode should be set for the service mandatory!!! (this line is the main line of the service! :) )
+                // Staying in foreground to prevent service from closing by Android system
                 startForeground(1, stubNotification);
                 putCurrentGPSLocation();
-                // stay in foreground to prevent service from closing by Android system
-                //stopForeground(false);
             }
         };
     }
@@ -138,7 +136,12 @@ public class TrackerGPSService extends Service  implements LocationListener {
         return START_STICKY;
     }
 
-
+    @Override
+    public void onDestroy() {
+        // Last update data in db before exiting from service
+        TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
+        super.onDestroy();
+    }
 
     // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
     Notification stubNotification;
