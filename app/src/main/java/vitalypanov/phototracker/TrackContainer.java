@@ -1,9 +1,13 @@
 package vitalypanov.phototracker;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Calendar;
+import java.util.List;
+
+import vitalypanov.phototracker.database.TrackerDatabaseHelper;
 
 
 /**
@@ -14,6 +18,7 @@ import java.util.Calendar;
 public class TrackContainer {
     private static TrackContainer mContainer;
     private Context mContext;
+    private SQLiteDatabase mDatabase;
     private List<Track> mTracks;
 
 
@@ -26,6 +31,7 @@ public class TrackContainer {
 
     private TrackContainer(Context context){
         mContext = context.getApplicationContext();
+        mDatabase = new TrackerDatabaseHelper (mContext).getWritableDatabase();
         mTracks = new ArrayList<Track>();
         generateTestArray();
     }
