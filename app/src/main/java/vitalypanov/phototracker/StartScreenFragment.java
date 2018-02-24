@@ -20,7 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 
 /**
  * Created by Vitaly on 29.08.2017.
@@ -36,7 +36,7 @@ public class StartScreenFragment extends Fragment {
     TrackerGPSService mService;
     boolean mBound = false;
 
-    private ImageButton mTrackStart;
+    private Button mTrackStart;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -68,7 +68,7 @@ public class StartScreenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_start_screen, container, false);
 
-        mTrackStart =  (ImageButton) view.findViewById(R.id.track_start);
+        mTrackStart =  (Button) view.findViewById(R.id.track_start);
         mTrackStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

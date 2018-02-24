@@ -76,11 +76,6 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_shortinfo_running_track, container, false);
         mStartTimeTextView = (TextView)v.findViewById(R.id.start_time_text_view);

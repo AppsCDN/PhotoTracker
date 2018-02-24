@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:padding="16dp">
 
     <TextView
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="40dp"
+        android:textSize="40sp"
         android:textAlignment="center"/>
     <TextView
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="60dp"
+        android:textSize="60sp"
         android:textAlignment="center"/>
     <TextView
         android:layout_width="match_parent"
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="25dp"
+        android:textSize="25sp"
         android:textAlignment="center"/>
     <TextView
         android:layout_width="match_parent"
@@ -68,31 +68,38 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="80dp"
         android:gravity="center|bottom"
         android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/track_photo"
-            android:layout_width="0dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
-            android:layout_weight=".25"
-            android:src="@mipmap/ic_camera" />
+            android:src="@mipmap/ic_camera"
+            android:background="@drawable/button_border"
+            android:padding="15dp"/>
+        <FrameLayout
+            android:layout_width="15dp"
+            android:layout_height="match_parent">
+        </FrameLayout>
 
         <ImageButton
             android:id="@+id/track_pause"
             android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight=".50"
-            android:src="@mipmap/ic_pause" />
-
+            android:src="@mipmap/ic_pause"
+            android:background="@drawable/button_border"/>
+        <FrameLayout
+            android:layout_width="15dp"
+            android:layout_height="match_parent">
+        </FrameLayout>
         <ImageButton
             android:id="@+id/track_settings"
-            android:layout_width="0dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
-            android:layout_weight=".25"
-            android:src="@mipmap/ic_settings"/>
+            android:src="@mipmap/ic_settings"
+            android:background="@drawable/button_border"/>
     </LinearLayout>
 </LinearLayout>

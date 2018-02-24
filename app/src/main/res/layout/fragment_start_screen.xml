@@ -14,20 +14,18 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_height="wrap_content"
         android:gravity="center|bottom"
         android:orientation="horizontal">
 
-        <ImageButton
+        <Button
             android:id="@+id/track_start"
-            android:tooltipText="@string/track_start_tooltip"
-            android:text="OK"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight=".50"
-            android:src="@mipmap/ic_forward" />
+            android:tooltipText="@string/track_start_tooltip"
+            android:text="@string/action_start"
+            android:textSize="20sp"
+            android:background="@drawable/button_border"/>
 
     </LinearLayout>
 </LinearLayout>

@@ -3,14 +3,14 @@ package vitalypanov.phototracker;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,9 +28,9 @@ import java.util.List;
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackGoogleMapFragment extends SupportMapFragment implements ViewPageUpdater{
+public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater{
     private static final String TAG = "PhotoTracker";
-    private Bitmap mMapImage;
+    private SupportMapFragment mapFragment = null;
     private GoogleMap mMap;
 
     TrackerGPSService mService;
@@ -46,14 +46,20 @@ public class RunningTrackGoogleMapFragment extends SupportMapFragment implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
+        View v = layoutInflater.inflate(R.layout.fragment_map_running_track, container, false);
+        mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
+        updatMapAsync();
+        return v;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        getActivity().invalidateOptionsMenu();
+        //getActivity().invalidateOptionsMenu();
         Intent i = TrackerGPSService.newIntent(getActivity());
         mConnection = new ServiceConnection() {
 
@@ -83,30 +89,15 @@ public class RunningTrackGoogleMapFragment extends SupportMapFragment implements
         getActivity().unbindService(mConnection);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.googlemap_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_current_location:
-                updateGoogleMapUI();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-    }
-
     /**
      * Updating assync google map and save map object into local variable
      * for future drawing
      */
     private void updatMapAsync(){
-        getMapAsync(new OnMapReadyCallback() {
+        if (mapFragment==null){
+            return;
+        }
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
@@ -138,7 +129,6 @@ public class RunningTrackGoogleMapFragment extends SupportMapFragment implements
         LatLng myPoint = new LatLng(
                 Lists.getLast(currentTrack).getLatitude(), Lists.getLast(currentTrack).getLongitude());
 
-        //BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(mMapImage);
         MarkerOptions itemMarker = new MarkerOptions()
                 .position(itemPoint);
         MarkerOptions myMarker = new MarkerOptions()

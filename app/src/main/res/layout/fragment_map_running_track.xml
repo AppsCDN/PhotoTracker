@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="vitalypanov.phototracker.StartScreenActivity">
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:background="@android:color/white"
-        android:layout_centerInParent="true"/>
+    android:paddingLeft="7dp">
+    <!-- Left padding is Very!!! needed to swipe from google map back - to another view page -->
+    <fragment
+        android:id="@+id/google_map_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        />
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
