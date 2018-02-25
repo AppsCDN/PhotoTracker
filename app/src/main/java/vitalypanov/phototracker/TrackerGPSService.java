@@ -138,12 +138,20 @@ public class TrackerGPSService extends Service  implements LocationListener {
 
     @Override
     public void onDestroy() {
-        currentTrack.setEndTime(Calendar.getInstance().getTime());
+        // track is ended
         currentTrack.setEndTime(Calendar.getInstance().getTime());
         // Last update data in db before exiting from service
         TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
         super.onDestroy();
     }
+
+    /**
+     * External call for forcing write to db
+     */
+    public void forceWriteToDb(){
+        TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
+    }
+
 
     // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
     Notification stubNotification;

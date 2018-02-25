@@ -1,23 +1,31 @@
 package vitalypanov.phototracker;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.ImageButton;
-import android.provider.MediaStore;
+import android.widget.TextView;
+
 import java.util.Timer;
 import java.util.TimerTask;
+
+import vitalypanov.phototracker.model.Track;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -63,7 +71,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     public void initializeTimerTask() {
         timerTask = new TimerTask() {
             public void run() {
-                updateUI();
+                updateTimerUI();
             }
         };
     }
@@ -87,6 +95,31 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         mDistanceTextView= (TextView)v.findViewById(R.id.distance_text_view);
 
         mCommentEditText= (EditText) v.findViewById(R.id.comment_text);
+        mCommentEditText.setInputType(InputType.TYPE_NULL);
+        mCommentEditText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // on long touch - show input keyboard
+                mCommentEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+                mCommentEditText.requestFocus();
+                return false;
+            }
+        });
+        mCommentEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        // on OK button - hide focus
+                        mCommentEditText.setInputType(InputType.TYPE_NULL);
+                        // after user commented - we should save it into database
+                        if (mService!= null){
+                            mService.getCurrentTrack().setComment(mCommentEditText.getText().toString());
+                            mService.forceWriteToDb();
+                        }
+                    }
+                return false;
+            }
+        });
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -104,6 +137,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             public void afterTextChanged(Editable editable) {
 
             }
+
+
         });
 
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
@@ -122,9 +157,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 stopTrack();
-                getActivity().finish(); // StartScreenActivity is already exists on the background of current activity
-                //Intent intent = StartScreenActivity.newIntent(getActivity());
-                //startActivity(intent);
+                getActivity().finish();
+                Intent intent = StartScreenActivity.newIntent(getActivity());
+                startActivity(intent);
             }
         });
 
@@ -135,6 +170,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
             }
         });
+
+        updateUI();
 
         return v;
     }
@@ -170,6 +207,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         super.onDestroy();
         getActivity().unbindService(mConnection);
     }
+
+
     /**
      * Stop recording track
      */
@@ -184,12 +223,31 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         updateUI();
     }
 
-    private void clearControls(){
-        mStartTimeTextView.setText("");
-        mDurationTimeTextView.setText("");
-        mDistanceTextView.setText("");
+    /**
+     *  Update timer UI controls by Service data
+     */
+    private void updateTimerUI(){
+        if (mService == null || mService.getCurrentTrack() == null || getActivity() == null){
+            return;
+        }
+        // update UI is possible only in main thread
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Track currentTrack = mService.getCurrentTrack();
+                mStartTimeTextView.setText(currentTrack.getStartTimeFormatted());
+                mDurationTimeTextView.setText(currentTrack.getDurationTimeStillRunningFormatted());
+                currentTrack.recalcDistance();
+                mDistanceTextView.setText(String.valueOf(currentTrack.getDistanceFormatted()));
+            }
+        });
+
     }
 
+    /**
+     *  Update all controls in UI by Service data
+     * (include timer UI controls)
+     */
     private void updateUI(){
         if (mService == null || mService.getCurrentTrack() == null || getActivity() == null){
             return;
@@ -198,11 +256,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                clearControls();
-                mStartTimeTextView.setText(mService.getCurrentTrack().getStartTimeFormatted());
-                mDurationTimeTextView.setText(mService.getCurrentTrack().getDurationTimeStillRunningFormatted());
-                mService.getCurrentTrack().recalcDistance();
-                mDistanceTextView.setText(String.valueOf(mService.getCurrentTrack().getDistanceFormatted()));
+                updateTimerUI();
+                mCommentEditText.setText(mService.getCurrentTrack().getComment());
             }
         });
 
