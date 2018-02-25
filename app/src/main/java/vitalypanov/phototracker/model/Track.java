@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import vitalypanov.phototracker.utilities.Lists;
+import vitalypanov.phototracker.utilities.ValidateUtil;
 
 /**
  * Track class
@@ -21,7 +22,7 @@ public class Track {
     private Date mEndTime;  //... when finished recording
     private String mComment;// user comment if provided
     private double mDistance;// Cashed distance value of the track (need recalculate when trackData are updated)
-    private List<Location> trackData = new ArrayList<>(); // gps locations data of the track
+    private List<TrackLocation> trackData = new ArrayList<>(); // gps locations data of the track
 
     // Format constants
     private final String LEAD_ZEROS_TIME_FORMAT = "%02d";
@@ -79,19 +80,19 @@ public class Track {
         this.mDistance = mDistance;
     }
 
-    public List<Location> getTrackData() {
+    public List<TrackLocation> getTrackData() {
         return trackData;
     }
 
-    public void setTrackData(List<Location> data) {
+    public void setTrackData(List<TrackLocation> data) {
         this.trackData = data;
     }
 
-    public Location getLastTrackItem() {
+    public TrackLocation getLastTrackItem() {
         return Lists.getLast(trackData);
     }
 
-    public void addTrackItem(Location locationItem) {
+    public void addTrackItem(TrackLocation locationItem) {
         trackData.add(locationItem);
     }
 
@@ -102,11 +103,19 @@ public class Track {
      */
     private double getRealDistance(){
         float distance = 0;
-        Location prevLocationItem = Lists.getFirst(trackData);
+        float[] distanceArr = new float[2];
+        TrackLocation prevLocationItem = Lists.getFirst(trackData);
         for (int index = 1; index< trackData.size(); index++){
-            Location currLocationItem = trackData.get(index);
-            distance += currLocationItem.distanceTo(prevLocationItem);
-            prevLocationItem = currLocationItem;
+            TrackLocation currLocationItem = trackData.get(index);
+            Location.distanceBetween(
+                    prevLocationItem.getLatitude(),
+                    prevLocationItem.getLongitude(),
+                    currLocationItem.getLatitude(),
+                    currLocationItem.getLongitude(),
+                    distanceArr);
+            if (ValidateUtil.isValidNumber(distanceArr[0])) {
+                distance +=  distanceArr[0];
+            }
         }
         return (double)((long)distance)/1000.;
     }

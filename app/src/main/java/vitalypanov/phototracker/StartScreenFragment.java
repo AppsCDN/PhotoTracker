@@ -12,8 +12,10 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +30,9 @@ import android.widget.Button;
 
 public class StartScreenFragment extends Fragment {
     private static final String TAG = "PhotoTracker";
+    public static final int MY_PERMISSION_REQUEST_READ_FINE_LOCATION = 1;
+    private static final int REQUEST_ERROR = 0;
+
     private static final int LOCATION_REQUEST = 1;
     private static String[] LOCATION_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -143,7 +148,12 @@ public class StartScreenFragment extends Fragment {
      * Start recording track
      */
     private void startTrack() {
-        checkPermissions();
+        // first check permissions of location services
+        if (!checkLocaionServices()){
+            // if no permissions - exit
+            return;
+        }
+        // otherwise start GPS service
         Intent i = TrackerGPSService.newIntent(getActivity());
         getActivity().startService(i);
         getActivity().bindService(i, mConnection, 0);
@@ -151,7 +161,12 @@ public class StartScreenFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void checkPermissions(){
+    /**
+     * Check of GPS and network location permissions
+     * @return  true - if permissions granted
+     *          false - if not - and user should grant permissions in shown dialog
+     */
+    private boolean checkLocaionServices(){
         LocationManager locationManager = (LocationManager) getActivity()
                 .getSystemService(Context.LOCATION_SERVICE);
         // getting GPS status
@@ -160,22 +175,24 @@ public class StartScreenFragment extends Fragment {
             !locationManager
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
             // GPS or Network is not enabled. Ask user to enable GPS/network in settings
-            showSettingsAlert();
+            showLocationServicesSettingsAlert();
+            return false;
         }
+        return true;
     }
 
     /**
      * Function to show settings alert dialog
      * On pressing Settings button will lauch Settings Options
      * */
-    private void showSettingsAlert(){
+    private void showLocationServicesSettingsAlert(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
 
         // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
+        alertDialog.setTitle(R.string.alert_gps_title);
 
         // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+        alertDialog.setMessage(R.string.alert_gps_message);
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
@@ -196,5 +213,21 @@ public class StartScreenFragment extends Fragment {
         alertDialog.show();
     }
 
-}
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults); switch (requestCode) {
+            case MY_PERMISSION_REQUEST_READ_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "permission granted");
 
+                } else {
+                    Log.i(TAG, "permission denied");
+                }
+                return;
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+}

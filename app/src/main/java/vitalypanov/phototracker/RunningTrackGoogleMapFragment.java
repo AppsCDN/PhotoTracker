@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
+import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.utilities.Lists;
 
 /**
@@ -122,7 +123,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         }
 
         // getting current gps track from service
-        List<Location> currentTrack = mService.getCurrentTrack().getTrackData();
+        List<TrackLocation> currentTrack = mService.getCurrentTrack().getTrackData();
         if (currentTrack == null || currentTrack.isEmpty()) {
             return;
         }
@@ -140,7 +141,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         mMap.addMarker(myMarker);
 
         PolylineOptions lines = new PolylineOptions();
-        for(Location loc : currentTrack){
+        for(TrackLocation loc : currentTrack){
             lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
         }
         mMap.addPolyline(lines);

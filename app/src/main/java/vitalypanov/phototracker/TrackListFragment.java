@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.content.Context;
 
 import java.util.List;
 
@@ -28,6 +30,18 @@ public class TrackListFragment  extends Fragment {
     // Interface for activity host
     public interface Callbacks{
         void onTrackSelected(Track crime);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+       //mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks =null;
     }
 
     public static TrackListFragment newInstance() {
@@ -76,7 +90,7 @@ public class TrackListFragment  extends Fragment {
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
         }
 
-        public void bindCrime(Track track){
+        public void bindTrack(Track track){
             mTrack = track;
             mStartTimeTextView.setText(mTrack.getStartTimeFormatted());
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
@@ -86,7 +100,8 @@ public class TrackListFragment  extends Fragment {
 
         @Override
         public void onClick(View v) {
-            mCallbacks.onTrackSelected(mTrack);
+
+            //mCallbacks.onTrackSelected(mTrack);
         }
     }
 
@@ -108,7 +123,7 @@ public class TrackListFragment  extends Fragment {
         @Override
         public void onBindViewHolder(TrackHolder holder, int position) {
             Track track = mTracks.get(position);
-            holder.bindCrime(track);
+            holder.bindTrack(track);
         }
 
         @Override

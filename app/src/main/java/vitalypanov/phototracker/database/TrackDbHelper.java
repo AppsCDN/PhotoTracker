@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackLocation;
 
 import static vitalypanov.phototracker.database.DbSchema.TracksTable.Cols;
 
@@ -23,6 +25,7 @@ import static vitalypanov.phototracker.database.DbSchema.TracksTable.Cols;
  */
 
 public class TrackDbHelper {
+    private static final String TAG = "TrackDbHelper";
     private static TrackDbHelper trackDbHelper;
     private Context mContext;
     private SQLiteDatabase mDatabase;
@@ -54,7 +57,7 @@ public class TrackDbHelper {
         // track data store in json format in one database field
         Gson gson = new Gson();
         values.put(Cols.TRACK_DATA, gson.toJson(track.getTrackData(),
-                new TypeToken<ArrayList<Location>>() {}.getType()));
+                new TypeToken<ArrayList<TrackLocation>>() {}.getType()));
         return values;
     }
 
@@ -94,13 +97,14 @@ public class TrackDbHelper {
     public List<Track> getTracks(){
         List<Track> tracks = new ArrayList<>();
         TrackCursorWrapper cursor =queryTracks(null, null);
-        try{
+        try {
             cursor.moveToFirst();
-            while (! cursor.isAfterLast()){
+            while (!cursor.isAfterLast()) {
                 tracks.add(cursor.getTrack());
                 cursor.moveToNext();
             }
-
+        }catch (Exception ex) {
+            Log.d(TAG, "getTracks: " +ex.toString());
         } finally {
             cursor.close();
         }

@@ -14,6 +14,8 @@ import java.util.UUID;
 
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackLocation;
+
 /**
  * Created by Vitaly on 25.02.2018.
  */
@@ -37,8 +39,8 @@ public class TrackCursorWrapper extends CursorWrapper {
         return track;
     }
 
-    private ArrayList<Location> parseJSON(String jsonString) {
+    private ArrayList<TrackLocation> parseJSON(String jsonString) {
         Gson gson = new GsonBuilder().create();
-        return gson.fromJson(jsonString, new TypeToken<ArrayList<Location>>() {}.getType());
+        return gson.fromJson(jsonString, new TypeToken<ArrayList<TrackLocation>>() {}.getType());
     }
 }

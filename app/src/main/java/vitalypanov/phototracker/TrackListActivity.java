@@ -20,4 +20,9 @@ public class TrackListActivity  extends SingleFragmentActivity {
         return TrackListFragment.newInstance();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
 }

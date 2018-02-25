@@ -13,4 +13,6 @@
     <string name="track_comment_hint">Enter a comment for the track.</string>
     <string name="track_start_tooltip">Start recording track...</string>
     <string name="action_track_list">Track list</string>
+    <string name="alert_gps_title">GPS settings</string>
+    <string name="alert_gps_message">GPS is not enabled. Do you want to go to the settings menu to turn it on?</string>
 </resources>

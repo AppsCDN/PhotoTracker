@@ -28,6 +28,7 @@ import java.util.TimerTask;
 
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackLocation;
 
 /**
  * Created by Vitaly on 25.08.2017.
@@ -320,7 +321,8 @@ public class TrackerGPSService extends Service  implements LocationListener {
                     }
                 }
                 // processing location...
-                processLocation(location);
+                TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude());
+                processLocation(trackLocation);
 
             }
 
@@ -331,26 +333,26 @@ public class TrackerGPSService extends Service  implements LocationListener {
 
     /**
      * Store location in track
-     * @param location
+     * @param trackLocation
      */
-    private void processLocation(Location location){
-        if (location== null) {
+    private void processLocation(TrackLocation trackLocation){
+        if (trackLocation== null) {
             return;
         }
         // getting last already stored location in list
-        Location lastLocation = null;
+        TrackLocation trackLastLocation = null;
         if (currentTrack != null && !currentTrack.getTrackData().isEmpty()) {
-            lastLocation = currentTrack.getLastTrackItem();
+            trackLastLocation = currentTrack.getLastTrackItem();
         }
         // last location is empty - it's the first location in track - store it
-        if (lastLocation == null) {
-            currentTrack.addTrackItem(location);
+        if (trackLastLocation == null) {
+            currentTrack.addTrackItem(trackLocation);
             return;
         }
         // not the first location in track
         // add gps location to current track if it differ from last already stored value
-        if (lastLocation.getLatitude() != location.getLatitude() || lastLocation.getLongitude() != location.getLongitude()) {
-            currentTrack.addTrackItem(location);
+        if (trackLastLocation.getLatitude() != trackLocation.getLatitude() || trackLastLocation.getLongitude() != trackLocation.getLongitude()) {
+            currentTrack.addTrackItem(trackLocation);
         }
     }
 
