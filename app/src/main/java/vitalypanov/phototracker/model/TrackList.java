@@ -23,11 +23,15 @@ public class TrackList {
         }
         return mContainer;
     }
+
     private TrackList(){
         mTracks = new ArrayList<Track>();
         generateTestArray();
     }
 
+    public List<Track> getTrackList(){
+        return mTracks;
+    }
     /**
      * Generating some test tracks...
      */

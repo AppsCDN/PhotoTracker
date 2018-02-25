@@ -61,7 +61,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; //  meters
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 20; // seconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 10; // seconds
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
@@ -138,6 +138,8 @@ public class TrackerGPSService extends Service  implements LocationListener {
 
     @Override
     public void onDestroy() {
+        currentTrack.setEndTime(Calendar.getInstance().getTime());
+        currentTrack.setEndTime(Calendar.getInstance().getTime());
         // Last update data in db before exiting from service
         TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
         super.onDestroy();

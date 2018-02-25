@@ -28,6 +28,10 @@
             android:name=".RunningTrackPagerActivity"
             android:theme="@style/NoTitleTheme">
         </activity>
+        <activity
+            android:name=".TrackListActivity"
+            android:theme="@style/NoTitleTheme">
+        </activity>
         <service android:name=".TrackerGPSService"
                  android:enabled="true" >
         </service>

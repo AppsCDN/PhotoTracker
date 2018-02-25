@@ -20,6 +20,7 @@ public class Track {
     private Date mStartTime;// start time when track was started
     private Date mEndTime;  //... when finished recording
     private String mComment;// user comment if provided
+    private double mDistance;// Cashed distance value of the track (need recalculate when trackData are updated)
     private List<Location> trackData = new ArrayList<>(); // gps locations data of the track
 
     // Format constants
@@ -70,6 +71,14 @@ public class Track {
         this.mComment = comment;
     }
 
+    public double getDistance() {
+        return mDistance;
+    }
+
+    public void setDistance(double mDistance) {
+        this.mDistance = mDistance;
+    }
+
     public List<Location> getTrackData() {
         return trackData;
     }
@@ -91,7 +100,7 @@ public class Track {
      * Rounded to full kilometers
      * @return track distance
      */
-    public double getDistance(){
+    private double getRealDistance(){
         float distance = 0;
         Location prevLocationItem = Lists.getFirst(trackData);
         for (int index = 1; index< trackData.size(); index++){
@@ -103,13 +112,31 @@ public class Track {
     }
 
     /**
+     * Recalculate distance value
+     */
+    public void recalcDistance(){
+        mDistance = getRealDistance();
+    }
+
+    /**
      * Duration time of the track
-     * (time since start time until now
+     * difference between startTime and endTime
      * @return duration time
      */
     public String getDurationTimeFormatted(){
+        return formatDuration(mEndTime.getTime() - mStartTime.getTime());
+    }
+    /**
+     * Duration time of the still running track
+     * (time since start time until now)
+     * @return duration time
+     */
+    public String getDurationTimeStillRunningFormatted(){
         Date currentTime = Calendar.getInstance().getTime();
-        long mills = currentTime.getTime() - mStartTime.getTime();
+        return formatDuration(currentTime.getTime() - mStartTime.getTime());
+    }
+
+    private String formatDuration(long mills){
         int hours = (int) (mills/(1000 * 60 * 60));
         int minutes = (int) (mills/(1000*60)) % 60;
         long seconds = (int) (mills / 1000) % 60;

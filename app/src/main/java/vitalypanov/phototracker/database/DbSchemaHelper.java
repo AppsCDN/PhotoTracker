@@ -25,6 +25,7 @@ public class DbSchemaHelper extends SQLiteOpenHelper{
                 TracksTable.Cols.UUID +", " +
                 TracksTable.Cols.START_TIME +", " +
                 TracksTable.Cols.END_TIME +", " +
+                TracksTable.Cols.DISTANCE +" real, " +
                 TracksTable.Cols.COMMENT +", " +
                 TracksTable.Cols.TRACK_DATA +
                 ")"

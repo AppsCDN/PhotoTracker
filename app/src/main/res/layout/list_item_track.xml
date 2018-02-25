@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/list_item_start_time_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:textStyle="bold"
+        tools:text="Start time" />
+    <TextView
+        android:id="@+id/list_item_distance_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/list_item_start_time_text_view"
+        android:padding="4dp"
+        tools:text="Distance" />
+    <TextView
+        android:id="@+id/list_item_comment_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/list_item_distance_text_view"
+        android:padding="4dp"
+        tools:text="Comment" />
+
+    <TextView
+        android:id="@+id/list_item_duration_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@id/list_item_distance_text_view"
+        android:padding="4dp"
+        tools:text="Duration" />
+
+
+
+</RelativeLayout>

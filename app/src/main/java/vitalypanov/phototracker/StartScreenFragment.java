@@ -37,6 +37,7 @@ public class StartScreenFragment extends Fragment {
     boolean mBound = false;
 
     private Button mTrackStart;
+    private Button mTrackList;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -75,6 +76,16 @@ public class StartScreenFragment extends Fragment {
                 startTrack();
             }
         });
+
+        mTrackList =  (Button) view.findViewById(R.id.track_list);
+        mTrackList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = TrackListActivity.newIntent(getActivity());
+                startActivity(intent);
+            }
+        });
+
 
         return view;
     }

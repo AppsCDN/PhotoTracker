@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ImageButton;
 import android.provider.MediaStore;
@@ -32,6 +35,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     private TextView mStartTimeTextView;
     private TextView mDurationTimeTextView;
     private TextView mDistanceTextView;
+    private EditText mCommentEditText;
 
     private ImageButton mPhotoButton;
     private ImageButton mPauseButton;
@@ -82,6 +86,26 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         mDurationTimeTextView= (TextView)v.findViewById(R.id.duration_time_text_view);
         mDistanceTextView= (TextView)v.findViewById(R.id.distance_text_view);
 
+        mCommentEditText= (EditText) v.findViewById(R.id.comment_text);
+        mCommentEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int i, int i1, int i2) {
+                if (mService!=null && mService.getCurrentTrack() !=null){
+                    mService.getCurrentTrack().setComment(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
         mPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,8 +122,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 stopTrack();
-                Intent intent = StartScreenActivity.newIntent(getActivity());
-                startActivity(intent);
+                getActivity().finish(); // StartScreenActivity is already exists on the background of current activity
+                //Intent intent = StartScreenActivity.newIntent(getActivity());
+                //startActivity(intent);
             }
         });
 
@@ -175,8 +200,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             public void run() {
                 clearControls();
                 mStartTimeTextView.setText(mService.getCurrentTrack().getStartTimeFormatted());
-                mDurationTimeTextView.setText(mService.getCurrentTrack().getDurationTimeFormatted());
-                mDistanceTextView.setText(String.valueOf(mService.getCurrentTrack().getDistanceFormatted()));;
+                mDurationTimeTextView.setText(mService.getCurrentTrack().getDurationTimeStillRunningFormatted());
+                mService.getCurrentTrack().recalcDistance();
+                mDistanceTextView.setText(String.valueOf(mService.getCurrentTrack().getDistanceFormatted()));
             }
         });
 

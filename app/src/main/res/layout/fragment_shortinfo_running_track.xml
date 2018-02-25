@@ -7,6 +7,23 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/start_time_text_view"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAlignment="center"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/track_start_time"
+        android:textAlignment="center"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp">
+    </FrameLayout>
+
+    <TextView
         android:id="@+id/duration_time_text_view"
         style="?android:attr/listSeparatorTextViewStyle"
         android:layout_width="match_parent"
@@ -38,18 +55,17 @@
         android:layout_height="20dp">
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/start_time_text_view"
-        style="?android:attr/listSeparatorTextViewStyle"
+    <EditText
+        android:id="@+id/comment_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="25sp"
-        android:textAlignment="center"/>
+        android:layout_marginRight="16dp"
+        android:textAlignment="center"
+        android:hint="@string/track_comment_hint"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/track_start_time"
+        android:text="@string/track_comment"
         android:textAlignment="center"/>
     <FrameLayout
         android:layout_width="match_parent"

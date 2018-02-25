@@ -2,12 +2,15 @@ package vitalypanov.phototracker.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
@@ -46,11 +49,12 @@ public class TrackDbHelper {
         values.put(Cols.UUID, track.getId().toString());
         values.put(Cols.START_TIME, track.getStartTime().getTime());
         values.put(Cols.END_TIME, track.getEndTime().getTime());
+        values.put(Cols.DISTANCE, track.getDistance());
         values.put(Cols.COMMENT, track.getComment());
         // track data store in json format in one database field
         Gson gson = new Gson();
         values.put(Cols.TRACK_DATA, gson.toJson(track.getTrackData(),
-                new TypeToken<ArrayList<Track>>() {}.getType()));
+                new TypeToken<ArrayList<Location>>() {}.getType()));
         return values;
     }
 
@@ -73,5 +77,33 @@ public class TrackDbHelper {
         mDatabase.update(TracksTable.NAME, values,
                 Cols.UUID + " =?",
                 new String[]{uuidString});
+    }
+
+    private TrackCursorWrapper queryTracks(String whereClause, String[] whereArgs){
+        Cursor cursor = mDatabase.query(TracksTable.NAME,
+                null,   // columns. null value is selecting all columns
+                whereClause,
+                whereArgs,
+                null,   // group by
+                null,   // having
+                null    // order by
+        );
+        return new TrackCursorWrapper(cursor);
+    }
+
+    public List<Track> getTracks(){
+        List<Track> tracks = new ArrayList<>();
+        TrackCursorWrapper cursor =queryTracks(null, null);
+        try{
+            cursor.moveToFirst();
+            while (! cursor.isAfterLast()){
+                tracks.add(cursor.getTrack());
+                cursor.moveToNext();
+            }
+
+        } finally {
+            cursor.close();
+        }
+        return tracks;
     }
 }
