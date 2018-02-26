@@ -6,9 +6,9 @@ import java.util.List;
  * Created by Vitaly on 19.02.2018.
  */
 
-public class Lists {
+public class ListUtils {
 
-    private Lists() {
+    private ListUtils() {
     }
 
     /**

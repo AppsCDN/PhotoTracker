@@ -2,7 +2,6 @@ package vitalypanov.phototracker;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import vitalypanov.phototracker.utilities.ServiceUtils;
+
 /**
  * Created by Vitaly on 29.08.2017.
  */
@@ -32,15 +32,11 @@ public class StartScreenFragment extends Fragment {
     private static final String TAG = "PhotoTracker";
     public static final int MY_PERMISSION_REQUEST_READ_FINE_LOCATION = 1;
     private static final int REQUEST_ERROR = 0;
-
     private static final int LOCATION_REQUEST = 1;
     private static String[] LOCATION_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
     };
-    TrackerGPSService mService;
-    boolean mBound = false;
-
     private Button mTrackStart;
     private Button mTrackList;
 
@@ -90,8 +86,6 @@ public class StartScreenFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
-
         return view;
     }
 
@@ -99,31 +93,13 @@ public class StartScreenFragment extends Fragment {
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
-        Intent i = TrackerGPSService.newIntent(getActivity());
-        mConnection = new ServiceConnection() {
-
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
-                mService = binder.getService();
-                mBound = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                mBound = false;
-            }
-
-
+        // if service already running we should start running activity above current
+        if (ServiceUtils.isServiceRunning(
+                  getActivity().getApplicationContext(),
+                  TrackerGPSService.class)){
+            Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
+            startActivity(intent);
         };
-        getActivity().bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getActivity().unbindService(mConnection);
     }
 
     @Override
@@ -156,7 +132,6 @@ public class StartScreenFragment extends Fragment {
         // otherwise start GPS service
         Intent i = TrackerGPSService.newIntent(getActivity());
         getActivity().startService(i);
-        getActivity().bindService(i, mConnection, 0);
         Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
         startActivity(intent);
     }

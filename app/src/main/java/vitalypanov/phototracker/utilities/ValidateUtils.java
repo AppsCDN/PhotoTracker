@@ -4,7 +4,7 @@ package vitalypanov.phototracker.utilities;
  * Created by Vitaly on 25.02.2018.
  */
 
-public class ValidateUtil {
+public class ValidateUtils {
     public static boolean isNull(Object obj) {
         return obj == null;
     }

@@ -3,7 +3,6 @@ package vitalypanov.phototracker;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -25,7 +24,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.List;
 
 import vitalypanov.phototracker.model.TrackLocation;
-import vitalypanov.phototracker.utilities.Lists;
+import vitalypanov.phototracker.utilities.ListUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -128,9 +127,9 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
             return;
         }
         LatLng itemPoint = new LatLng(
-                Lists.getFirst(currentTrack).getLatitude(), Lists.getFirst(currentTrack).getLongitude());
+                ListUtils.getFirst(currentTrack).getLatitude(), ListUtils.getFirst(currentTrack).getLongitude());
         LatLng myPoint = new LatLng(
-                Lists.getLast(currentTrack).getLatitude(), Lists.getLast(currentTrack).getLongitude());
+                ListUtils.getLast(currentTrack).getLatitude(), ListUtils.getLast(currentTrack).getLongitude());
 
         MarkerOptions itemMarker = new MarkerOptions()
                 .position(itemPoint);

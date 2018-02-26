@@ -8,8 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import vitalypanov.phototracker.utilities.Lists;
-import vitalypanov.phototracker.utilities.ValidateUtil;
+import vitalypanov.phototracker.utilities.ListUtils;
+import vitalypanov.phototracker.utilities.ValidateUtils;
 
 /**
  * Track class
@@ -89,7 +89,7 @@ public class Track {
     }
 
     public TrackLocation getLastTrackItem() {
-        return Lists.getLast(trackData);
+        return ListUtils.getLast(trackData);
     }
 
     public void addTrackItem(TrackLocation locationItem) {
@@ -104,7 +104,7 @@ public class Track {
     private double getRealDistance(){
         float distance = 0;
         float[] distanceArr = new float[2];
-        TrackLocation prevLocationItem = Lists.getFirst(trackData);
+        TrackLocation prevLocationItem = ListUtils.getFirst(trackData);
         for (int index = 1; index< trackData.size(); index++){
             TrackLocation currLocationItem = trackData.get(index);
             Location.distanceBetween(
@@ -113,7 +113,7 @@ public class Track {
                     currLocationItem.getLatitude(),
                     currLocationItem.getLongitude(),
                     distanceArr);
-            if (ValidateUtil.isValidNumber(distanceArr[0])) {
+            if (ValidateUtils.isValidNumber(distanceArr[0])) {
                 distance +=  distanceArr[0];
             }
         }
