@@ -1,16 +1,18 @@
 package vitalypanov.phototracker;
 
-import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.content.Context;
 
 import java.util.List;
 
@@ -76,22 +78,61 @@ public class TrackListFragment  extends Fragment {
             implements View.OnClickListener{
 
         Track mTrack;
+        TrackAdapter mTrackAdapter;
+        private TextView mStartDateTextView;
         private TextView mStartTimeTextView;
         private TextView mDistanceTextView;
         private TextView mDurationTextView;
         private TextView mCommentTextView;
+        private ImageButton mDeleteButton;
 
         public TrackHolder(View itemView ){
             super(itemView);
             itemView.setOnClickListener(this);
+            mStartDateTextView = (TextView)itemView.findViewById(R.id.list_item_start_date_text_view);
             mStartTimeTextView = (TextView)itemView.findViewById(R.id.list_item_start_time_text_view);
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
+            mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
+            mDeleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.remove_track_confirm_title);
+                    String sMessage = getResources().getString(R.string.remove_track_confirm_message) +
+                            "\n" +
+                            "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
+                            "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
+                            mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
+                            (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
+                    builder.setMessage(sMessage);
+                    builder.setPositiveButton(R.string.remove_track_confirm_button_ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // confirm deleting - do it
+                                    TrackDbHelper.get(getContext()).deleteTrack(mTrack);
+                                    mTrackAdapter.removeAt(getAdapterPosition());
+                                }
+                            });
+                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // cancel confirmation dialog - do nothing
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            });
         }
 
-        public void bindTrack(Track track){
+        public void bindTrack(Track track, TrackAdapter trackAdapter){
             mTrack = track;
+            mTrackAdapter = trackAdapter;
+            mStartDateTextView.setText(mTrack.getStartDateFormatted());
             mStartTimeTextView.setText(mTrack.getStartTimeFormatted());
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
             mDurationTextView.setText(mTrack.getDurationTimeFormatted());
@@ -123,7 +164,7 @@ public class TrackListFragment  extends Fragment {
         @Override
         public void onBindViewHolder(TrackHolder holder, int position) {
             Track track = mTracks.get(position);
-            holder.bindTrack(track);
+            holder.bindTrack(track, this);
         }
 
         @Override
@@ -133,6 +174,16 @@ public class TrackListFragment  extends Fragment {
 
         public void setTracks(List<Track> tracks){
             mTracks = tracks;
+        }
+
+        /**
+         * Delete position from list
+         * @param position
+         */
+        public void removeAt(int position) {
+            mTracks.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, mTracks.size());
         }
 
     }

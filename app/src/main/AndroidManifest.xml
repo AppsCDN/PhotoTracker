@@ -18,7 +18,8 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyA3Tzc7nldsAOW6KM7T9Dl4R3qCQ7rb3Hk">
         </meta-data>
-        <activity android:name=".StartScreenActivity">
+        <activity
+            android:name=".StartScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -29,11 +30,11 @@
             android:theme="@style/NoTitleTheme">
         </activity>
         <activity
-            android:name=".TrackListActivity"
-            android:theme="@style/NoTitleTheme">
+            android:name=".TrackListActivity">
         </activity>
-        <service android:name=".TrackerGPSService"
-                 android:enabled="true" >
+        <service
+            android:name=".TrackerGPSService"
+            android:enabled="true" >
         </service>
     </application>
 

@@ -78,14 +78,12 @@ public class TrackerGPSService extends Service  implements LocationListener {
     private Timer dbTimer;
     private TimerTask dbTimerTask;
 
+    /**
+     * Timer for regular requesting gps coordinates
+     */
     public void startTimer() {
-        //set a new Timer
         timer = new Timer();
-
-        //initialize the TimerTask's job
         initializeTimerTask();
-
-        //schedule the timer, to wake up every 1 second
         timer.schedule(timerTask, 0, UPDATE_INTERVAL); //
     }
 
@@ -101,6 +99,9 @@ public class TrackerGPSService extends Service  implements LocationListener {
         };
     }
 
+    /**
+     * Timer for regular writing gps coordinates into db
+     */
     public void startDbTimer() {
         //set a new Timer
         dbTimer = new Timer();
@@ -116,15 +117,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
             }
         };
     }
-
-    /*
-    public void stopDbTimerTask() {
-        if (dbTimer != null) {
-            dbTimer.cancel();
-            dbTimer = null;
-        }
-    }
-    */
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

@@ -82,14 +82,6 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
                 if (fragment != null) {
                     fragment.onPageSelected();
                 }
-
-                /*
-                mLeftButton.setVisibility(View.GONE);
-                if ( position==PAGE_GOOGLE_MAP ){
-                    mLeftButton.setVisibility(View.VISIBLE);
-                }
-                */
-
             }
 
             @Override
@@ -97,23 +89,6 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
                 int i = 0;
             }
         });
-
-        /*
-        mLeftButton = new Button(this);
-        mLeftButton.setText("Click me");
-        addContentView(mLeftButton, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        mLeftButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                //Intent i=new Intent(this,SecondActivity.class);
-                //startActivity(i);
-                int i =0 ;
-
-            };
-        });
-        */
         mViewPager.setCurrentItem(PAGE_SHORT_INFO);
     }
 

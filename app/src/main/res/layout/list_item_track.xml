@@ -2,39 +2,132 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    style="?android:attr/listSeparatorTextViewStyle">
 
-    <TextView
-        android:id="@+id/list_item_start_time_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
-        android:textStyle="bold"
-        tools:text="Start time" />
-    <TextView
-        android:id="@+id/list_item_distance_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/list_item_start_time_text_view"
-        android:padding="4dp"
-        tools:text="Distance" />
-    <TextView
-        android:id="@+id/list_item_comment_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/list_item_distance_text_view"
-        android:padding="4dp"
-        tools:text="Comment" />
-
-    <TextView
-        android:id="@+id/list_item_duration_text_view"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/buttons_frame"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_toLeftOf="@id/list_item_distance_text_view"
+        android:layout_alignParentRight="true">
+        <ImageButton
+            android:id="@+id/list_item_track_continue_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@mipmap/ic_play"
+            android:scaleType="fitXY"
+            android:background="@drawable/button"
+            android:visibility="invisible"
+            />
+        <ImageButton
+            android:id="@+id/list_item_track_delete_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@mipmap/ic_delete_gray"
+            android:background="@drawable/button"
+            android:scaleType="fitXY"
+            />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/date_time_frame"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/buttons_frame"
         android:padding="4dp"
-        tools:text="Duration" />
+        >
+        <TextView
+            android:id="@+id/list_item_start_date_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            tools:text="00-00-0000"
+            />
+        <TextView
+            android:id="@+id/list_item_start_time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:text=""
+            tools:text="00:00"
+            />
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/comment_image_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date_time_frame"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <TextView
+            android:id="@+id/list_item_comment_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Comment"
+            />
+    </LinearLayout>
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/distance_frame"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/comment_image_frame"
+        android:padding="4dp">
+        <TextView
+            android:id="@+id/list_item_distance_text_view"
+            android:text="0,000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:padding="4dp"
+            />
+        <TextView
+            android:text="@string/distance_metrics"
+            android:textSize="10sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:gravity="top"
+            />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/duration_frame"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/distance_frame"
+        android:layout_below="@+id/comment_image_frame"
+        android:padding="4dp">
+        <TextView
+            android:id="@+id/list_item_duration_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:padding="4dp"
+            tools:text="00:00"
+            />
+        <TextView
+            android:text="@string/duration"
+            android:textSize="10sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            />
+    </LinearLayout>
 
 </RelativeLayout>

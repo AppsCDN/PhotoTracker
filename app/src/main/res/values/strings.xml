@@ -15,4 +15,9 @@
     <string name="action_track_list">Track list</string>
     <string name="alert_gps_title">GPS settings</string>
     <string name="alert_gps_message">GPS is not enabled. Do you want to go to the settings menu to turn it on?</string>
+    <string name="remove_track_confirm_title">Removing track"</string>
+    <string name="remove_track_confirm_message">Are you sure you want to remove the selected track?"</string>
+    <string name="remove_track_confirm_button_ok">Remove"</string>
+    <string name="duration">Duration</string>
+    <string name="distance_metrics">Km</string>
 </resources>

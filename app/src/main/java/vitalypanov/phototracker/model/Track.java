@@ -1,15 +1,13 @@
 package vitalypanov.phototracker.model;
 
-import android.location.Location;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import vitalypanov.phototracker.utilities.DateUtils;
 import vitalypanov.phototracker.utilities.ListUtils;
-import vitalypanov.phototracker.utilities.ValidateUtils;
 
 /**
  * Track class
@@ -24,8 +22,7 @@ public class Track {
     private double mDistance;// Cashed distance value of the track (need recalculate when trackData are updated)
     private List<TrackLocation> trackData = new ArrayList<>(); // gps locations data of the track
 
-    // Format constants
-    private final String LEAD_ZEROS_TIME_FORMAT = "%02d";
+    // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
 
     /**
@@ -103,19 +100,11 @@ public class Track {
      */
     private double getRealDistance(){
         float distance = 0;
-        float[] distanceArr = new float[2];
         TrackLocation prevLocationItem = ListUtils.getFirst(trackData);
         for (int index = 1; index< trackData.size(); index++){
             TrackLocation currLocationItem = trackData.get(index);
-            Location.distanceBetween(
-                    prevLocationItem.getLatitude(),
-                    prevLocationItem.getLongitude(),
-                    currLocationItem.getLatitude(),
-                    currLocationItem.getLongitude(),
-                    distanceArr);
-            if (ValidateUtils.isValidNumber(distanceArr[0])) {
-                distance +=  distanceArr[0];
-            }
+            distance += currLocationItem.distanceTo(prevLocationItem);
+            prevLocationItem = currLocationItem;
         }
         return (double)((long)distance)/1000.;
     }
@@ -146,12 +135,7 @@ public class Track {
     }
 
     private String formatDuration(long mills){
-        int hours = (int) (mills/(1000 * 60 * 60));
-        int minutes = (int) (mills/(1000*60)) % 60;
-        long seconds = (int) (mills / 1000) % 60;
-        return (String.format(LEAD_ZEROS_TIME_FORMAT, hours) + ":" +
-                String.format(LEAD_ZEROS_TIME_FORMAT, minutes)  + ":" +
-                String.format(LEAD_ZEROS_TIME_FORMAT, seconds));
+        return DateUtils.getDurationFormatted(mills);
     }
 
     /**
@@ -167,13 +151,14 @@ public class Track {
      * @return
      */
     public String getStartTimeFormatted() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(mStartTime);
-        int hours = calendar.get(Calendar.HOUR_OF_DAY);
-        int minutes = calendar.get(Calendar.MINUTE);
-        int seconds = calendar.get(Calendar.SECOND);
-        return (String.format(LEAD_ZEROS_TIME_FORMAT, hours) + ":" +
-                String.format(LEAD_ZEROS_TIME_FORMAT, minutes)  + ":" +
-                String.format(LEAD_ZEROS_TIME_FORMAT, seconds));
+        return DateUtils.getTimeFormatted(mStartTime);
+    }
+
+    /**
+     * Date time formatted
+     * @return
+     */
+    public String getStartDateFormatted() {
+        return DateUtils.getDateFormatted(mStartTime);
     }
 }

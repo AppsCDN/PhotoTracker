@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.utilities.ServiceUtils;
 
 /**
@@ -100,6 +101,15 @@ public class StartScreenFragment extends Fragment {
             Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
             startActivity(intent);
         };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // update tracks count value on button
+        if (mTrackList!= null) {
+            mTrackList.setText(getResources().getString(R.string.action_track_list) + " (" + String.valueOf(TrackDbHelper.get(getContext()).getTracksCount()) + ")");
+        }
     }
 
     @Override

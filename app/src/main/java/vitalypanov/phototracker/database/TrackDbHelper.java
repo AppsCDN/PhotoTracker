@@ -3,8 +3,8 @@ package vitalypanov.phototracker.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -82,6 +82,15 @@ public class TrackDbHelper {
                 new String[]{uuidString});
     }
 
+    /**
+     * Delete track from Db
+     * @param track Track object
+     */
+    public void deleteTrack(Track track){
+        mDatabase.delete(TracksTable.NAME, TracksTable.Cols.UUID + " = ?",
+                new String[]{track.getId().toString()});
+    }
+
     private TrackCursorWrapper queryTracks(String whereClause, String[] whereArgs){
         Cursor cursor = mDatabase.query(TracksTable.NAME,
                 null,   // columns. null value is selecting all columns
@@ -89,11 +98,15 @@ public class TrackDbHelper {
                 whereArgs,
                 null,   // group by
                 null,   // having
-                null    // order by
+                Cols.ID + " desc"    // order by
         );
         return new TrackCursorWrapper(cursor);
     }
 
+    /**
+     * Reading all tracks from db to list
+     * @return
+     */
     public List<Track> getTracks(){
         List<Track> tracks = new ArrayList<>();
         TrackCursorWrapper cursor =queryTracks(null, null);
@@ -109,5 +122,13 @@ public class TrackDbHelper {
             cursor.close();
         }
         return tracks;
+    }
+
+    /**
+     * Get tracks count in db table
+     * @return
+     */
+    public long getTracksCount(){
+        return DatabaseUtils.queryNumEntries(mDatabase, TracksTable.NAME);
     }
 }

@@ -8,6 +8,7 @@ public class DbSchema {
     public static final class TracksTable{
         public static final String NAME = "Tracks";
         public static final class Cols{
+            public static final String ID = "_id";
             public static final String UUID = "uuid";
             public static final String START_TIME = "start_time";
             public static final String END_TIME  ="end_time";
