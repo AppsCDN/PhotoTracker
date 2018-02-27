@@ -16,6 +16,7 @@ import java.util.List;
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
+import vitalypanov.phototracker.model.TrackPhoto;
 
 import static vitalypanov.phototracker.database.DbSchema.TracksTable.Cols;
 
@@ -59,7 +60,7 @@ public class TrackDbHelper {
         values.put(Cols.TRACK_DATA, gson.toJson(track.getTrackData(),
                 new TypeToken<ArrayList<TrackLocation>>() {}.getType()));
         values.put(Cols.PHOTO_FILES, gson.toJson(track.getPhotoFiles(),
-                new TypeToken<ArrayList<String>>() {}.getType()));
+                new TypeToken<ArrayList<TrackPhoto>>() {}.getType()));
         return values;
     }
 

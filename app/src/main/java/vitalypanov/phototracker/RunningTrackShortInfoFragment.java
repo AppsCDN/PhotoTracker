@@ -151,7 +151,6 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         mTrackPhotoImage = (ImageView) v.findViewById(R.id.track_photo_image);
-        updatePhotoUI();
 
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -233,7 +232,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     private void updatePhotoUI(){
-        if (mService == null || mService.getCurrentTrack() == null || getActivity() == null){
+        if (mService == null
+                || mService.getCurrentTrack() == null || getActivity() == null
+                || mService.getCurrentTrack().getLastPhotoItem() == null){
             return;
         }
         File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mService.getCurrentTrack().getLastPhotoItem().getPhotoFileName());
@@ -330,6 +331,6 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 mCommentEditText.setText(mService.getCurrentTrack().getComment());
             }
         });
-
+        updatePhotoUI();
     }
 }
