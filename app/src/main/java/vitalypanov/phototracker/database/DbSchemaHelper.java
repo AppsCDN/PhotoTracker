@@ -27,7 +27,8 @@ public class DbSchemaHelper extends SQLiteOpenHelper{
                 TracksTable.Cols.END_TIME +", " +
                 TracksTable.Cols.DISTANCE +" real, " +
                 TracksTable.Cols.COMMENT +", " +
-                TracksTable.Cols.TRACK_DATA +
+                TracksTable.Cols.TRACK_DATA +", " +
+                TracksTable.Cols.PHOTO_FILES +
                 ")"
         );
     }

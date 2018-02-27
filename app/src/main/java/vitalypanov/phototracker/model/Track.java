@@ -23,9 +23,9 @@ public class Track {
     private Date mStartTime;// start time when track was started
     private Date mEndTime;  //... when finished recording
     private String mComment;// user comment if provided
-    private double mDistance;// Cashed distance value of the track (need recalculate when trackData are updated)
-    private List<TrackLocation> trackData = new ArrayList<>(); // gps locations data of the track
-    private List<String> photos = new ArrayList<>(); // names of photo files
+    private double mDistance;// Cashed distance value of the track (need recalculate when mTrackData are updated)
+    private List<TrackLocation> mTrackData = new ArrayList<>(); // gps locations data of the track
+    private List<TrackPhoto> mPhotoFiles = new ArrayList<>(); // names of photo files attached to the track
 
     // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
@@ -45,7 +45,8 @@ public class Track {
         mId = id;
         mStartTime = new Date();
         mEndTime = new Date();
-        trackData = new ArrayList<>();
+        mTrackData = new ArrayList<>();
+        mPhotoFiles = new ArrayList<>();
     }
 
     public UUID getId() { return mId;}
@@ -83,19 +84,36 @@ public class Track {
     }
 
     public List<TrackLocation> getTrackData() {
-        return trackData;
+        return mTrackData;
     }
 
     public void setTrackData(List<TrackLocation> data) {
-        this.trackData = data;
+        this.mTrackData = data;
     }
 
     public TrackLocation getLastTrackItem() {
-        return ListUtils.getLast(trackData);
+        return ListUtils.getLast(mTrackData);
     }
 
     public void addTrackItem(TrackLocation locationItem) {
-        trackData.add(locationItem);
+        mTrackData.add(locationItem);
+    }
+
+    public List<TrackPhoto> getPhotoFiles() {
+        return mPhotoFiles;
+    }
+
+    public void setPhotoFiles(List<TrackPhoto> photoFiles) {
+        this.mPhotoFiles = photoFiles;
+    }
+
+    public void addPhotoItem(String photoFileName, TrackLocation trackLocation) {
+        TrackPhoto trackPhoto = new TrackPhoto(photoFileName, trackLocation);
+        mPhotoFiles.add(trackPhoto);
+    }
+
+    public TrackPhoto getLastPhotoItem() {
+        return ListUtils.getLast(mPhotoFiles);
     }
 
     /**
@@ -105,9 +123,9 @@ public class Track {
      */
     private double getRealDistance(){
         float distance = 0;
-        TrackLocation prevLocationItem = ListUtils.getFirst(trackData);
-        for (int index = 1; index< trackData.size(); index++){
-            TrackLocation currLocationItem = trackData.get(index);
+        TrackLocation prevLocationItem = ListUtils.getFirst(mTrackData);
+        for (int index = 1; index< mTrackData.size(); index++){
+            TrackLocation currLocationItem = mTrackData.get(index);
             distance += currLocationItem.distanceTo(prevLocationItem);
             prevLocationItem = currLocationItem;
         }
@@ -181,19 +199,19 @@ public class Track {
      * @param context
      * @return File object for taking picture
      */
-    public File getNewPhotoFile(Context context){
+    public File getPhotoFile(Context context, String fileName){
         File externalFileDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if (externalFileDir == null){
             return null;
         }
-        return new File(externalFileDir, getNewPhotoFileName());
+        return new File(externalFileDir, fileName);
     }
 
     /**
      * Create new photo file name - for new photo in track
      * @return
      */
-    private String getNewPhotoFileName(){
+    public String getNewPhotoFileName(){
         Calendar currentDateTime = Calendar.getInstance();
         int year = currentDateTime.get(Calendar.YEAR);
         int month = currentDateTime.get(Calendar.MONTH);

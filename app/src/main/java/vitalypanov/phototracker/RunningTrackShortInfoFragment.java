@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 
@@ -55,7 +56,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     private ImageButton mPauseButton;
     private ImageButton mSetingsButton;
 
-    private File mCurrentPhotoFile;
+    private String mCurrentPhotoFileName;
     private ImageView mTrackPhotoImage;
 
 
@@ -150,7 +151,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         mTrackPhotoImage = (ImageView) v.findViewById(R.id.track_photo_image);
-
+        updatePhotoUI();
 
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -200,9 +201,10 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             return;
         }
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        mCurrentPhotoFile = mService.getCurrentTrack().getNewPhotoFile(getContext());
+        mCurrentPhotoFileName = mService.getCurrentTrack().getNewPhotoFileName();
+        File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mCurrentPhotoFileName);
         //Uri uri = Uri.fromFile(mCurrentPhotoFile);
-        Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", mCurrentPhotoFile);
+        Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", currentPhotoFile);
         capturePhoto.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(capturePhoto, REQUEST_PHOTO);
     }
@@ -215,7 +217,14 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         switch (requestCode){
 
             case REQUEST_PHOTO:
-                updatePhotoView();
+                File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mCurrentPhotoFileName);
+                if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                    mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
+                    TrackDbHelper.get(getContext()).updateTrack(mService.getCurrentTrack());
+                } else {
+                    mCurrentPhotoFileName = null;
+                }
+                updatePhotoUI();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);;
@@ -223,12 +232,15 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
     }
 
-    private void updatePhotoView(){
-        if (mCurrentPhotoFile == null || !mCurrentPhotoFile.exists()){
+    private void updatePhotoUI(){
+        if (mService == null || mService.getCurrentTrack() == null || getActivity() == null){
+            return;
+        }
+        File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mService.getCurrentTrack().getLastPhotoItem().getPhotoFileName());
+        if (currentPhotoFile == null || !currentPhotoFile.exists()){
             mTrackPhotoImage.setImageDrawable(null);
         } else {
-            Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoFile.getPath());
-            //Bitmap bMapScaled = BitmapScalerUtils.scaleToFitHeight(bitmap,mTrackPhotoImage.getHeight());
+            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
             Bitmap bMapScaled = BitmapScalerUtils.scaleToFitWidth(bitmap,mTrackPhotoImage.getWidth());
             mTrackPhotoImage.setImageBitmap(bMapScaled);
         }

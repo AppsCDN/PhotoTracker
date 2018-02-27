@@ -15,6 +15,7 @@ public class DbSchema {
             public static final String COMMENT = "comment";
             public static final String DISTANCE = "distance";
             public static final String TRACK_DATA = "track_data";
+            public static final String PHOTO_FILES = "photo_files";
         }
     }
 }

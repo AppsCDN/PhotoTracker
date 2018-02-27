@@ -58,6 +58,8 @@ public class TrackDbHelper {
         Gson gson = new Gson();
         values.put(Cols.TRACK_DATA, gson.toJson(track.getTrackData(),
                 new TypeToken<ArrayList<TrackLocation>>() {}.getType()));
+        values.put(Cols.PHOTO_FILES, gson.toJson(track.getPhotoFiles(),
+                new TypeToken<ArrayList<String>>() {}.getType()));
         return values;
     }
 

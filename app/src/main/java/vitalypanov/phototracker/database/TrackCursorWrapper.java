@@ -2,7 +2,6 @@ package vitalypanov.phototracker.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.location.Location;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,6 +14,7 @@ import java.util.UUID;
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
+import vitalypanov.phototracker.model.TrackPhoto;
 
 /**
  * Created by Vitaly on 25.02.2018.
@@ -35,12 +35,18 @@ public class TrackCursorWrapper extends CursorWrapper {
         track.setEndTime(new Date(getLong(getColumnIndex(TracksTable.Cols.END_TIME))));
         track.setDistance(getDouble(getColumnIndex(TracksTable.Cols.DISTANCE)));
         track.setComment(getString(getColumnIndex(TracksTable.Cols.COMMENT)));
-        track.setTrackData(parseJSON(getString(getColumnIndex(TracksTable.Cols.TRACK_DATA))));
+        track.setTrackData(parseTrackDataJSON(getString(getColumnIndex(TracksTable.Cols.TRACK_DATA))));
+        track.setPhotoFiles(parsePhotoFilesJSON(getString(getColumnIndex(TracksTable.Cols.PHOTO_FILES))));
         return track;
     }
 
-    private ArrayList<TrackLocation> parseJSON(String jsonString) {
+    private ArrayList<TrackLocation> parseTrackDataJSON(String jsonString) {
         Gson gson = new GsonBuilder().create();
         return gson.fromJson(jsonString, new TypeToken<ArrayList<TrackLocation>>() {}.getType());
+    }
+
+    private ArrayList<TrackPhoto> parsePhotoFilesJSON(String jsonString) {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(jsonString, new TypeToken<ArrayList<TrackPhoto>>() {}.getType());
     }
 }
