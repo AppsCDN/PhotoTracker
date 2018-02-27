@@ -151,7 +151,7 @@ public class TrackListFragment  extends Fragment {
         }
 
         private void updatePhotoUI(){
-            BitmapScalerUtils.updatePhoto(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext());
+            BitmapScalerUtils.updatePhotoAssync(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext());
         }
 
         @Override
