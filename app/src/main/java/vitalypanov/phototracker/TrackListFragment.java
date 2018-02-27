@@ -5,19 +5,23 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 
 /**
  * Created by Vitaly on 25.02.2018.
@@ -57,6 +61,10 @@ public class TrackListFragment  extends Fragment {
         mTrackRecyclerView = (RecyclerView)view.
                 findViewById(R.id.crime_recycler_view);
         mTrackRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        // add divider
+        DividerItemDecoration divider = new DividerItemDecoration(mTrackRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        divider.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.custom_divider));
+        mTrackRecyclerView.addItemDecoration(divider);
         updateUI();
         return view;
     }
@@ -85,6 +93,7 @@ public class TrackListFragment  extends Fragment {
         private TextView mDurationTextView;
         private TextView mCommentTextView;
         private ImageButton mDeleteButton;
+        private ImageView mTrackPhotoImageView;
 
         public TrackHolder(View itemView ){
             super(itemView);
@@ -93,6 +102,7 @@ public class TrackListFragment  extends Fragment {
             mStartTimeTextView = (TextView)itemView.findViewById(R.id.list_item_start_time_text_view);
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
+            mTrackPhotoImageView = (ImageView) itemView.findViewById(R.id.list_item_track_photo_image);
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
             mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
@@ -137,6 +147,11 @@ public class TrackListFragment  extends Fragment {
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
             mDurationTextView.setText(mTrack.getDurationTimeFormatted());
             mCommentTextView.setText(mTrack.getComment());
+            updatePhotoUI();
+        }
+
+        private void updatePhotoUI(){
+            BitmapScalerUtils.updatePhoto(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext());
         }
 
         @Override

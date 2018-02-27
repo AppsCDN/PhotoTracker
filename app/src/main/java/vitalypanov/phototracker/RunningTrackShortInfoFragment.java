@@ -5,8 +5,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -216,14 +214,17 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         switch (requestCode){
 
             case REQUEST_PHOTO:
-                File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mCurrentPhotoFileName);
-                if (currentPhotoFile != null && currentPhotoFile.exists()) {
-                    mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
-                    TrackDbHelper.get(getContext()).updateTrack(mService.getCurrentTrack());
-                } else {
-                    mCurrentPhotoFileName = null;
+                if (mService!= null && mService.getCurrentTrack() != null) {
+                    // check for null service is needed because after take photo the fragment can not exists
+                    File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(), mCurrentPhotoFileName);
+                    if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                        mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
+                        TrackDbHelper.get(getContext()).updateTrack(mService.getCurrentTrack());
+                    } else {
+                        mCurrentPhotoFileName = null;
+                    }
+                    updatePhotoUI();
                 }
-                updatePhotoUI();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);;
@@ -232,19 +233,10 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     private void updatePhotoUI(){
-        if (mService == null
-                || mService.getCurrentTrack() == null || getActivity() == null
-                || mService.getCurrentTrack().getLastPhotoItem() == null){
+        if (mService == null){
             return;
         }
-        File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mService.getCurrentTrack().getLastPhotoItem().getPhotoFileName());
-        if (currentPhotoFile == null || !currentPhotoFile.exists()){
-            mTrackPhotoImage.setImageDrawable(null);
-        } else {
-            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
-            Bitmap bMapScaled = BitmapScalerUtils.scaleToFitWidth(bitmap,mTrackPhotoImage.getWidth());
-            mTrackPhotoImage.setImageBitmap(bMapScaled);
-        }
+        BitmapScalerUtils.updatePhoto(mService.getCurrentTrack(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
     }
 
     @Override
