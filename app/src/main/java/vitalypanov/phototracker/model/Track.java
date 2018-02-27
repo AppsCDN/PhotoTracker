@@ -1,5 +1,9 @@
 package vitalypanov.phototracker.model;
 
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,6 +25,7 @@ public class Track {
     private String mComment;// user comment if provided
     private double mDistance;// Cashed distance value of the track (need recalculate when trackData are updated)
     private List<TrackLocation> trackData = new ArrayList<>(); // gps locations data of the track
+    private List<String> photos = new ArrayList<>(); // names of photo files
 
     // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
@@ -155,10 +160,49 @@ public class Track {
     }
 
     /**
+     * Start time formatted
+     * @return
+     */
+    public String getStartTimeShortFormatted() {
+        return DateUtils.getShortTimeFormatted(mStartTime);
+    }
+
+
+    /**
      * Date time formatted
      * @return
      */
     public String getStartDateFormatted() {
         return DateUtils.getDateFormatted(mStartTime);
+    }
+
+    /**
+     * Getting File object of new photo file
+     * @param context
+     * @return File object for taking picture
+     */
+    public File getNewPhotoFile(Context context){
+        File externalFileDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (externalFileDir == null){
+            return null;
+        }
+        return new File(externalFileDir, getNewPhotoFileName());
+    }
+
+    /**
+     * Create new photo file name - for new photo in track
+     * @return
+     */
+    private String getNewPhotoFileName(){
+        Calendar currentDateTime = Calendar.getInstance();
+        int year = currentDateTime.get(Calendar.YEAR);
+        int month = currentDateTime.get(Calendar.MONTH);
+        int day = currentDateTime.get(Calendar.DAY_OF_MONTH);
+        int hour = currentDateTime.get(Calendar.HOUR_OF_DAY);
+        int minute = currentDateTime.get(Calendar.MINUTE);
+        int second = currentDateTime.get(Calendar.SECOND);
+        return "IMG_" +
+                String.valueOf(year) + String.valueOf(month) + String.valueOf(day) + "_" +
+                String.valueOf(hour) + String.valueOf(minute) + String.valueOf(second) + ".jpg";
     }
 }

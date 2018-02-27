@@ -1,9 +1,13 @@
 package vitalypanov.phototracker;
 
+import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -17,15 +21,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -49,6 +55,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     private ImageButton mPauseButton;
     private ImageButton mSetingsButton;
 
+    private File mCurrentPhotoFile;
+    private ImageView mTrackPhotoImage;
 
 
     private Timer timer;
@@ -141,14 +149,22 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
         });
 
+        mTrackPhotoImage = (ImageView) v.findViewById(R.id.track_photo_image);
+
+
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
+        final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        //mCurrentPhotoFile = mService.getCurrentTrack().getNewPhotoFile(getContext());
+        //mCurrentPhotoFile != null &&
+        boolean canTakePhoto = capturePhoto.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
         mPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
                 // take photo
-                final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(capturePhoto, REQUEST_PHOTO);
+                takePhoto();
             }
         });
 
@@ -174,6 +190,48 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         updateUI();
 
         return v;
+    }
+
+    /**
+     * Taking photo
+     */
+    private void takePhoto(){
+        if (mService==null || mService.getCurrentTrack() == null){
+            return;
+        }
+        final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        mCurrentPhotoFile = mService.getCurrentTrack().getNewPhotoFile(getContext());
+        //Uri uri = Uri.fromFile(mCurrentPhotoFile);
+        Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", mCurrentPhotoFile);
+        capturePhoto.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivityForResult(capturePhoto, REQUEST_PHOTO);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+        switch (requestCode){
+
+            case REQUEST_PHOTO:
+                updatePhotoView();
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);;
+        }
+
+    }
+
+    private void updatePhotoView(){
+        if (mCurrentPhotoFile == null || !mCurrentPhotoFile.exists()){
+            mTrackPhotoImage.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoFile.getPath());
+            //Bitmap bMapScaled = BitmapScalerUtils.scaleToFitHeight(bitmap,mTrackPhotoImage.getHeight());
+            Bitmap bMapScaled = BitmapScalerUtils.scaleToFitWidth(bitmap,mTrackPhotoImage.getWidth());
+            mTrackPhotoImage.setImageBitmap(bMapScaled);
+        }
     }
 
     @Override
@@ -235,7 +293,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void run() {
                 Track currentTrack = mService.getCurrentTrack();
-                mStartTimeTextView.setText(currentTrack.getStartTimeFormatted());
+                mStartTimeTextView.setText(currentTrack.getStartTimeShortFormatted());
                 mDurationTimeTextView.setText(currentTrack.getDurationTimeStillRunningFormatted());
                 currentTrack.recalcDistance();
                 mDistanceTextView.setText(String.valueOf(currentTrack.getDistanceFormatted()));

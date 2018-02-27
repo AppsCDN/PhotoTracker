@@ -28,6 +28,20 @@ public class DateUtils {
                 String.format(LEAD_ZEROS_TIME_FORMAT, seconds));
     }
 
+    /**
+     * Start time formatted short
+     * Only hours and minutes
+     * @return
+     */
+    public static String getShortTimeFormatted(Date dDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dDate);
+        int hours = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
+        return (String.format(LEAD_ZEROS_TIME_FORMAT, hours) + ":" +
+                String.format(LEAD_ZEROS_TIME_FORMAT, minutes));
+    }
+
     public static String getDurationFormatted (long mills){
         int hours = (int) (mills/(1000 * 60 * 60));
         int minutes = (int) (mills/(1000*60)) % 60;
