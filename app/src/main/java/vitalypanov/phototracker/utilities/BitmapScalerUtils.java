@@ -40,15 +40,14 @@ public class BitmapScalerUtils {
      * @param context       context
      */
     public static void updatePhoto(Track track, ImageView imageView, int scaleWidth, Context context){
+        imageView.setImageDrawable(null);
         if (track== null
                 || track.getLastPhotoItem() == null
                 || context == null){
             return;
         }
         File currentPhotoFile = track.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
-        if (currentPhotoFile == null || !currentPhotoFile.exists()){
-            imageView.setImageDrawable(null);
-        } else {
+        if (currentPhotoFile != null && currentPhotoFile.exists()){
             Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
             Bitmap bMapScaled = BitmapScalerUtils.scaleToFitWidth(bitmap, scaleWidth);
             imageView.setImageBitmap(bMapScaled);

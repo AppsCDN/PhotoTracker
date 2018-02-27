@@ -186,6 +186,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         updateUI();
+        updatePhotoUI();
 
         return v;
     }
@@ -253,6 +254,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 mService = binder.getService();
                 mBound = true;
                 updateUI();
+                updatePhotoUI();
             }
 
             @Override
@@ -323,6 +325,5 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 mCommentEditText.setText(mService.getCurrentTrack().getComment());
             }
         });
-        updatePhotoUI();
     }
 }
