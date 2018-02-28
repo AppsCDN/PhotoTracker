@@ -179,6 +179,10 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
 
     @Override
     public void onPageSelected() {
+        // load photo bitmaps for showing on google map
+        if (mService!= null && mService.getCurrentTrack() != null) {
+            mService.getCurrentTrack().loadCashedBitmaps(getContext());
+        }
         // redraw map when selecting tab
         updatMapAsync();
     }

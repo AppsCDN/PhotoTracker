@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 
 import java.io.File;
 
+import vitalypanov.phototracker.BitmapCache;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 import vitalypanov.phototracker.utilities.FileUtils;
 
@@ -38,14 +39,24 @@ public class TrackBitmap {
 
     public Bitmap getBitmap() { return mBitmap; }
 
-    public void loadBitmap(Context context){
+    public void loadBitmap(Context context) {
+        // first check cache
+        Bitmap bitmap = BitmapCache.get().getBitmaps().get(mTrackPhoto.getPhotoFileName());
+        if (bitmap != null) {
+            // bitmap exists in cache - exiting
+            mBitmap = bitmap;
+            return;
+        }
+        // bitmap not exist in cache - loading it from file and scale
         File currentPhotoFile = FileUtils.getPhotoFile(context, mTrackPhoto.getPhotoFileName());
-        if (currentPhotoFile != null && currentPhotoFile.exists()){
+        if (currentPhotoFile != null && currentPhotoFile.exists()) {
             Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
-            mBitmap = bitmapFromFile.getWidth() < bitmapFromFile.getHeight() ?
+            bitmap = bitmapFromFile.getWidth() < bitmapFromFile.getHeight() ?
                     BitmapScalerUtils.scaleToFitHeight(bitmapFromFile, SCALE_SMALL_SIZE) // portrait
                     :
                     BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, SCALE_SMALL_SIZE); // landscape
+            BitmapCache.get().getBitmaps().put(mTrackPhoto.getPhotoFileName(), bitmap);
+            mBitmap = bitmap;
         }
     }
 }

@@ -46,6 +46,7 @@ public class Track {
         mEndTime = new Date();
         mTrackData = new ArrayList<>();
         mPhotoFiles = new ArrayList<>();
+        mCashedBitmaps = new ArrayList<>();
     }
 
     public UUID getId() { return mId;}
@@ -216,8 +217,15 @@ public class Track {
 
     /**
      * Load all bitmaps of the track into memory - for UI optimization
+     * If bitmaps already loaded (list is the same size as mPhotoFiles list) - exiting  immediately
+     * @param context
      */
     public void loadCashedBitmaps(Context context){
+        if (mCashedBitmaps.size() == mPhotoFiles.size()){
+            // all bitmaps already loaded
+            return;
+        }
+        // need to refresh bitmaps in memory according new file list names
         mCashedBitmaps.clear();
         for (TrackPhoto trackPhoto : mPhotoFiles){
             TrackBitmap trackBitmap = new TrackBitmap(trackPhoto);
