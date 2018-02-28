@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Photo Tracker (beta)</string>
+    <string name="photo_folder">PhotoTracker</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_start">Start</string>
     <string name="action_stop">Stop</string>

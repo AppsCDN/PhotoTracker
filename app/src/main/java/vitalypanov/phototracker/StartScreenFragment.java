@@ -34,9 +34,13 @@ public class StartScreenFragment extends Fragment {
     public static final int MY_PERMISSION_REQUEST_READ_FINE_LOCATION = 1;
     private static final int REQUEST_ERROR = 0;
     private static final int LOCATION_REQUEST = 1;
+    private static final int EXTERNAL_STORAGE_REQUEST = 2;
     private static String[] LOCATION_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
+    };
+    private static String[] EXTERNAL_STORAGE_PERMISSIONS = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
     private Button mTrackStart;
     private Button mTrackList;
@@ -56,6 +60,10 @@ public class StartScreenFragment extends Fragment {
         return (hasPermisson(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
+    private  boolean canAccessExternalStorage(){
+        return (hasPermisson(Manifest.permission.WRITE_EXTERNAL_STORAGE));
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +71,9 @@ public class StartScreenFragment extends Fragment {
         setHasOptionsMenu(true);
         if (!canAccessLocation()){
             requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
+        }
+        if (!canAccessExternalStorage()){
+            requestPermissions(EXTERNAL_STORAGE_PERMISSIONS, EXTERNAL_STORAGE_REQUEST);
         }
     }
 

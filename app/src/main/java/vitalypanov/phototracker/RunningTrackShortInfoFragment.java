@@ -202,7 +202,6 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         mCurrentPhotoFileName = mService.getCurrentTrack().getNewPhotoFileName();
         File currentPhotoFile = FileUtils.getPhotoFile(getContext(),mCurrentPhotoFileName);
-        //Uri uri = Uri.fromFile(mCurrentPhotoFile);
         Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", currentPhotoFile);
         capturePhoto.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(capturePhoto, REQUEST_PHOTO);
