@@ -1,9 +1,7 @@
 package vitalypanov.phototracker.model;
 
 import android.content.Context;
-import android.os.Environment;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,6 +24,7 @@ public class Track {
     private double mDistance;// Cashed distance value of the track (need recalculate when mTrackData are updated)
     private List<TrackLocation> mTrackData = new ArrayList<>(); // gps locations data of the track
     private List<TrackPhoto> mPhotoFiles = new ArrayList<>(); // names of photo files attached to the track
+    private List<TrackBitmap> mCashedBitmaps = new ArrayList<>(); // for fast working in UI with photos
 
     // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
@@ -116,6 +115,10 @@ public class Track {
         return ListUtils.getLast(mPhotoFiles);
     }
 
+    public List<TrackBitmap> getCashedBitmaps() {
+        return mCashedBitmaps;
+    }
+
     /**
      * Calculate full distance of the track.
      * Rounded to full kilometers
@@ -195,19 +198,6 @@ public class Track {
     }
 
     /**
-     * Getting File object of new photo file
-     * @param context
-     * @return File object for taking picture
-     */
-    public File getPhotoFile(Context context, String fileName){
-        File externalFileDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        if (externalFileDir == null){
-            return null;
-        }
-        return new File(externalFileDir, fileName);
-    }
-
-    /**
      * Create new photo file name - for new photo in track
      * @return
      */
@@ -222,5 +212,17 @@ public class Track {
         return "IMG_" +
                 String.valueOf(year) + String.valueOf(month) + String.valueOf(day) + "_" +
                 String.valueOf(hour) + String.valueOf(minute) + String.valueOf(second) + ".jpg";
+    }
+
+    /**
+     * Load all bitmaps of the track into memory - for UI optimization
+     */
+    public void loadCashedBitmaps(Context context){
+        mCashedBitmaps.clear();
+        for (TrackPhoto trackPhoto : mPhotoFiles){
+            TrackBitmap trackBitmap = new TrackBitmap(trackPhoto);
+            trackBitmap.loadBitmap(context);
+            mCashedBitmaps.add(trackBitmap);
+        }
     }
 }

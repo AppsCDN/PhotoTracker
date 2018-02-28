@@ -16,6 +16,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
+import vitalypanov.phototracker.model.TrackBitmap;
 import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.utilities.ListUtils;
 
@@ -71,7 +74,9 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
                 mService = binder.getService();
                 mBound = true;
-                // after service bound we can update map
+                // after service bound we can load photos
+                mService.getCurrentTrack().loadCashedBitmaps(getContext());
+                // ...and update map
                 updatMapAsync();
             }
 
@@ -122,25 +127,40 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         }
 
         // getting current gps track from service
-        List<TrackLocation> currentTrack = mService.getCurrentTrack().getTrackData();
-        if (currentTrack == null || currentTrack.isEmpty()) {
+        List<TrackLocation> trackData = mService.getCurrentTrack().getTrackData();
+        if (trackData == null || trackData.isEmpty()) {
             return;
         }
         LatLng itemPoint = new LatLng(
-                ListUtils.getFirst(currentTrack).getLatitude(), ListUtils.getFirst(currentTrack).getLongitude());
+                ListUtils.getFirst(trackData).getLatitude(), ListUtils.getFirst(trackData).getLongitude());
         LatLng myPoint = new LatLng(
-                ListUtils.getLast(currentTrack).getLatitude(), ListUtils.getLast(currentTrack).getLongitude());
+                ListUtils.getLast(trackData).getLatitude(), ListUtils.getLast(trackData).getLongitude());
 
+        mMap.clear();
+
+        // start point marker
         MarkerOptions itemMarker = new MarkerOptions()
                 .position(itemPoint);
+        mMap.addMarker(itemMarker);
+
+        // end(current) point marker
         MarkerOptions myMarker = new MarkerOptions()
                 .position(myPoint);
-        mMap.clear();
-        mMap.addMarker(itemMarker);
         mMap.addMarker(myMarker);
 
+        // all bitmap markers
+        for (TrackBitmap trackBitmap :  mService.getCurrentTrack().getCashedBitmaps()){
+            TrackLocation trackLocation = trackBitmap.getTrackPhoto().getTrackLocation();
+            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
+            MarkerOptions photoMarker = new MarkerOptions()
+                    .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
+                    .icon(itemBitmap)
+                    ;
+            mMap.addMarker(photoMarker);
+        }
+
         PolylineOptions lines = new PolylineOptions();
-        for(TrackLocation loc : currentTrack){
+        for(TrackLocation loc : trackData){
             lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
         }
         mMap.addPolyline(lines);

@@ -41,7 +41,7 @@ public class BitmapScalerUtils {
      * @param context       Context
      */
     public static void updatePhoto(Track track, ImageView imageView, int scaleWidth, Context context){
-        imageView.setImageBitmap(getScaledBitmap(track, scaleWidth, context));
+        imageView.setImageBitmap(getLastScaledBitmap(track, scaleWidth, context));
     }
 
     /**
@@ -63,14 +63,14 @@ public class BitmapScalerUtils {
      * @param context       Context
      * @return
      */
-    public static Bitmap getScaledBitmap(Track track, int scaleWidth, Context context) {
+    public static Bitmap getLastScaledBitmap(Track track, int scaleWidth, Context context) {
         Bitmap bitmap =null;
         if (track== null
                 || track.getLastPhotoItem() == null
                 || context == null){
             return bitmap;
         }
-        File currentPhotoFile = track.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
+        File currentPhotoFile = FileUtils.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
         if (currentPhotoFile != null && currentPhotoFile.exists()){
             Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
             bitmap = BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, scaleWidth);

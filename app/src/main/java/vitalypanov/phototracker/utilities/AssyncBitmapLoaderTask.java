@@ -34,7 +34,7 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(Void... params) {
-        return BitmapScalerUtils.getScaledBitmap(mTrack, mScaleWidth, mContext);
+        return BitmapScalerUtils.getLastScaledBitmap(mTrack, mScaleWidth, mContext);
     }
 
     @Override

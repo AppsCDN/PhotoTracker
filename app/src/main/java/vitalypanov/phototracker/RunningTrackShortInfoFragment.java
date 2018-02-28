@@ -31,6 +31,7 @@ import java.util.TimerTask;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
+import vitalypanov.phototracker.utilities.FileUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -200,7 +201,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         }
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         mCurrentPhotoFileName = mService.getCurrentTrack().getNewPhotoFileName();
-        File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(),mCurrentPhotoFileName);
+        File currentPhotoFile = FileUtils.getPhotoFile(getContext(),mCurrentPhotoFileName);
         //Uri uri = Uri.fromFile(mCurrentPhotoFile);
         Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", currentPhotoFile);
         capturePhoto.putExtra(MediaStore.EXTRA_OUTPUT, uri);
@@ -217,7 +218,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             case REQUEST_PHOTO:
                 if (mService!= null && mService.getCurrentTrack() != null) {
                     // check for null service is needed because after take photo the fragment can not exists
-                    File currentPhotoFile = mService.getCurrentTrack().getPhotoFile(getContext(), mCurrentPhotoFileName);
+                    File currentPhotoFile = FileUtils.getPhotoFile(getContext(), mCurrentPhotoFileName);
                     if (currentPhotoFile != null && currentPhotoFile.exists()) {
                         mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
                         TrackDbHelper.get(getContext()).updateTrack(mService.getCurrentTrack());
