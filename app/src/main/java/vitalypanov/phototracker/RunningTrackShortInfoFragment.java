@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -92,6 +93,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);// !!!! MUST HAVE THIS LINE
+                                // (or should save/restore all members of this fragment - for example: mCurrentPhotoFileName)
+                                // for properly working with camera intent
         startTimer();
     }
 
@@ -187,7 +191,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         updateUI();
-        updatePhotoUI();
+        //updatePhotoUI();
 
         return v;
     }
@@ -213,19 +217,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             return;
         }
         switch (requestCode){
-
             case REQUEST_PHOTO:
-                if (mService!= null && mService.getCurrentTrack() != null) {
-                    // check for null service is needed because after take photo the fragment can not exists
-                    File currentPhotoFile = FileUtils.getPhotoFile(getContext(), mCurrentPhotoFileName);
-                    if (currentPhotoFile != null && currentPhotoFile.exists()) {
-                        mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
-                        TrackDbHelper.get(getContext()).updateTrack(mService.getCurrentTrack());
-                    } else {
-                        mCurrentPhotoFileName = null;
-                    }
-                    updatePhotoUI();
-                }
+                AssyncUpdatePhotoAfterTakePhotoTask assyncUpdatePhotoAfterTakePhotoTask = new AssyncUpdatePhotoAfterTakePhotoTask();
+                assyncUpdatePhotoAfterTakePhotoTask.execute();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);;
@@ -233,11 +227,62 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
     }
 
+    /**
+     * Assync update image after take photo
+     *
+     */
+    private class AssyncUpdatePhotoAfterTakePhotoTask extends AsyncTask<Void, Void, Void> {
+
+        public AssyncUpdatePhotoAfterTakePhotoTask() {
+        }
+
+        @Override
+        protected void onPreExecute() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTrackPhotoImage.setImageBitmap(null);
+                }
+            });
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // wait service object
+            while (!mBound || getActivity() == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (mService!= null && mService.getCurrentTrack() != null) {
+                // check for null service is needed because after take photo the fragment can not exists
+                File currentPhotoFile = FileUtils.getPhotoFile(getActivity(), mCurrentPhotoFileName);
+                if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                    mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
+                    TrackDbHelper.get(getActivity()).updateTrack(mService.getCurrentTrack());
+                } else {
+                    mCurrentPhotoFileName = null;
+                }
+                updatePhotoUI();
+            }
+            return null;
+        }
+
+
+    }
+
     private void updatePhotoUI(){
         if (mService == null){
             return;
         }
-        BitmapScalerUtils.updatePhoto(mService.getCurrentTrack(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                BitmapScalerUtils.updatePhoto(mService.getCurrentTrack(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
+            }
+        });
     }
 
     @Override
