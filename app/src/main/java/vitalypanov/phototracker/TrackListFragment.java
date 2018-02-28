@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -94,6 +95,7 @@ public class TrackListFragment  extends Fragment {
         private TextView mCommentTextView;
         private ImageButton mDeleteButton;
         private ImageView mTrackPhotoImageView;
+        private RelativeLayout mLoadingPanel;
 
         public TrackHolder(View itemView ){
             super(itemView);
@@ -103,6 +105,7 @@ public class TrackListFragment  extends Fragment {
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
             mTrackPhotoImageView = (ImageView) itemView.findViewById(R.id.list_item_track_photo_image);
+            mLoadingPanel = (RelativeLayout) itemView.findViewById(R.id.list_item_track_loading_photo);
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
             mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
@@ -151,7 +154,7 @@ public class TrackListFragment  extends Fragment {
         }
 
         private void updatePhotoUI(){
-            BitmapScalerUtils.updatePhotoAssync(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext());
+            BitmapScalerUtils.updatePhotoAssync(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext(),mLoadingPanel);
         }
 
         @Override

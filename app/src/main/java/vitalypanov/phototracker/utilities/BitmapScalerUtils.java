@@ -3,8 +3,8 @@ package vitalypanov.phototracker.utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import java.io.File;
 
@@ -38,78 +38,45 @@ public class BitmapScalerUtils {
      * @param track         Track object - from which we take LAST photo - and draw it on image view
      * @param imageView     Which image view we place photo
      * @param scaleWidth    Which width bitmap of photo will be scaled
-     * @param context       context
+     * @param context       Context
      */
     public static void updatePhoto(Track track, ImageView imageView, int scaleWidth, Context context){
-        imageView.setImageDrawable(null);
-        if (track== null
-                || track.getLastPhotoItem() == null
-                || context == null){
-            return;
-        }
-        File currentPhotoFile = track.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
-        if (currentPhotoFile != null && currentPhotoFile.exists()){
-            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
-            Bitmap bMapScaled = BitmapScalerUtils.scaleToFitWidth(bitmap, scaleWidth);
-            imageView.setImageBitmap(bMapScaled);
-        }
+        imageView.setImageBitmap(getScaledBitmap(track, scaleWidth, context));
     }
 
     /**
      * Assync version of updatePhoto.
      * Drawing photo on image view control.
      * Do drawing with scaling within provided scaleWidth value
-     * @param track         Track object - from which we take LAST photo - and draw it on image view
-     * @param imageView     Which image view we place photo
-     * @param scaleWidth    Which width bitmap of photo will be scaled
-     * @param context       context
+     * All params are the same as in updatePhoto
+     * @param loadingPanel  Animated progress picture which shows when image loads (can be null)
      */
-    public static void updatePhotoAssync(Track track, ImageView imageView, int scaleWidth, Context context){
-        AssyncImageViewUpdater assyncImageViewUpdater = new AssyncImageViewUpdater(track, imageView, scaleWidth, context);
+    public static void updatePhotoAssync(Track track, ImageView imageView, int scaleWidth, Context context, RelativeLayout loadingPanel){
+        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(track, imageView, scaleWidth, context, loadingPanel);
         assyncImageViewUpdater.execute();
     }
 
-    private static class AssyncImageViewUpdater  extends AsyncTask<Void, Void, Bitmap> {
-
-        Track mTrack;
-        ImageView mImageView;
-        int mScaleWidth;
-        Context mContext;
-
-        public AssyncImageViewUpdater(Track track, ImageView imageView, int scaleWidth, Context context) {
-            this.mTrack = track;
-            this.mImageView = imageView;
-            this.mScaleWidth = scaleWidth;
-            this.mContext = context;
-        }
-
-        @Override
-        protected Bitmap doInBackground(Void... params) {
-            Bitmap bitmap =null;
-            if (mTrack== null
-                    || mTrack.getLastPhotoItem() == null
-                    || mContext == null){
-                return bitmap;
-            }
-            File currentPhotoFile = mTrack.getPhotoFile(mContext,mTrack.getLastPhotoItem().getPhotoFileName());
-            if (currentPhotoFile != null && currentPhotoFile.exists()){
-                Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
-                bitmap = BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, mScaleWidth);
-            }
+    /**
+     * Scale last bitmap in track according provided scaleWidth and return it
+     * @param track         Track object - from which we take LAST photo - and draw it on image view
+     * @param scaleWidth    Which width bitmap of photo will be scaled
+     * @param context       Context
+     * @return
+     */
+    public static Bitmap getScaledBitmap(Track track, int scaleWidth, Context context) {
+        Bitmap bitmap =null;
+        if (track== null
+                || track.getLastPhotoItem() == null
+                || context == null){
             return bitmap;
         }
-
-        @Override
-        protected void onPreExecute() {
-            mImageView.setImageBitmap(null);
+        File currentPhotoFile = track.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
+        if (currentPhotoFile != null && currentPhotoFile.exists()){
+            Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
+            bitmap = BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, scaleWidth);
         }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            mImageView.setImageBitmap(bitmap);
-        }
+        return bitmap;
     }
-
 
 }
 
