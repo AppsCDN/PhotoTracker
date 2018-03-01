@@ -23,6 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -64,6 +65,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     private ImageButton mSetingsButton;
 
     private String mCurrentPhotoFileName;
+
+    private RelativeLayout mTrackPhotoLayout;
+    private TextView mPhotoCounterTextView;
     private ImageView mTrackPhotoImage;
 
 
@@ -159,6 +163,12 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
 
         });
+
+        mTrackPhotoLayout= (RelativeLayout) v.findViewById(R.id.track_photo_layout);
+
+        mPhotoCounterTextView = (TextView) v.findViewById(R.id.photo_counter_textview);
+        mPhotoCounterTextView.setVisibility(View.GONE);
+        mPhotoCounterTextView.bringToFront();
 
         mTrackPhotoImage = (ImageView) v.findViewById(R.id.track_photo_image);
         mTrackPhotoImage.setOnClickListener(new View.OnClickListener() {
@@ -304,7 +314,11 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BitmapScalerUtils.updatePhoto(mService.getCurrentTrack().getLastPhotoItem(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
+                Track currentTrack = mService.getCurrentTrack();
+                BitmapScalerUtils.updatePhoto(currentTrack.getLastPhotoItem(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
+                mPhotoCounterTextView.setVisibility(currentTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
+                mPhotoCounterTextView.setText(" " + String.valueOf(currentTrack.getPhotoFiles().size()) + " ");
+                mPhotoCounterTextView.bringToFront();
             }
         });
     }

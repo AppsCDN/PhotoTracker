@@ -77,14 +77,31 @@
                 android:layout_height="wrap_content"
                 android:indeterminate="true" />
         </RelativeLayout>
-        <ImageView
-            android:id="@+id/list_item_track_photo_image"
+        <RelativeLayout
+            android:id="@+id/list_item_track_photo_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:cropToPadding="true"
-            android:scaleType="centerInside"
-            android:layout_below="@+id/list_item_track_loading_photo"
-            />
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/list_item_track_loading_photo">
+            <TextView
+                android:id="@+id/list_item_image_counter_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginVertical="15dp"
+                android:background="@drawable/counter_background"
+                android:padding="4dp"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                tools:text="78" />
+            <ImageView
+                android:id="@+id/list_item_track_photo_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cropToPadding="true"
+                android:scaleType="centerInside"
+                />
+        </RelativeLayout>
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

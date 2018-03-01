@@ -100,6 +100,8 @@ public class TrackListFragment  extends Fragment {
         private ImageButton mDeleteButton;
         private ImageView mTrackPhotoImageView;
         private RelativeLayout mLoadingPanel;
+        private RelativeLayout mTrackPhotoLayout;
+        private TextView mImageCounterTextView;
 
         public TrackHolder(View itemView ){
             super(itemView);
@@ -108,6 +110,9 @@ public class TrackListFragment  extends Fragment {
             mStartTimeTextView = (TextView)itemView.findViewById(R.id.list_item_start_time_text_view);
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
+
+            // photo layout elements:
+            mTrackPhotoLayout = (RelativeLayout) itemView.findViewById(R.id.list_item_track_photo_layout);
             mTrackPhotoImageView = (ImageView) itemView.findViewById(R.id.list_item_track_photo_image);
             mTrackPhotoImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -118,8 +123,13 @@ public class TrackListFragment  extends Fragment {
                     }
                 }
             });
+            mImageCounterTextView= (TextView) itemView.findViewById(R.id.list_item_image_counter_textview);
+
+            // progress of loading image layout
             mLoadingPanel = (RelativeLayout) itemView.findViewById(R.id.list_item_track_loading_photo);
+
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
+
             mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -158,11 +168,15 @@ public class TrackListFragment  extends Fragment {
         public void bindTrack(Track track, TrackAdapter trackAdapter){
             mTrack = track;
             mTrackAdapter = trackAdapter;
+
             mStartDateTextView.setText(mTrack.getStartDateFormatted());
             mStartTimeTextView.setText(mTrack.getStartTimeFormatted());
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
             mDurationTextView.setText(mTrack.getDurationTimeFormatted());
             mCommentTextView.setText(mTrack.getComment());
+            mTrackPhotoLayout.setVisibility(mTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
+            mImageCounterTextView.setText(" " + String.valueOf(mTrack.getPhotoFiles().size()) + " ");
+            mImageCounterTextView.bringToFront();
             updatePhotoUI();
         }
 
