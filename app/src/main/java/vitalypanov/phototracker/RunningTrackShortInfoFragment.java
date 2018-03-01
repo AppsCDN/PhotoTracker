@@ -37,6 +37,7 @@ import vitalypanov.phototracker.others.GenericFileProvider;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 import vitalypanov.phototracker.utilities.FileUtils;
+import vitalypanov.phototracker.utilities.MessageUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -213,9 +214,17 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
      * Taking photo
      */
     private void takePhoto(){
+        // Service not bind yet - exit
         if (mService==null || mService.getCurrentTrack() == null){
             return;
         }
+
+        // gps location not defined yet (at least one) - notify user and exit
+        if (mService.getCurrentTrack().getLastTrackItem() == null){
+            MessageUtils.ShowMessageBox(R.string.no_location_title, R.string.no_location_message, getContext());
+            return;
+        }
+
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         mCurrentPhotoFileName = mService.getCurrentTrack().getNewPhotoFileName();
         File currentPhotoFile = FileUtils.getPhotoFile(getContext(),mCurrentPhotoFileName);

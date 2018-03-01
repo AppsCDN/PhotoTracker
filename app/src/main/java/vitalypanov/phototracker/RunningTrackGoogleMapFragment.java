@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -152,6 +154,11 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         // all bitmap markers
         for (TrackBitmap trackBitmap :  mService.getCurrentTrack().getCashedBitmaps()){
             TrackLocation trackLocation = trackBitmap.getTrackPhoto().getTrackLocation();
+            if (trackLocation == null){
+                // Not possible situation!
+                // At the moment of taking photo at least one location should be defined.
+                Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
+            }
             BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
             MarkerOptions photoMarker = new MarkerOptions()
                     .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
