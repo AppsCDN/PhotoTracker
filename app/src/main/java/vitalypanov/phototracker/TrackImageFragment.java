@@ -72,6 +72,6 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
 
     @Override
     public void onPageSelected() {
-        updatePhotoUI();
+        //
     }
 }
