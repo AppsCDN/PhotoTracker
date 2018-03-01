@@ -19,11 +19,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 
 /**
@@ -111,7 +113,7 @@ public class TrackListFragment  extends Fragment {
                 @Override
                 public void onClick(View view) {
                     if (mTrack.getPhotoFiles().size()>0) {
-                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID());
+                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList< TrackPhoto>) mTrack.getPhotoFiles());
                         startActivity(intent);
                     }
                 }

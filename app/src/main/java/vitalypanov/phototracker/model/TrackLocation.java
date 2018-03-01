@@ -1,5 +1,7 @@
 package vitalypanov.phototracker.model;
 
+import java.io.Serializable;
+
 /**
  * Custom Location class for storing longitude and latitude.
  *
@@ -10,7 +12,7 @@ package vitalypanov.phototracker.model;
  * Created by Vitaly on 25.02.2018.
  */
 
-public class TrackLocation {
+public class TrackLocation implements Serializable{
 
     private double mLongitude;
     private double mLatitude;

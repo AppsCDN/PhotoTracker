@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,6 +34,7 @@ import vitalypanov.phototracker.activity.StartScreenActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.GenericFileProvider;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
@@ -163,7 +165,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 if (mService.getCurrentTrack().getPhotoFiles().size()>0) {
-                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID());
+                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles());
                     startActivity(intent);
                 }
             }

@@ -1,11 +1,13 @@
 package vitalypanov.phototracker.model;
 
+import java.io.Serializable;
+
 /**
  * Photo image of the track
  * Created by Vitaly on 27.02.2018.
  */
 
-public class TrackPhoto {
+public class TrackPhoto implements Serializable{
     String mPhotoFileName;
     TrackLocation mTrackLocation;
 

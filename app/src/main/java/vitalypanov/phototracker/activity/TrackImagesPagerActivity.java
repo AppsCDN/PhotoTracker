@@ -10,19 +10,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.ArrayList;
 
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.TrackImageFragment;
-import vitalypanov.phototracker.database.TrackDbHelper;
-import vitalypanov.phototracker.model.Track;
-import vitalypanov.phototracker.model.TrackBitmap;
+import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 
 /**
@@ -33,14 +29,15 @@ import vitalypanov.phototracker.others.ViewPageUpdater;
 public class TrackImagesPagerActivity extends AppCompatActivity {
     private static final String TAG = "PhotoTracker";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
+    private static final String EXTRA_PHOTO_LIST = "phototracker.photo_list";
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
-    private List<TrackBitmap> mBitmaps;
     private TextView mCounterTextView;
+    private ArrayList<TrackPhoto> mTrackPhotos;
 
-    public static Intent newIntent(Context packageContext, UUID uuid){
+    public static Intent newIntent(Context packageContext, ArrayList<TrackPhoto> trackPhotos){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
-        intent.putExtra(EXTRA_TRACK_UUID, uuid);
+        intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
         return intent;
     }
 
@@ -52,26 +49,23 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_pager_images);
 
-        UUID uuid = (UUID)getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
-        Track track = TrackDbHelper.get(this).getTrack(uuid);
-        track.loadCashedBitmaps(this);
-        mBitmaps = track.getCashedBitmaps();
+        mTrackPhotos = (ArrayList<TrackPhoto>)getIntent().getSerializableExtra(EXTRA_PHOTO_LIST);
 
-        mViewPager = (ViewPager)findViewById(R.id.activity_pager_images_view_pager);
+        mViewPager = (ViewPager) findViewById(R.id.activity_pager_images_view_pager);
         mCounterTextView = (TextView) findViewById(R.id.activity_pager_counter_textview);
         mCounterTextView.bringToFront();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mPagerAdapter =new FragmentStatePagerAdapter(fragmentManager) {
+        mPagerAdapter = new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                TrackBitmap trackBitmap = mBitmaps.get(position);
-                return TrackImageFragment.newInstance(trackBitmap.getTrackPhoto().getPhotoFileName());
+                TrackPhoto trackPhoto = mTrackPhotos.get(position);
+                return TrackImageFragment.newInstance(trackPhoto.getPhotoFileName());
             }
 
             @Override
             public int getCount() {
-                return mBitmaps.size();
+                return mTrackPhotos.size();
             }
 
             @Override
@@ -107,6 +101,27 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         int position = 0;
         mViewPager.setCurrentItem(position);
         updateCounter(position);
+
+        /*
+        mHandler = MessageUtils.ShowProgressDialog(
+                R.string.progress_dialog_title,
+                R.string.progress_dialog_message,
+                this);
+
+        final Context context = this;
+        new Runnable() {
+            @Override
+            public void run() {
+                // loading bitmpas
+                UUID uuid = (UUID) getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
+                Track track = TrackDbHelper.get(getParent()).getTrack(uuid);
+                track.loadCashedBitmaps(context);
+                mBitmaps = track.getCashedBitmaps();
+                mHandler.sendEmptyMessage(0); // after finishing loading bitmpas send empty message to progress dialog to close
+            }
+        };
+        */
+
     }
     private void updateCounter(int position){
         //mCounterTextView.setVisibility(View.VISIBLE);
@@ -121,11 +136,6 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
             }
         }, 2000);
         */
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override
