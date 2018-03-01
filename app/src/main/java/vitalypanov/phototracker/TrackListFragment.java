@@ -2,6 +2,7 @@ package vitalypanov.phototracker;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
@@ -105,6 +107,15 @@ public class TrackListFragment  extends Fragment {
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
             mTrackPhotoImageView = (ImageView) itemView.findViewById(R.id.list_item_track_photo_image);
+            mTrackPhotoImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mTrack.getPhotoFiles().size()>0) {
+                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID());
+                        startActivity(intent);
+                    }
+                }
+            });
             mLoadingPanel = (RelativeLayout) itemView.findViewById(R.id.list_item_track_loading_photo);
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
             mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
@@ -154,7 +165,10 @@ public class TrackListFragment  extends Fragment {
         }
 
         private void updatePhotoUI(){
-            BitmapScalerUtils.updatePhotoAssync(mTrack, mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext(), mLoadingPanel);
+            if (mTrack == null){
+                return;
+            }
+            BitmapScalerUtils.updatePhotoAssync(mTrack.getLastPhotoItem(), mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext(), mLoadingPanel);
         }
 
         @Override

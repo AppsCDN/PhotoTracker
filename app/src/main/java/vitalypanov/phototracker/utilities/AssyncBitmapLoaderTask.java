@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackPhoto;
 
 /**
  * Drawing photo on image view control asynchronously.
@@ -18,14 +18,14 @@ import vitalypanov.phototracker.model.Track;
 
 public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 
-    Track mTrack;           // Track object - from which we take LAST photo - and draw it on image view
+    TrackPhoto mTrackPhoto;           // Track object - from which we take LAST photo - and draw it on image view
     ImageView mImageView;   // Which image view we place photo
     int mScaleWidth;        // Which width bitmap of photo will be scaled
     Context mContext;
     RelativeLayout mLoadingPanel;   // Animated progress picture which shows when image loads (can be null)
 
-    public AssyncBitmapLoaderTask(Track track, ImageView imageView, int scaleWidth, Context context, RelativeLayout loadingPanel) {
-        this.mTrack = track;
+    public AssyncBitmapLoaderTask(TrackPhoto trackPhoto, ImageView imageView, int scaleWidth, Context context, RelativeLayout loadingPanel) {
+        this.mTrackPhoto = trackPhoto;
         this.mImageView = imageView;
         this.mScaleWidth = scaleWidth;
         this.mContext = context;
@@ -34,14 +34,14 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(Void... params) {
-        return BitmapScalerUtils.getLastScaledBitmap(mTrack, mScaleWidth, mContext);
+        return BitmapScalerUtils.getScaledBitmap(mTrackPhoto, mScaleWidth, mContext);
     }
 
     @Override
     protected void onPreExecute() {
         // show loading progress image only if photos exists in track
         if (mLoadingPanel!=null) {
-            mLoadingPanel.setVisibility(mTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
+            mLoadingPanel.setVisibility(mTrackPhoto!=null ? View.VISIBLE : View.GONE);
         }
         mImageView.setImageBitmap(null);
     }

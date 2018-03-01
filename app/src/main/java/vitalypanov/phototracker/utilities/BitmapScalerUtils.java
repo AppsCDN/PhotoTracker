@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
 
 import java.io.File;
 
-import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackPhoto;
 
 /**
  * Created by Vitaly on 27.02.2018.
@@ -35,13 +35,13 @@ public class BitmapScalerUtils {
     /**
      * Drawing photo on image view control.
      * Do drawing with scaling within provided scaleWidth value
-     * @param track         Track object - from which we take LAST photo - and draw it on image view
+     * @param trackPhoto    Track photo object - draw it on image view
      * @param imageView     Which image view we place photo
      * @param scaleWidth    Which width bitmap of photo will be scaled
      * @param context       Context
      */
-    public static void updatePhoto(Track track, ImageView imageView, int scaleWidth, Context context){
-        imageView.setImageBitmap(getLastScaledBitmap(track, scaleWidth, context));
+    public static void updatePhoto(TrackPhoto trackPhoto, ImageView imageView, int scaleWidth, Context context){
+        imageView.setImageBitmap(getScaledBitmap(trackPhoto, scaleWidth, context));
     }
 
     /**
@@ -51,26 +51,24 @@ public class BitmapScalerUtils {
      * All params are the same as in updatePhoto
      * @param loadingPanel  Animated progress picture which shows when image loads (can be null)
      */
-    public static void updatePhotoAssync(Track track, ImageView imageView, int scaleWidth, Context context, RelativeLayout loadingPanel){
-        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(track, imageView, scaleWidth, context, loadingPanel);
+    public static void updatePhotoAssync(TrackPhoto trackPhoto, ImageView imageView, int scaleWidth, Context context, RelativeLayout loadingPanel){
+        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(trackPhoto, imageView, scaleWidth, context, loadingPanel);
         assyncImageViewUpdater.execute();
     }
 
     /**
-     * Scale last bitmap in track according provided scaleWidth and return it
-     * @param track         Track object - from which we take LAST photo - and draw it on image view
+     * Scale bitmap in track according provided scaleWidth and return it
+     * @param trackPhoto    Track photo object - and draw it on image view
      * @param scaleWidth    Which width bitmap of photo will be scaled
      * @param context       Context
      * @return
      */
-    public static Bitmap getLastScaledBitmap(Track track, int scaleWidth, Context context) {
+    public static Bitmap getScaledBitmap(TrackPhoto trackPhoto, int scaleWidth, Context context) {
         Bitmap bitmap =null;
-        if (track== null
-                || track.getLastPhotoItem() == null
-                || context == null){
+        if (trackPhoto== null || context == null){
             return bitmap;
         }
-        File currentPhotoFile = FileUtils.getPhotoFile(context,track.getLastPhotoItem().getPhotoFileName());
+        File currentPhotoFile = FileUtils.getPhotoFile(context,trackPhoto.getPhotoFileName());
         if (currentPhotoFile != null && currentPhotoFile.exists()){
             Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
             bitmap = BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, scaleWidth);

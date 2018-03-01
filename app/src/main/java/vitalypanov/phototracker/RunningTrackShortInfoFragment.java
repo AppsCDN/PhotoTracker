@@ -30,6 +30,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import vitalypanov.phototracker.activity.StartScreenActivity;
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.others.GenericFileProvider;
@@ -157,6 +158,15 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         mTrackPhotoImage = (ImageView) v.findViewById(R.id.track_photo_image);
+        mTrackPhotoImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mService.getCurrentTrack().getPhotoFiles().size()>0) {
+                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID());
+                    startActivity(intent);
+                }
+            }
+        });
 
         mPhotoButton = (ImageButton) v.findViewById(R.id.track_photo);
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -277,13 +287,13 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     private void updatePhotoUI(){
-        if (mService == null){
+        if (mService == null || mService.getCurrentTrack() == null){
             return;
         }
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BitmapScalerUtils.updatePhoto(mService.getCurrentTrack(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
+                BitmapScalerUtils.updatePhoto(mService.getCurrentTrack().getLastPhotoItem(), mTrackPhotoImage, mTrackPhotoImage.getWidth(), getContext());
             }
         });
     }

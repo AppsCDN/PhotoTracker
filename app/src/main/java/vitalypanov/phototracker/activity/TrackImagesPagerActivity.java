@@ -12,30 +12,32 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
-import android.widget.Button;
+
+import java.util.List;
+import java.util.UUID;
 
 import vitalypanov.phototracker.R;
-import vitalypanov.phototracker.RunningTrackGoogleMapFragment;
-import vitalypanov.phototracker.RunningTrackShortInfoFragment;
+import vitalypanov.phototracker.TrackImageFragment;
+import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackBitmap;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 
-
 /**
- * Created by Vitaly on 23.02.2018.
+ * Images of the track pages
+ * Created by Vitaly on 01.03.2018.
  */
 
-public class RunningTrackPagerActivity extends AppCompatActivity {
+public class TrackImagesPagerActivity extends AppCompatActivity {
     private static final String TAG = "PhotoTracker";
-    // Pages
-    private static final int PAGE_SHORT_INFO = 0;
-    private static final int PAGE_GOOGLE_MAP = 1;
-    private static final int PAGES_COUNT = PAGE_GOOGLE_MAP + 1;
+    private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
-    private Button mLeftButton;
+    private List<TrackBitmap> mBitmaps;
 
-    public static Intent newIntent(Context packageContext){
-        Intent intent = new Intent(packageContext, RunningTrackPagerActivity.class);
+    public static Intent newIntent(Context packageContext, UUID uuid){
+        Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
+        intent.putExtra(EXTRA_TRACK_UUID, uuid);
         return intent;
     }
 
@@ -44,26 +46,23 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pager_running_track);
 
+        UUID uuid = (UUID)getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
+        Track track = TrackDbHelper.get(this).getTrack(uuid);
+        track.loadCashedBitmaps(this);
+        mBitmaps = track.getCashedBitmaps();
+
         mViewPager = (ViewPager)findViewById(R.id.activity_pager_running_track_view_pager);
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPagerAdapter =new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                switch (position){
-                    case PAGE_SHORT_INFO:
-                        // short info page of current track
-                        return RunningTrackShortInfoFragment.newInstance();
-                    case PAGE_GOOGLE_MAP:
-                        // google map page of current track
-                        return RunningTrackGoogleMapFragment.newInstance();
-                    default:
-                        return null; // Oooops!
-                }
+                TrackBitmap trackBitmap = mBitmaps.get(position);
+                return TrackImageFragment.newInstance(trackBitmap.getTrackPhoto().getPhotoFileName());
             }
 
             @Override
             public int getCount() {
-                return PAGES_COUNT;
+                return mBitmaps.size();
             }
 
             @Override
@@ -93,7 +92,9 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
                 int i = 0;
             }
         });
-        mViewPager.setCurrentItem(PAGE_SHORT_INFO);
+
+        // TODO: Should select selected item on prev activity
+        mViewPager.setCurrentItem(0);
     }
 
     @Override
@@ -103,8 +104,8 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // TODO Check here if track recording are already started
-        // in this case show warning message before leave
-        // super.onBackPressed();
+        super.onBackPressed();
+        this.finish();
     }
+
 }

@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
@@ -50,7 +51,7 @@ public class TrackDbHelper {
      */
     private static ContentValues getContentValues(Track track){
         ContentValues values = new ContentValues();
-        values.put(Cols.UUID, track.getId().toString());
+        values.put(Cols.UUID, track.getUUID().toString());
         values.put(Cols.START_TIME, track.getStartTime().getTime());
         values.put(Cols.END_TIME, track.getEndTime().getTime());
         values.put(Cols.DISTANCE, track.getDistance());
@@ -78,7 +79,7 @@ public class TrackDbHelper {
      * @param track Track object
      */
     public void updateTrack(Track track){
-        String uuidString = track.getId().toString();
+        String uuidString = track.getUUID().toString();
         ContentValues values = getContentValues(track);
         mDatabase.update(TracksTable.NAME, values,
                 Cols.UUID + " =?",
@@ -91,7 +92,7 @@ public class TrackDbHelper {
      */
     public void deleteTrack(Track track){
         mDatabase.delete(TracksTable.NAME, TracksTable.Cols.UUID + " = ?",
-                new String[]{track.getId().toString()});
+                new String[]{track.getUUID().toString()});
     }
 
     private TrackCursorWrapper queryTracks(String whereClause, String[] whereArgs){
@@ -108,7 +109,7 @@ public class TrackDbHelper {
 
     /**
      * Reading all tracks from db to list
-     * @return
+     * @return  Track list
      */
     public List<Track> getTracks(){
         List<Track> tracks = new ArrayList<>();
@@ -125,6 +126,24 @@ public class TrackDbHelper {
             cursor.close();
         }
         return tracks;
+    }
+
+    /**
+     * Reading only one track with provided UUID value from db
+     * @return  Track object
+     */
+    public Track getTrack(UUID id){
+        TrackCursorWrapper cursor = queryTracks(Cols.UUID + " = ?",
+                new String[]{id.toString()});
+        try{
+            if (cursor.getCount() == 0){
+                return null;
+            }
+            cursor.moveToFirst();
+            return cursor.getTrack();
+        } finally {
+            cursor.close();
+        }
     }
 
     /**

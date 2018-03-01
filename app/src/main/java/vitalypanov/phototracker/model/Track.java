@@ -17,7 +17,7 @@ import vitalypanov.phototracker.utilities.ListUtils;
  */
 
 public class Track {
-    private UUID mId;       // unique id of the track
+    private UUID mUUID;       // unique id of the track
     private Date mStartTime;// start time when track was started
     private Date mEndTime;  //... when finished recording
     private String mComment;// user comment if provided
@@ -38,10 +38,10 @@ public class Track {
 
     /**
      * For already exists tracks - provide Id in parameter
-     * @param id - track id in database
+     * @param UUID - track UUID in database
      */
-    public Track(UUID id) {
-        mId = id;
+    public Track(UUID UUID) {
+        mUUID = UUID;
         mStartTime = new Date();
         mEndTime = new Date();
         mTrackData = new ArrayList<>();
@@ -49,7 +49,7 @@ public class Track {
         mCashedBitmaps = new ArrayList<>();
     }
 
-    public UUID getId() { return mId;}
+    public UUID getUUID() { return mUUID;}
 
     public Date getStartTime() {
         return mStartTime;
