@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +36,7 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
     private List<TrackBitmap> mBitmaps;
+    private TextView mCounterTextView;
 
     public static Intent newIntent(Context packageContext, UUID uuid){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
@@ -44,14 +47,20 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pager_running_track);
+        // hide status bar when showing images
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        setContentView(R.layout.activity_pager_images);
 
         UUID uuid = (UUID)getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
         Track track = TrackDbHelper.get(this).getTrack(uuid);
         track.loadCashedBitmaps(this);
         mBitmaps = track.getCashedBitmaps();
 
-        mViewPager = (ViewPager)findViewById(R.id.activity_pager_running_track_view_pager);
+        mViewPager = (ViewPager)findViewById(R.id.activity_pager_images_view_pager);
+        mCounterTextView = (TextView) findViewById(R.id.activity_pager_counter_textview);
+        mCounterTextView.bringToFront();
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPagerAdapter =new FragmentStatePagerAdapter(fragmentManager) {
             @Override
@@ -85,6 +94,8 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
                 if (fragment != null) {
                     fragment.onPageSelected();
                 }
+                updateCounter(position);
+
             }
 
             @Override
@@ -93,8 +104,23 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
             }
         });
 
-        // TODO: Should select selected item on prev activity
-        mViewPager.setCurrentItem(0);
+        int position = 0;
+        mViewPager.setCurrentItem(position);
+        updateCounter(position);
+    }
+    private void updateCounter(int position){
+        //mCounterTextView.setVisibility(View.VISIBLE);
+        mCounterTextView.setText(String.valueOf(position+1) + "/" + mPagerAdapter.getCount());
+        /*
+        // after some second - hide counter
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCounterTextView.setVisibility(View.GONE);
+            }
+        }, 2000);
+        */
     }
 
     @Override
