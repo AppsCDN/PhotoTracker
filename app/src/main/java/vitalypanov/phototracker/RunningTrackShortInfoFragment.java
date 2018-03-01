@@ -282,8 +282,10 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
         @Override
         protected Void doInBackground(Void... voids) {
-            // wait service object
-            while (!mBound || getActivity() == null) {
+            // wait for service and Activity correct objects
+            while (mService == null
+                    || mService.getCurrentTrack() == null
+                    || getActivity() == null) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {

@@ -126,10 +126,10 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/track_photo"
+            android:id="@+id/track_pause"
             android:layout_width="80dp"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_camera"
+            android:src="@mipmap/ic_pause"
             android:background="@drawable/button_border"
             android:padding="15dp"/>
         <FrameLayout
@@ -138,11 +138,11 @@
         </FrameLayout>
 
         <ImageButton
-            android:id="@+id/track_pause"
+            android:id="@+id/track_photo"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_pause"
+            android:src="@mipmap/ic_camera"
             android:background="@drawable/button_border"/>
         <FrameLayout
             android:layout_width="15dp"
