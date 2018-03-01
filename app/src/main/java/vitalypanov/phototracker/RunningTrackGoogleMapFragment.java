@@ -27,13 +27,14 @@ import java.util.List;
 
 import vitalypanov.phototracker.model.TrackBitmap;
 import vitalypanov.phototracker.model.TrackLocation;
+import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.ListUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater{
+public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater {
     private static final String TAG = "PhotoTracker";
     private SupportMapFragment mapFragment = null;
     private GoogleMap mMap;

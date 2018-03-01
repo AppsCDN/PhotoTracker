@@ -29,8 +29,11 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vitalypanov.phototracker.activity.StartScreenActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.others.GenericFileProvider;
+import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 import vitalypanov.phototracker.utilities.FileUtils;
 

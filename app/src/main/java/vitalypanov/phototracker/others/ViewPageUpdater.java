@@ -1,4 +1,4 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.others;
 
 /**
  * Selecting page in view page event

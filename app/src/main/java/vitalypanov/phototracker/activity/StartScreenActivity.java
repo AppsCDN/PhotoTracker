@@ -1,11 +1,10 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import vitalypanov.phototracker.StartScreenFragment;
 
 public class StartScreenActivity extends SingleFragmentActivity {
     private static final String TAG = "PhotoTracker";

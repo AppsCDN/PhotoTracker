@@ -25,25 +25,25 @@
             android:value="AIzaSyA3Tzc7nldsAOW6KM7T9Dl4R3qCQ7rb3Hk">
         </meta-data>
         <activity
-            android:name=".StartScreenActivity">
+            android:name=".activity.StartScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".RunningTrackPagerActivity"
+            android:name=".activity.RunningTrackPagerActivity"
             android:theme="@style/NoTitleTheme">
         </activity>
         <activity
-            android:name=".TrackListActivity">
+            android:name=".activity.TrackListActivity">
         </activity>
         <service
             android:name=".TrackerGPSService"
             android:enabled="true" >
         </service>
         <provider
-            android:name=".GenericFileProvider"
+            android:name=".others.GenericFileProvider"
             android:authorities="${applicationId}.vitalypanov.phototracker.provider"
             android:exported="false"
             android:grantUriPermissions="true">

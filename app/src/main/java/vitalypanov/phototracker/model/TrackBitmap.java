@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 
 import java.io.File;
 
-import vitalypanov.phototracker.BitmapCache;
+import vitalypanov.phototracker.utilities.BitmapCache;
 import vitalypanov.phototracker.utilities.BitmapScalerUtils;
 import vitalypanov.phototracker.utilities.FileUtils;
 

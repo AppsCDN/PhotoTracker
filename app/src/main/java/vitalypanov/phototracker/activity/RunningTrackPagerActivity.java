@@ -1,4 +1,4 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,10 @@ import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import vitalypanov.phototracker.R;
+import vitalypanov.phototracker.RunningTrackGoogleMapFragment;
+import vitalypanov.phototracker.RunningTrackShortInfoFragment;
+import vitalypanov.phototracker.others.ViewPageUpdater;
 
 
 /**

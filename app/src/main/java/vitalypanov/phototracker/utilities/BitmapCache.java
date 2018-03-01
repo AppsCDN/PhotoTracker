@@ -1,4 +1,4 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.utilities;
 
 import android.graphics.Bitmap;
 

@@ -1,10 +1,12 @@
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.activity;
 
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+
+import vitalypanov.phototracker.R;
 
 /**
  * Created by Vitaly on 31.07.2017.
