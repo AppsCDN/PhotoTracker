@@ -42,6 +42,10 @@
             android:name=".activity.TrackImagesPagerActivity"
             android:theme="@style/NoTitleTheme">
         </activity>
+        <activity
+            android:name=".activity.GoogleMapActivity"
+            android:theme="@style/NoTitleTheme">
+        </activity>
         <service
             android:name=".TrackerGPSService"
             android:enabled="true" >

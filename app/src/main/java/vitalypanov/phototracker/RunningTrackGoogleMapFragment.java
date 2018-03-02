@@ -7,29 +7,16 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.List;
-
-import vitalypanov.phototracker.model.TrackBitmap;
-import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.others.ViewPageUpdater;
-import vitalypanov.phototracker.utilities.ListUtils;
+import vitalypanov.phototracker.utilities.GoogleMapUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -111,78 +98,12 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
-                updateGoogleMapUI();
+                if (mService == null){
+                    return;
+                }
+                GoogleMapUtils.updateGoogleMapUI(mMap, mService.getCurrentTrack(), getContext());
             }
         });
-    }
-
-    /**
-     Draw on google map
-     */
-    private void updateGoogleMapUI(){
-        if (mMap == null ){
-            return;
-        }
-
-        // service which holds track data should be not empty
-        if (mService == null){
-            return;
-        }
-
-        // getting current gps track from service
-        List<TrackLocation> trackData = mService.getCurrentTrack().getTrackData();
-        if (trackData == null || trackData.isEmpty()) {
-            return;
-        }
-        LatLng itemPoint = new LatLng(
-                ListUtils.getFirst(trackData).getLatitude(), ListUtils.getFirst(trackData).getLongitude());
-        LatLng myPoint = new LatLng(
-                ListUtils.getLast(trackData).getLatitude(), ListUtils.getLast(trackData).getLongitude());
-
-        mMap.clear();
-
-        // start point marker
-        MarkerOptions itemMarker = new MarkerOptions()
-                .position(itemPoint);
-        mMap.addMarker(itemMarker);
-
-        // end(current) point marker
-        MarkerOptions myMarker = new MarkerOptions()
-                .position(myPoint);
-        mMap.addMarker(myMarker);
-
-        // all bitmap markers
-        for (TrackBitmap trackBitmap :  mService.getCurrentTrack().getCashedBitmaps()){
-            TrackLocation trackLocation = trackBitmap.getTrackPhoto().getTrackLocation();
-            if (trackLocation == null){
-                // Not possible situation!
-                // At the moment of taking photo at least one location should be defined.
-                Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
-            }
-            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
-            MarkerOptions photoMarker = new MarkerOptions()
-                    .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
-                    .icon(itemBitmap)
-                    ;
-            mMap.addMarker(photoMarker);
-        }
-
-        PolylineOptions lines = new PolylineOptions();
-        for(TrackLocation loc : trackData){
-            lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
-        }
-        mMap.addPolyline(lines);
-
-        LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(itemPoint)
-                .include(myPoint)
-                .build();
-        int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
-
-        //mMap.animateCamera(update);
-        mMap.moveCamera(update);
-
     }
 
     @Override

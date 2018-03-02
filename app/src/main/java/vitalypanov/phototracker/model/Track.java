@@ -137,6 +137,50 @@ public class Track {
     }
 
     /**
+     * Calculate new location with min longtitude and latidude in track
+     * @return
+     */
+    public TrackLocation getMinTrackLocation(){
+        return getMinMaxTrackLocation(false);
+    }
+
+    /**
+     * Calculate new location with max longtitude and latidude in track
+     * @return
+     */
+    public TrackLocation getMaxTrackLocation(){
+        return getMinMaxTrackLocation(true);
+    }
+
+    private TrackLocation getMinMaxTrackLocation(boolean bMaxCalculate){
+        if (mTrackData == null){
+            return null;
+        }
+        TrackLocation trackLocationResult = ListUtils.getFirst(mTrackData);
+        double longitude = trackLocationResult.getLongitude();
+        double latitude = trackLocationResult.getLatitude();
+        for (int index = 1; index< mTrackData.size(); index++){
+            TrackLocation currLocationItem = mTrackData.get(index);
+            if (bMaxCalculate) {
+                if (currLocationItem.getLongitude() > longitude) {
+                    longitude = currLocationItem.getLongitude();
+                }
+                if (currLocationItem.getLatitude() > latitude) {
+                    latitude = currLocationItem.getLatitude();
+                }
+            } else {
+                if (currLocationItem.getLongitude() < longitude){
+                    longitude = currLocationItem.getLongitude();
+                }
+                if (currLocationItem.getLatitude() < latitude){
+                    latitude = currLocationItem.getLatitude();
+                }
+            }
+        }
+        return new TrackLocation(longitude, latitude);
+    }
+
+    /**
      * Recalculate distance value
      */
     public void recalcDistance(){

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import vitalypanov.phototracker.activity.GoogleMapActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
@@ -94,14 +95,15 @@ public class TrackListFragment  extends Fragment {
         TrackAdapter mTrackAdapter;
         private TextView mStartDateTextView;
         private TextView mStartTimeTextView;
+        private ImageButton mDeleteButton;
         private TextView mDistanceTextView;
         private TextView mDurationTextView;
-        private TextView mCommentTextView;
-        private ImageButton mDeleteButton;
-        private ImageView mTrackPhotoImageView;
-        private RelativeLayout mLoadingPanel;
+        private ImageButton mTrackMapButton;
         private RelativeLayout mTrackPhotoLayout;
+        private ImageView mTrackPhotoImageView;
         private TextView mImageCounterTextView;
+        private RelativeLayout mLoadingPanel;
+        private TextView mCommentTextView;
 
         public TrackHolder(View itemView ){
             super(itemView);
@@ -110,6 +112,14 @@ public class TrackListFragment  extends Fragment {
             mStartTimeTextView = (TextView)itemView.findViewById(R.id.list_item_start_time_text_view);
             mDistanceTextView = (TextView)itemView.findViewById(R.id.list_item_distance_text_view);
             mDurationTextView = (TextView) itemView.findViewById(R.id.list_item_duration_text_view);
+            mTrackMapButton = (ImageButton) itemView.findViewById(R.id.list_item_track_map_button);
+            mTrackMapButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = GoogleMapActivity.newIntent(getActivity(), mTrack.getUUID());
+                    startActivity(intent);
+                }
+            });
 
             // photo layout elements:
             mTrackPhotoLayout = (RelativeLayout) itemView.findViewById(R.id.list_item_track_photo_layout);
