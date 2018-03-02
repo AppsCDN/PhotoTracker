@@ -23,10 +23,13 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
@@ -43,6 +46,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
     public static final String REQUEST_CODE = "REQUEST_CODE";
     public static final String NOTIFICATION = "NOTIFICATION";
+    private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
 
     public Track getCurrentTrack() {
         return currentTrack;
@@ -79,6 +83,26 @@ public class TrackerGPSService extends Service  implements LocationListener {
     private Timer dbTimer;
     private TimerTask dbTimerTask;
 
+    /**
+     * Run new track
+     * @param context
+     * @return
+     */
+    public static Intent newIntent(Context context){
+        return new Intent(context, TrackerGPSService.class);
+    }
+
+    /**
+     * Rerun axisting track
+     * @param context
+     * @param trackUUID
+     * @return
+     */
+    public static Intent newIntent(Context context, UUID trackUUID){
+        Intent intent = new Intent(context, TrackerGPSService.class);
+        intent.putExtra(EXTRA_TRACK_UUID, trackUUID);
+        return intent;
+    }
     /**
      * Timer for regular requesting gps coordinates
      */
@@ -120,11 +144,26 @@ public class TrackerGPSService extends Service  implements LocationListener {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        currentTrack = new Track();
-        currentTrack.setStartTime(Calendar.getInstance().getTime());
-        TrackDbHelper.get(getApplicationContext()).insertTrack(currentTrack);
+        UUID uuid = (UUID)intent.getSerializableExtra(EXTRA_TRACK_UUID);
+        if (uuid != null)
+        {   // Continue already existing track
+            currentTrack = TrackDbHelper.get(getApplicationContext()).getTrack(uuid);
+            currentTrack.setEndTime(new Date());
+            TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
+        } else {
+            // Create new track
+            currentTrack = new Track();
+            currentTrack.setStartTime(Calendar.getInstance().getTime());
+            TrackDbHelper.get(getApplicationContext()).insertTrack(currentTrack);
+        }
         startTimer();
         startDbTimer();
         return START_STICKY;
@@ -163,10 +202,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    public static Intent newIntent(Context context){
-        return new Intent(context, TrackerGPSService.class);
     }
 
     public TrackerGPSService() {

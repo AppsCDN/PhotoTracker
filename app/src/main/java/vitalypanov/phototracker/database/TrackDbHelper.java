@@ -102,7 +102,7 @@ public class TrackDbHelper {
                 whereArgs,
                 null,   // group by
                 null,   // having
-                Cols.ID + " desc"    // order by
+                Cols.END_TIME + " desc, " + Cols.ID + " desc"    // order by end time descending - for showing fresh tracks at the top
         );
         return new TrackCursorWrapper(cursor);
     }

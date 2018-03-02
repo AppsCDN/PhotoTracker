@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vitalypanov.phototracker.activity.GoogleMapActivity;
+import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
@@ -99,6 +100,7 @@ public class TrackListFragment  extends Fragment {
         private TextView mDistanceTextView;
         private TextView mDurationTextView;
         private ImageButton mTrackMapButton;
+        private ImageButton mTrackContinueButton;
         private RelativeLayout mTrackPhotoLayout;
         private ImageView mTrackPhotoImageView;
         private TextView mImageCounterTextView;
@@ -118,6 +120,51 @@ public class TrackListFragment  extends Fragment {
                 public void onClick(View view) {
                     Intent intent = GoogleMapActivity.newIntent(getActivity(), mTrack.getUUID());
                     startActivity(intent);
+                }
+            });
+
+            mTrackContinueButton = (ImageButton) itemView.findViewById(R.id.list_item_track_continue_button);
+            mTrackContinueButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Run service within existing track object
+
+                    // show warning message before continue recording of the track
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.continue_track_confirm_title);
+                    String sMessage = getResources().getString(R.string.continue_track_confirm_message) +
+                            "\n" +
+                            "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
+                            "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
+                            mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
+                            (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
+                    builder.setMessage(sMessage);
+                    builder.setPositiveButton(R.string.continue_track_confirm_button_ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // confirmed to continue existing service!
+
+                                    // Run track recording service and provide them our selected track to continue
+                                    Intent i = TrackerGPSService.newIntent(getActivity(), mTrack.getUUID());
+                                    getActivity().startService(i);
+
+                                    // third - hide current activity and show "status" activity
+                                    getActivity().finish();
+                                    Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
+                                    startActivity(intent);
+
+                                }
+                            });
+                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // cancel confirmation dialog - do nothing
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
             });
 

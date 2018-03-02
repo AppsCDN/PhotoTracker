@@ -13,15 +13,6 @@
         android:layout_alignParentRight="true"
         android:padding="8dp">
         <ImageButton
-            android:id="@+id/list_item_track_continue_button"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@mipmap/ic_play"
-            android:scaleType="fitXY"
-            android:background="@drawable/button"
-            android:visibility="invisible"
-            />
-        <ImageButton
             android:id="@+id/list_item_track_delete_button"
             android:layout_width="20dp"
             android:layout_height="20dp"
@@ -128,7 +119,15 @@
             android:id="@+id/list_item_track_map_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_map"
+            android:src="@mipmap/ic_map_round"
+            android:scaleType="fitXY"
+            android:background="@drawable/button"
+            />
+        <ImageButton
+            android:id="@+id/list_item_track_continue_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_steps_round"
             android:scaleType="fitXY"
             android:background="@drawable/button"
             />

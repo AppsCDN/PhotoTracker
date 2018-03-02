@@ -28,4 +28,7 @@
     <string name="gps_cancel">Cancel</string>
     <string name="progress_dialog_title">Please wait</string>
     <string name="progress_dialog_message">Track information loading... Please wait.</string>
+    <string name="continue_track_confirm_title">Continue track"</string>
+    <string name="continue_track_confirm_message">Are you sure you want to continue recording of the selected track?</string>
+    <string name="continue_track_confirm_button_ok">GO</string>
 </resources>
