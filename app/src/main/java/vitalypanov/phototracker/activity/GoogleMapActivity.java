@@ -2,7 +2,9 @@ package vitalypanov.phototracker.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.WindowManager;
 
 import java.util.UUID;
 
@@ -16,6 +18,13 @@ public class GoogleMapActivity extends SingleFragmentActivity {
         Intent intent = new Intent(context, GoogleMapActivity.class);
         intent.putExtra(EXTRA_TRACK_UUID, uuid);
         return intent;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // hide status bar when showing images
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     @Override
