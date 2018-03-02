@@ -3,7 +3,6 @@ package vitalypanov.phototracker.utilities;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -88,8 +87,20 @@ public class GoogleMapUtils {
                 .include(maxPoint)
                 .build();
         int margin = context.getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-        final CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        int height = context.getResources().getDisplayMetrics().heightPixels;
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
 
+        // other variants:
+
+        /*
+        // 1. This is crashed variant:
+        final CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
+        googleMap.moveCamera(update);
+        */
+
+        /*
+        // 2. This is work variant but show world wide map first, and only then move camera:
         googleMap.setOnMapLoadedCallback(
                 new GoogleMap.OnMapLoadedCallback() {
                     @Override
@@ -98,6 +109,6 @@ public class GoogleMapUtils {
                         googleMap.moveCamera(update);
                     }
                 });
-
+        */
     }
 }
