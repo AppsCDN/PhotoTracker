@@ -68,6 +68,7 @@ public class GoogleMapUtils {
             MarkerOptions photoMarker = new MarkerOptions()
                     .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
                     .icon(itemBitmap)
+                    .snippet(trackBitmap.getTrackPhoto().getPhotoFileName())
                     ;
             googleMap.addMarker(photoMarker);
         }

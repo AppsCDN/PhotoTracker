@@ -14,7 +14,12 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 
+import java.util.ArrayList;
+
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
+import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
 
@@ -22,10 +27,10 @@ import vitalypanov.phototracker.utilities.GoogleMapUtils;
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater {
+public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, GoogleMap.OnMarkerClickListener {
     private static final String TAG = "PhotoTracker";
     private SupportMapFragment mapFragment = null;
-    private GoogleMap mMap;
+    private GoogleMap mGoogleMap;
 
     TrackerGPSService mService;
     boolean mBound = false;
@@ -94,14 +99,16 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         if (mapFragment==null){
             return;
         }
+        final RunningTrackGoogleMapFragment thisForCallback = this;
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
+                mGoogleMap = googleMap;
+                mGoogleMap.setOnMarkerClickListener(thisForCallback);
                 if (mService == null){
                     return;
                 }
-                GoogleMapUtils.updateGoogleMapUI(mMap, mService.getCurrentTrack(), getContext());
+                GoogleMapUtils.updateGoogleMapUI(mGoogleMap, mService.getCurrentTrack(), getContext());
             }
         });
     }
@@ -115,4 +122,19 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         // redraw map when selecting tab
         updatMapAsync();
     }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        String photoFileName = marker.getSnippet();
+        if (    photoFileName == null
+                || mService == null
+                || mService.getCurrentTrack() == null
+                || mService.getCurrentTrack().getPhotoFiles().isEmpty()) {
+            return false;
+        }
+        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), photoFileName);
+        startActivity(intent);
+        return false;
+    }
+
 }

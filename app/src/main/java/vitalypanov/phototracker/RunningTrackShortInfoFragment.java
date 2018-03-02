@@ -175,7 +175,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 if (mService.getCurrentTrack().getPhotoFiles().size()>0) {
-                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles());
+                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), null);
                     startActivity(intent);
                 }
             }

@@ -30,14 +30,17 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     private static final String TAG = "PhotoTracker";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
     private static final String EXTRA_PHOTO_LIST = "phototracker.photo_list";
+    private static final String EXTRA_PHOTO_TO_SELECT = "phototracker.photo_to_select";
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
     private TextView mCounterTextView;
     private ArrayList<TrackPhoto> mTrackPhotos;
+    private String mPhotoToSelectName;
 
-    public static Intent newIntent(Context packageContext, ArrayList<TrackPhoto> trackPhotos){
+    public static Intent newIntent(Context packageContext, ArrayList<TrackPhoto> trackPhotos, String photoToSelectName){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
         intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
+        intent.putExtra(EXTRA_PHOTO_TO_SELECT, photoToSelectName);
         return intent;
     }
 
@@ -50,6 +53,7 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pager_images);
 
         mTrackPhotos = (ArrayList<TrackPhoto>)getIntent().getSerializableExtra(EXTRA_PHOTO_LIST);
+        mPhotoToSelectName= getIntent().getStringExtra(EXTRA_PHOTO_TO_SELECT);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_pager_images_view_pager);
         mCounterTextView = (TextView) findViewById(R.id.activity_pager_counter_textview);
@@ -99,6 +103,15 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         });
 
         int position = 0;
+        if (mPhotoToSelectName!= null && !mPhotoToSelectName.isEmpty()){
+            // search element with provided photo name
+            for(int i = 0; i< mTrackPhotos.size(); i++){
+                if (mTrackPhotos.get(i).getPhotoFileName().equals(mPhotoToSelectName)){
+                    position = i; // image was founded
+                    break;
+                }
+            }
+        }
         mViewPager.setCurrentItem(position);
         updateCounter(position);
 

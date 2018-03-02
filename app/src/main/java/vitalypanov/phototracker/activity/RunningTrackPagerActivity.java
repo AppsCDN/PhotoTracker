@@ -103,8 +103,9 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // TODO Check here if track recording are already started
-        // in this case show warning message before leave
-        // super.onBackPressed();
+        // pressing back on google map cause returning to short info page
+        if (mViewPager.getCurrentItem() == PAGE_GOOGLE_MAP){
+            mViewPager.setCurrentItem(PAGE_SHORT_INFO);
+        }
     }
 }

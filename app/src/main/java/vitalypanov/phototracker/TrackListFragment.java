@@ -128,7 +128,7 @@ public class TrackListFragment  extends Fragment {
                 @Override
                 public void onClick(View view) {
                     if (mTrack.getPhotoFiles().size()>0) {
-                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList< TrackPhoto>) mTrack.getPhotoFiles());
+                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList< TrackPhoto>) mTrack.getPhotoFiles(), null);
                         startActivity(intent);
                     }
                 }

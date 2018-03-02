@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,22 +11,26 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
 
 /**
  * Created by Vitaly on 23.02.2018.
  */
 
-public class GoogleMapFragment extends Fragment {
+public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerClickListener {
     private static final String TAG = "PhotoTracker";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
     private SupportMapFragment mapFragment = null;
-    private GoogleMap mMap;
+    private GoogleMap mGoogleMap;
     private Track mTrack;
 
     public static GoogleMapFragment newInstance(UUID uuid) {
@@ -52,7 +57,6 @@ public class GoogleMapFragment extends Fragment {
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
         View v = layoutInflater.inflate(R.layout.fragment_map_track, container, false);
         mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
-        //mapFragment.getView().setVisibility(View.GONE);
         updatMapAsync();
         return v;
     }
@@ -71,12 +75,13 @@ public class GoogleMapFragment extends Fragment {
         if (mapFragment==null){
             return;
         }
+        final GoogleMapFragment thisForCallback = this;
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                GoogleMapUtils.updateGoogleMapUI(mMap, mTrack, getContext());
-                //mapFragment.getView().setVisibility(View.VISIBLE);
+                mGoogleMap = googleMap;
+                mGoogleMap.setOnMarkerClickListener(thisForCallback);
+                GoogleMapUtils.updateGoogleMapUI(mGoogleMap, mTrack, getContext());
             }
         });
     }
@@ -86,15 +91,13 @@ public class GoogleMapFragment extends Fragment {
         super.onResume();
     }
 
-    /*
     @Override
-    public void onPageSelected() {
-        // load photo bitmaps for showing on google map
-        if (mTrack != null) {
-            mTrack.loadCashedBitmaps(getContext());
+    public boolean onMarkerClick(Marker marker) {
+        String photoFileName = marker.getSnippet();
+        if (photoFileName!= null && mTrack.getPhotoFiles().size()>0) {
+            Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mTrack.getPhotoFiles(), photoFileName);
+            startActivity(intent);
         }
-        // redraw map when selecting tab
-        updatMapAsync();
+        return false;
     }
-    */
 }
