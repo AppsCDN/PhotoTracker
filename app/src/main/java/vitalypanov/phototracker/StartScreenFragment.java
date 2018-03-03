@@ -25,6 +25,7 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import vitalypanov.phototracker.activity.AboutDialogActivity;
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
@@ -66,7 +67,7 @@ public class StartScreenFragment extends Fragment {
     PrimaryDrawerItem  mMenuAbout;
 
     private Button mTrackStart;
-    private Button mTrackList;
+    //private Button mTrackList;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -114,13 +115,6 @@ public class StartScreenFragment extends Fragment {
             }
         });
 
-        mTrackList =  (Button) view.findViewById(R.id.track_list);
-        mTrackList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showTrackList();
-            }
-        });
         return view;
     }
 
@@ -139,7 +133,7 @@ public class StartScreenFragment extends Fragment {
         mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS).withEnabled(false);
         mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK).withEnabled(false);
         mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET).withEnabled(false);
-        mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT).withEnabled(false);
+        mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
 
         new DrawerBuilder()
             .withActivity(parentActivity)
@@ -159,7 +153,7 @@ public class StartScreenFragment extends Fragment {
                             new Drawer.OnDrawerItemClickListener() {
                                 @Override
                                 public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                                    switch (position) {
+                                    switch ((int)drawerItem.getIdentifier()) {
                                         case MENU_ITEM_START_TRACK:
                                             startTrack();
                                             break;
@@ -173,6 +167,7 @@ public class StartScreenFragment extends Fragment {
                                         case MENU_ITEM_RATE_PLAY_MARKET:
                                             break;
                                         case MENU_ITEM_ABOUT:
+                                            showAboutDialog();
                                             break;
                                     }
                                     return false;
@@ -206,10 +201,18 @@ public class StartScreenFragment extends Fragment {
      */
     private void updateTrackListCounterUI(){
         long tracksCount =  TrackDbHelper.get(getContext()).getTracksCount();
-        mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
+        //mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
         mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
+        mMenuTrackList.withEnabled(tracksCount > 0);
     }
 
+    /**
+     * Show About dialog
+     */
+    private void showAboutDialog(){
+        Intent intent = AboutDialogActivity.newIntent(getActivity());
+        startActivity(intent);
+    }
     /**
      * Show track list
      */

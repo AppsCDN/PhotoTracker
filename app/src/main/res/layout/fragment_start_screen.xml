@@ -3,13 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.StartScreenActivity">
+    tools:context=".activity.StartScreenActivity"
+    android:background="@drawable/new_york">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/track_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="#90ddf5"
         android:minHeight="?attr/actionBarSize"
         android:transitionName="actionBar" />
 
@@ -20,14 +23,8 @@
         android:gravity="center|top"
         android:orientation="vertical"
         android:layout_below="@+id/track_toolbar"
-        android:padding="4dp">
-        <Button
-            android:id="@+id/track_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/action_track_list"
-            android:textSize="10sp"
-            android:background="@drawable/button_border"/>
+        android:padding="8dp">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -40,6 +37,7 @@
             android:tooltipText="@string/track_start_tooltip"
             android:text="@string/action_start"
             android:textSize="20sp"
+            android:textColor="@color/colorPrimaryDark"
             android:background="@drawable/button_border"/>
 
     </LinearLayout>

@@ -45,6 +45,9 @@
         <activity
             android:name=".activity.GoogleMapActivity">
         </activity>
+        <activity
+            android:name=".activity.AboutDialogActivity">
+        </activity>
         <service
             android:name=".TrackerGPSService"
             android:enabled="true" >

@@ -259,7 +259,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
         Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         stubNotification = new NotificationCompat.Builder(this)
                 .setTicker(resources.getString(R.string.app_name))
-                .setSmallIcon(R.mipmap.ic_walk)
+                .setSmallIcon(R.mipmap.ic_steps)
                 .setLargeIcon(appBitmap)
                 .setContentTitle(resources.getString(R.string.app_name))
                 .setContentText(resources.getString(R.string.photo_tracker_process_text))
