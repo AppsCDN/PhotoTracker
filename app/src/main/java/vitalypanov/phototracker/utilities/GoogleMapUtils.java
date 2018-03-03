@@ -64,13 +64,14 @@ public class GoogleMapUtils {
                 // At the moment of taking photo at least one location should be defined.
                 Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
             }
-            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
-            MarkerOptions photoMarker = new MarkerOptions()
-                    .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
-                    .icon(itemBitmap)
-                    .snippet(trackBitmap.getTrackPhoto().getPhotoFileName())
-                    ;
-            googleMap.addMarker(photoMarker);
+            if (trackBitmap.getBitmap()!= null) {
+                BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
+                MarkerOptions photoMarker = new MarkerOptions()
+                        .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
+                        .icon(itemBitmap)
+                        .snippet(trackBitmap.getTrackPhoto().getPhotoFileName());
+                googleMap.addMarker(photoMarker);
+            }
         }
 
         PolylineOptions lines = new PolylineOptions();
