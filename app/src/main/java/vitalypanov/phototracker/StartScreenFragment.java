@@ -205,13 +205,9 @@ public class StartScreenFragment extends Fragment {
      * Update tracks count value on button and other UI
      */
     private void updateTrackListCounterUI(){
-        mMenuTrackList.withBadge("");
-        mTrackList.setText(R.string.action_track_list);
         long tracksCount =  TrackDbHelper.get(getContext()).getTracksCount();
-        if (tracksCount > 0) {
-            mTrackList.setText(getResources().getString(R.string.action_track_list) + " (" + String.valueOf(tracksCount) + ")");
-            mMenuTrackList.withBadge(String.valueOf(tracksCount));
-        }
+        mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
+        mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
     }
 
     /**
