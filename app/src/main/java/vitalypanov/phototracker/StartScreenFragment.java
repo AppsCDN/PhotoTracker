@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -131,7 +132,7 @@ public class StartScreenFragment extends Fragment {
         mMenuStartTrack = new PrimaryDrawerItem().withName(R.string.menu_start).withIcon(R.mipmap.ic_steps).withSelectable(false).withIdentifier(MENU_ITEM_START_TRACK);
         mMenuTrackList = new PrimaryDrawerItem().withName(R.string.menu_track_list).withIcon(R.mipmap.ic_list).withSelectable(false).withIdentifier(MENU_ITEM_TRACK_LIST);
         mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS).withEnabled(false);
-        mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK).withEnabled(false);
+        mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK);
         mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET).withEnabled(false);
         mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
 
@@ -163,6 +164,7 @@ public class StartScreenFragment extends Fragment {
                                         case MENU_ITEM_SETTINGS:
                                             break;
                                         case MENU_ITEM_SEND_FEEDBACK:
+                                            sendFeedback();
                                             break;
                                         case MENU_ITEM_RATE_PLAY_MARKET:
                                             break;
@@ -204,6 +206,22 @@ public class StartScreenFragment extends Fragment {
         //mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
         mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
         mMenuTrackList.withEnabled(tracksCount > 0);
+    }
+
+    /**
+     * Send feedback
+     */
+    private void sendFeedback(){
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{getResources().getString(R.string.app_feedback_email_text)});
+        i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_feedback_email_title));
+        //i.putExtra(Intent.EXTRA_TEXT   , "");
+        try {
+            startActivity(Intent.createChooser(i, getResources().getString(R.string.app_feedback_send_title)));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getActivity(), getResources().getString(R.string.app_feedback_send_failed), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
