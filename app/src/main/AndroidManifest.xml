@@ -26,8 +26,6 @@
         </meta-data>
         <activity
             android:name=".activity.StartScreenActivity">
-            <!--
-            android:theme="@style/NoTitleTheme" -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

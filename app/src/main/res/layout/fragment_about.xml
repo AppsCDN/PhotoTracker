@@ -1,6 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragment_container"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-</FrameLayout>
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.Toolbar
+        android:tooltipText="About"
+        android:theme="@style/ActionBarWhite"
+        android:id="@+id/track_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:minHeight="?attr/actionBarSize"
+        android:transitionName="actionBar"/>
+
+    <ImageView
+        android:id="@+id/app_image"
+        android:layout_below="@+id/track_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="60dp"
+        android:src="@mipmap/ic_launcher_round"
+        />
+    <TextView
+        android:id="@+id/app_text_view"
+        android:layout_below="@+id/app_image"
+        android:text="@string/app_name"
+        android:paddingTop="22dp"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:id="@+id/app_comment_view"
+        android:layout_below="@+id/app_text_view"
+        android:text="@string/app_comment"
+        android:padding="50dp"
+        android:maxLines="2"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+
+    <ImageView
+        android:id="@+id/steps_image"
+        android:paddingBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:src="@mipmap/ic_steps"
+        />
+    <TextView
+        android:id="@+id/app_copyright_view"
+        android:layout_above="@+id/steps_image"
+        android:paddingBottom="20dp"
+        android:text="@string/app_copyright_text"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:id="@+id/app_version_view"
+        android:layout_above="@+id/app_copyright_view"
+        android:paddingBottom="10dp"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="1.0.0"
+        />
+</RelativeLayout>
