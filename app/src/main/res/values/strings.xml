@@ -29,7 +29,7 @@
     <string name="action_start">Start</string>
     <string name="action_track_list">Track list</string>
     <string name="menu_start">Start</string>
-    <string name="menu_track_list">Track list</string>
+    <string name="menu_track_list">Recorded Tracks</string>
     <string name="menu_send_feedback">Send feedback</string>
     <string name="menu_rate_play_market">Rate at Play Market</string>
     <string name="menu_settings">Settings</string>
