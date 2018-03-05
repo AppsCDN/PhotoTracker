@@ -1,12 +1,10 @@
 package vitalypanov.phototracker;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -46,19 +44,6 @@ public class StartScreenFragment extends Fragment {
     private static final int MENU_ITEM_RATE_PLAY_MARKET = 5;
     private static final int MENU_ITEM_ABOUT = 6;
 
-    // gps location permission  id's:
-    private static final int LOCATION_REQUEST = 1;
-    private static String[] LOCATION_PERMISSIONS = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-    };
-
-    // external storage permission id's:
-    private static final int EXTERNAL_STORAGE_REQUEST = 2;
-    private static String[] EXTERNAL_STORAGE_PERMISSIONS = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
     // Main menu items:
     PrimaryDrawerItem  mMenuStartTrack;
     PrimaryDrawerItem  mMenuTrackList;
@@ -68,7 +53,7 @@ public class StartScreenFragment extends Fragment {
     PrimaryDrawerItem  mMenuAbout;
 
     private Button mTrackStart;
-    //private Button mTrackList;
+    private PhotoTrackerPermissions mPhotoTrackerPermissions;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -77,27 +62,12 @@ public class StartScreenFragment extends Fragment {
         return new StartScreenFragment();
     }
 
-    private boolean hasPermisson (String perm){
-        return (PackageManager.PERMISSION_GRANTED == getActivity().checkSelfPermission(perm));
-    }
-
-    private  boolean canAccessLocation(){
-        return (hasPermisson(Manifest.permission.ACCESS_FINE_LOCATION));
-    }
-
-    private  boolean canAccessExternalStorage(){
-        return (hasPermisson(Manifest.permission.WRITE_EXTERNAL_STORAGE));
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
-        if (!canAccessLocation()){
-            requestPermissions(LOCATION_PERMISSIONS, LOCATION_REQUEST);
-        }
-        if (!canAccessExternalStorage()){
-            requestPermissions(EXTERNAL_STORAGE_PERMISSIONS, EXTERNAL_STORAGE_REQUEST);
+        mPhotoTrackerPermissions = new PhotoTrackerPermissions(this);
+        if (!mPhotoTrackerPermissions.hasPermissions()){
+            mPhotoTrackerPermissions.requestPermissions();
         }
     }
 
