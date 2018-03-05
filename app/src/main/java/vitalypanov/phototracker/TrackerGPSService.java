@@ -2,6 +2,8 @@ package vitalypanov.phototracker;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -15,6 +17,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -38,7 +41,9 @@ import vitalypanov.phototracker.model.TrackLocation;
  */
 
 public class TrackerGPSService extends Service  implements LocationListener {
-    private static final String TAG = "TrackerGPSService";
+    // Service constants:
+    private static final String TAG = "PhotoTracker GPSService";
+    private static final String NOTIFICATION_CHANNEL_ID = "TrackerGPSService_ID";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
     private static final int UPDATE_DB_INTERVAL = 1000*60*5;// is 5 minutes interval for updating in Db
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
@@ -46,41 +51,28 @@ public class TrackerGPSService extends Service  implements LocationListener {
     public static final String REQUEST_CODE = "REQUEST_CODE";
     public static final String NOTIFICATION = "NOTIFICATION";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // The minimum distance to change Updates in meters
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 10; // The minimum time between updates in milliseconds
 
+    // Service private:
+    private Track currentTrack;
+    private boolean isGPSEnabled = false;   // flag for GPS status
+    private boolean isNetworkEnabled = false;   // flag for network status
+    private boolean canGetLocation = false;         // flag for GPS status
+    private final IBinder mBinder = new LocalBinder();  // Binder given to clients
+    private Notification mStubNotification; // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
+    private Timer timer;    // Timer for getting GPS coordinates
+    private TimerTask timerTask;
+    private Timer dbTimer;  // Timer for updating data in database
+    private TimerTask dbTimerTask;
+
+    // Service protected:
+    protected LocationManager locationManager;  // Declaring a Location Manager
+
+    // Service public:
     public Track getCurrentTrack() {
         return currentTrack;
     }
-
-    private Track currentTrack;
-
-    // flag for GPS status
-    boolean isGPSEnabled = false;
-
-    // flag for network status
-    boolean isNetworkEnabled = false;
-
-    // flag for GPS status
-    boolean canGetLocation = false;
-
-    // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; //  meters
-
-    // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 10; // seconds
-
-    // Declaring a Location Manager
-    protected LocationManager locationManager;
-
-    // Binder given to clients
-    private final IBinder mBinder = new LocalBinder();
-
-    // Timer for getting GPS coordinates
-    private Timer timer;
-    private TimerTask timerTask;
-
-    // Timer for updating data in database
-    private Timer dbTimer;
-    private TimerTask dbTimerTask;
 
     /**
      * Run new track
@@ -113,11 +105,11 @@ public class TrackerGPSService extends Service  implements LocationListener {
 
     public void initializeTimerTask() {
         buildStubNotification();
+        startForeground(1, mStubNotification);
         timerTask = new TimerTask() {
             public void run() {
                 // Foreground mode should be set for the service mandatory!!! (this line is the main line of the service! :) )
                 // Staying in foreground to prevent service from closing by Android system
-                startForeground(1, stubNotification);
                 putCurrentGPSLocation();
             }
         };
@@ -184,9 +176,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
         TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
     }
 
-
-    // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
-    Notification stubNotification;
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -256,7 +245,16 @@ public class TrackerGPSService extends Service  implements LocationListener {
         Intent i = RunningTrackPagerActivity.newIntent(this);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
         Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        stubNotification = new NotificationCompat.Builder(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // For android Oreo should specify notification channel.
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, TAG, NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription(TAG);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        mStubNotification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setTicker(resources.getString(R.string.app_name))
                 .setSmallIcon(R.mipmap.ic_steps)
                 .setLargeIcon(appBitmap)
@@ -265,11 +263,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .build();
-        /*
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-        notificationManagerCompat.notify(0, notification);
-        sendBroadcast(new Intent((ACTION_SHOW_NOTIFICATION)), PERM_PRIVATE);
-        */
     }
 
     private boolean isNetworkAvailableAndConnected(){
