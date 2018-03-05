@@ -3,10 +3,13 @@ package vitalypanov.phototracker.utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import java.io.File;
+import java.io.IOException;
 
 import vitalypanov.phototracker.model.TrackPhoto;
 
@@ -41,7 +44,11 @@ public class BitmapScalerUtils {
      * @param context       Context
      */
     public static void updatePhoto(TrackPhoto trackPhoto, ImageView imageView, int scaleWidth, Context context){
-        imageView.setImageBitmap(getScaledBitmap(trackPhoto, scaleWidth, context));
+        try {
+            imageView.setImageBitmap(getScaledBitmap(trackPhoto, scaleWidth, context));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -63,18 +70,45 @@ public class BitmapScalerUtils {
      * @param context       Context
      * @return
      */
-    public static Bitmap getScaledBitmap(TrackPhoto trackPhoto, int scaleWidth, Context context) {
+    public static Bitmap getScaledBitmap(TrackPhoto trackPhoto, int scaleWidth, Context context) throws IOException {
         Bitmap bitmap =null;
         if (trackPhoto== null || context == null){
             return bitmap;
         }
         File currentPhotoFile = FileUtils.getPhotoFile(context,trackPhoto.getPhotoFileName());
         if (currentPhotoFile != null && currentPhotoFile.exists()){
+            // read bitmap from file
             Bitmap bitmapFromFile = BitmapFactory.decodeFile(currentPhotoFile.getPath());
+            // Reading EXIF information from bitmap file and rotate if need it
+            ExifInterface exif = new ExifInterface(currentPhotoFile.getPath());
+            int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            if (rotation != 0f) {
+                // need to rotate loaded bitmap due to EXIF info
+                int rotationInDegrees = exifToDegrees(rotation);
+                Matrix matrix = new Matrix();
+                matrix.preRotate(rotationInDegrees);
+                bitmapFromFile = Bitmap.createBitmap(bitmapFromFile, 0, 0, bitmapFromFile.getWidth(), bitmapFromFile.getHeight(), matrix, true);
+            }
+            // scale bitmap adjust screen width
             bitmap = BitmapScalerUtils.scaleToFitWidth(bitmapFromFile, scaleWidth);
         }
         return bitmap;
     }
 
+    /**
+     * Convert EXIF orientation to normal degrees
+     * (for future image rotation)
+     *
+     * @param exifOrientation
+     * @return num of degrees to rotate if need it
+     */
+    private static int exifToDegrees(int exifOrientation) {
+        switch (exifOrientation){
+            case ExifInterface.ORIENTATION_ROTATE_90:   return 90;
+            case ExifInterface.ORIENTATION_ROTATE_180:  return 180;
+            case ExifInterface.ORIENTATION_ROTATE_270:  return 270;
+            default: return 0;
+        }
+    }
 }
 

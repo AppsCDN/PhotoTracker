@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.io.IOException;
+
 import vitalypanov.phototracker.model.TrackPhoto;
 
 /**
@@ -34,7 +36,14 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(Void... params) {
-        return BitmapScalerUtils.getScaledBitmap(mTrackPhoto, mScaleWidth, mContext);
+        try {
+            return BitmapScalerUtils.getScaledBitmap(mTrackPhoto, mScaleWidth, mContext);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+
+        }
     }
 
     @Override
