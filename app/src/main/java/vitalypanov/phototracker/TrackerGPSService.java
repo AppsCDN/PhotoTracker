@@ -241,11 +241,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
      * Build notification object for setForeground() function
      */
     private void buildStubNotification(){
-        Resources resources = getResources();
-        Intent i = RunningTrackPagerActivity.newIntent(this);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // For android Oreo should specify notification channel.
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -254,10 +249,14 @@ public class TrackerGPSService extends Service  implements LocationListener {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        Resources resources = getResources();
+        Intent i = RunningTrackPagerActivity.newIntent(this);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         mStubNotification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setTicker(resources.getString(R.string.app_name))
-                .setSmallIcon(R.mipmap.ic_steps)
                 .setLargeIcon(appBitmap)
+                .setSmallIcon(R.mipmap.ic_steps)
                 .setContentTitle(resources.getString(R.string.app_name))
                 .setContentText(resources.getString(R.string.photo_tracker_process_text))
                 .setContentIntent(pi)
