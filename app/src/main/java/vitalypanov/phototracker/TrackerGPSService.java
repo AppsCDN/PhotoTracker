@@ -252,7 +252,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
         Resources resources = getResources();
         Intent i = RunningTrackPagerActivity.newIntent(this);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        Bitmap appBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_notification);
         mStubNotification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setTicker(resources.getString(R.string.app_name))
                 .setLargeIcon(appBitmap)
