@@ -19,7 +19,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Calendar;
@@ -29,7 +29,6 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
-import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
