@@ -28,7 +28,7 @@ import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackPhoto;
-import vitalypanov.phototracker.utilities.BitmapScalerUtils;
+import vitalypanov.phototracker.utilities.AssyncBitmapLoaderTask;
 
 /**
  * Created by Vitaly on 25.02.2018.
@@ -238,10 +238,15 @@ public class TrackListFragment  extends Fragment {
         }
 
         private void updatePhotoUI(){
-            if (mTrack == null){
+            if (mTrack == null || mTrack.getLastPhotoItem() == null){
                 return;
             }
-            BitmapScalerUtils.updatePhotoAssync(mTrack.getLastPhotoItem(), mTrackPhotoImageView, mTrackRecyclerView.getWidth(), getContext(), mLoadingPanel);
+            AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mTrack.getLastPhotoItem().getPhotoFileName(),
+                    mTrackPhotoImageView,
+                    mTrackRecyclerView.getWidth(),
+                    getContext(),
+                    mLoadingPanel);
+            assyncImageViewUpdater.execute();
         }
 
         @Override

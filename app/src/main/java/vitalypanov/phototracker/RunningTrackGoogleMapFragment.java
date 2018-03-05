@@ -70,7 +70,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 mService = binder.getService();
                 mBound = true;
                 // after service bound we can load photos
-                mService.getCurrentTrack().loadCashedBitmaps(getContext());
+                //mService.getCurrentTrack().loadCashedBitmaps(getContext());
                 // ...and update map
                 updatMapAsync();
             }
@@ -117,7 +117,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     public void onPageSelected() {
         // load photo bitmaps for showing on google map
         if (mService!= null && mService.getCurrentTrack() != null) {
-            mService.getCurrentTrack().loadCashedBitmaps(getContext());
+            //mService.getCurrentTrack().loadCashedBitmaps(getContext());
         }
         // redraw map when selecting tab
         updatMapAsync();

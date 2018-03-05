@@ -1,6 +1,7 @@
 package vitalypanov.phototracker.utilities;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,8 +17,8 @@ import java.util.List;
 
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.model.Track;
-import vitalypanov.phototracker.model.TrackBitmap;
 import vitalypanov.phototracker.model.TrackLocation;
+import vitalypanov.phototracker.model.TrackPhoto;
 
 /**
  * Created by Vitaly on 02.03.2018.
@@ -25,6 +26,7 @@ import vitalypanov.phototracker.model.TrackLocation;
 
 public class GoogleMapUtils {
     private static final String TAG = "PhotoTracker";
+    private static int SCALE_SMALL_SIZE = 150;
 
     /**
      Draw on google map
@@ -57,19 +59,20 @@ public class GoogleMapUtils {
         googleMap.addMarker(myMarker);
 
         // all bitmap markers
-        for (TrackBitmap trackBitmap :  track.getCashedBitmaps()){
-            TrackLocation trackLocation = trackBitmap.getTrackPhoto().getTrackLocation();
+        for (TrackPhoto trackPhoto :  track.getPhotoFiles()){
+            TrackLocation trackLocation = trackPhoto.getTrackLocation();
             if (trackLocation == null){
                 // Not possible situation!
                 // At the moment of taking photo at least one location should be defined.
                 Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
             }
-            if (trackBitmap.getBitmap()!= null) {
-                BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(trackBitmap.getBitmap());
+            Bitmap bitmap = BitmapHandler.get(context).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), SCALE_SMALL_SIZE);
+            if (bitmap!= null) {
+                BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
                 MarkerOptions photoMarker = new MarkerOptions()
                         .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
                         .icon(itemBitmap)
-                        .snippet(trackBitmap.getTrackPhoto().getPhotoFileName());
+                        .snippet(trackPhoto.getPhotoFileName());
                 googleMap.addMarker(photoMarker);
             }
         }

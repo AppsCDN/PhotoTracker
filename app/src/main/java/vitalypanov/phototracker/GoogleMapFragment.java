@@ -49,7 +49,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
 
         UUID uuid = (UUID)getArguments().getSerializable(EXTRA_TRACK_UUID);
         mTrack = TrackDbHelper.get(getActivity()).getTrack(uuid);
-        mTrack.loadCashedBitmaps(getActivity());
+       // mTrack.loadCashedBitmaps(getActivity());
 
     }
 

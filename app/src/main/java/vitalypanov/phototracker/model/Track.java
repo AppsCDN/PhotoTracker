@@ -1,7 +1,5 @@
 package vitalypanov.phototracker.model;
 
-import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,7 +22,6 @@ public class Track {
     private double mDistance;// Cashed distance value of the track (need recalculate when mTrackData are updated)
     private List<TrackLocation> mTrackData = new ArrayList<>(); // gps locations data of the track
     private List<TrackPhoto> mPhotoFiles = new ArrayList<>(); // names of photo files attached to the track
-    private List<TrackBitmap> mCashedBitmaps = new ArrayList<>(); // for fast working in UI with photos
 
     // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
@@ -46,7 +43,6 @@ public class Track {
         mEndTime = new Date();
         mTrackData = new ArrayList<>();
         mPhotoFiles = new ArrayList<>();
-        mCashedBitmaps = new ArrayList<>();
     }
 
     public UUID getUUID() { return mUUID;}
@@ -114,10 +110,6 @@ public class Track {
 
     public TrackPhoto getLastPhotoItem() {
         return ListUtils.getLast(mPhotoFiles);
-    }
-
-    public List<TrackBitmap> getCashedBitmaps() {
-        return mCashedBitmaps;
     }
 
     /**
@@ -257,24 +249,5 @@ public class Track {
         return "IMG_" +
                 String.valueOf(year) + String.valueOf(month) + String.valueOf(day) + "_" +
                 String.valueOf(hour) + String.valueOf(minute) + String.valueOf(second) + ".jpg";
-    }
-
-    /**
-     * Load all bitmaps of the track into memory - for UI optimization
-     * If bitmaps already loaded (list is the same size as mPhotoFiles list) - exiting  immediately
-     * @param context
-     */
-    public void loadCashedBitmaps(Context context){
-        if (mCashedBitmaps.size() == mPhotoFiles.size()){
-            // all bitmaps already loaded
-            return;
-        }
-        // need to refresh bitmaps in memory according new file list names
-        mCashedBitmaps.clear();
-        for (TrackPhoto trackPhoto : mPhotoFiles){
-            TrackBitmap trackBitmap = new TrackBitmap(trackPhoto);
-            trackBitmap.loadBitmap(context);
-            mCashedBitmaps.add(trackBitmap);
-        }
     }
 }
