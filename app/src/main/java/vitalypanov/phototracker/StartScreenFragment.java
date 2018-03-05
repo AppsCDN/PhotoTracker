@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -103,7 +104,7 @@ public class StartScreenFragment extends Fragment {
         mMenuTrackList = new PrimaryDrawerItem().withName(R.string.menu_track_list).withIcon(R.mipmap.ic_list).withSelectable(false).withIdentifier(MENU_ITEM_TRACK_LIST);
         mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS).withEnabled(false);
         mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK);
-        mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET).withEnabled(false);
+        mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET);
         mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
 
         new DrawerBuilder()
@@ -137,6 +138,7 @@ public class StartScreenFragment extends Fragment {
                                             sendFeedback();
                                             break;
                                         case MENU_ITEM_RATE_PLAY_MARKET:
+                                            ratePlayMarket();
                                             break;
                                         case MENU_ITEM_ABOUT:
                                             showAboutDialog();
@@ -168,6 +170,14 @@ public class StartScreenFragment extends Fragment {
         updateTrackListCounterUI();
     }
 
+    /**
+     * Rate at Play market functionallity
+     */
+    private void ratePlayMarket(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(getResources().getString(R.string.app_playmarket_link)));
+        startActivity(intent);
+    }
     /**
      * Update tracks count value on button and other UI
      */
