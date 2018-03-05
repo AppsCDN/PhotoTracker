@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Photo Tracker</string>
+    <string name="app_name">PhotoTracker</string>
     <string name="app_comment">Recording your own GPS tracks with taking pictures what you would like.</string>
     <string name="app_version_title">Version:</string>
     <string name="app_copyright_text">\u00A9 2018 Vitaly Panov</string>
