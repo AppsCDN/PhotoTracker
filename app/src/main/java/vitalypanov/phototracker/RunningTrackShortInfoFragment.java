@@ -2,6 +2,7 @@ package vitalypanov.phototracker;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -201,10 +203,30 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         mPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopTrack();
-                getActivity().finish();
-                Intent intent = StartScreenActivity.newIntent(getActivity());
-                startActivity(intent);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setCancelable(true);
+                builder.setTitle(R.string.pause_service_confirm_title);
+                String sMessage = getResources().getString(R.string.pause_service_confirm_message);
+                builder.setMessage(sMessage);
+                builder.setPositiveButton(R.string.pause_service_confirm_button_ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // confirm pausing - do it
+                                stopTrack();
+                                getActivity().finish();
+                                Intent intent = StartScreenActivity.newIntent(getActivity());
+                                startActivity(intent);
+                            }
+                        });
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // cancel confirmation dialog - do nothing
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 
