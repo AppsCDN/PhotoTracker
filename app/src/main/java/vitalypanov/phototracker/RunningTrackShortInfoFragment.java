@@ -1,15 +1,12 @@
 package vitalypanov.phototracker;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -38,6 +35,7 @@ import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackPhoto;
+import vitalypanov.phototracker.others.BindTrackerGPSService;
 import vitalypanov.phototracker.others.GenericFileProvider;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
@@ -49,36 +47,28 @@ import vitalypanov.phototracker.utilities.Utils;
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackShortInfoFragment  extends Fragment implements ViewPageUpdater {
+public class RunningTrackShortInfoFragment  extends Fragment implements ViewPageUpdater, BindTrackerGPSService {
     private static final String TAG = "PhotoTracker";
     private static final int UPDATE_INTERVAL = 1000*1;// each second update interface
-
     private static final int REQUEST_PHOTO = 1;
-
-    private TrackerGPSService mService;
-    private boolean mBound = false;
 
     private TextView mStartTimeTextView;
     private TextView mDurationTimeTextView;
     private TextView mDistanceTextView;
     private EditText mCommentEditText;
-
     private ImageButton mPhotoButton;
     private ImageButton mPauseButton;
     private ImageButton mSetingsButton;
-
-    private String mCurrentPhotoFileName;
-
     private RelativeLayout mTrackPhotoLayout;
     private TextView mPhotoCounterTextView;
     private ImageView mTrackPhotoImage;
 
+    private TrackerGPSService mService;
+
+    private String mCurrentPhotoFileName;
 
     private Timer timer;
     private TimerTask timerTask;
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection ;
 
     public void startTimer() {
         //set a new Timer
@@ -110,6 +100,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         setRetainInstance(true);// !!!! MUST HAVE THIS LINE
                                 // (or should save/restore all members of this fragment - for example: mCurrentPhotoFileName)
                                 // for properly working with camera intent
+                                // TODO Additional: Sometimes the Fragment unloaded unexpected - so need to save/restore mCurrentPhotoFileName variable!!!!
         startTimer();
     }
 
@@ -240,7 +231,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         });
 
         updateUI();
-        //updatePhotoUI();
+        updatePhotoUI();
 
         return v;
     }
@@ -333,15 +324,22 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     private void updatePhotoUI(){
-        if (mService == null || mService.getCurrentTrack() == null){
+        if (Utils.isNull(mService)
+                || Utils.isNull(mService.getCurrentTrack())
+                || Utils.isNull(mTrackPhotoImage)){
             return;
         }
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Track currentTrack = mService.getCurrentTrack();
-                if ( !Utils.isNull(currentTrack) && !Utils.isNull(currentTrack.getLastPhotoItem())) {
-                    mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
+                final Track currentTrack = mService.getCurrentTrack();
+                if (!Utils.isNull(currentTrack) && !Utils.isNull(currentTrack.getLastPhotoItem())) {
+                    mTrackPhotoImage.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
+                        }
+                    });
                 }
                 mPhotoCounterTextView.setVisibility(currentTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
                 mPhotoCounterTextView.setText(" " + String.valueOf(currentTrack.getPhotoFiles().size()) + " ");
@@ -349,40 +347,6 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             }
         });
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getActivity().invalidateOptionsMenu();
-        Intent i = TrackerGPSService.newIntent(getActivity());
-        mConnection = new ServiceConnection() {
-
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
-                mService = binder.getService();
-                mBound = true;
-                updateUI();
-                updatePhotoUI();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                mBound = false;
-            }
-
-
-        };
-        getActivity().bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getActivity().unbindService(mConnection);
-    }
-
 
     /**
      * Stop recording track
@@ -394,8 +358,13 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
     @Override
     public void onPageSelected() {
-        // uodate data in controls
         updateUI();
+    }
+
+    @Override
+    public void onBindService(TrackerGPSService service) {
+        mService = service;
+        updatePhotoUI();
     }
 
     /**

@@ -6,5 +6,10 @@ package vitalypanov.phototracker.others;
  */
 
 public interface ViewPageUpdater {
+
+    /**
+     * On selecting new page
+     */
     void onPageSelected();
+
 }

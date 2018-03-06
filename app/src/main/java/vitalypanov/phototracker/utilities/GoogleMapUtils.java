@@ -68,14 +68,18 @@ public class GoogleMapUtils {
                 // At the moment of taking photo at least one location should be defined.
                 Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
             }
-            Bitmap bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
-            if (bitmap!= null) {
-                BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
-                MarkerOptions photoMarker = new MarkerOptions()
-                        .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
-                        .icon(itemBitmap)
-                        .snippet(trackPhoto.getPhotoFileName());
-                googleMap.addMarker(photoMarker);
+
+            // if has bitmaps for showing on map
+            if (!Utils.isNull(bitmapHashMap)) {
+                Bitmap bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
+                if (!Utils.isNull(bitmap)) {
+                    BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
+                    MarkerOptions photoMarker = new MarkerOptions()
+                            .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
+                            .icon(itemBitmap)
+                            .snippet(trackPhoto.getPhotoFileName());
+                    googleMap.addMarker(photoMarker);
+                }
             }
         }
 

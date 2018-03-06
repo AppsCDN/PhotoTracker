@@ -181,7 +181,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        TrackerGPSService getService() {
+        public TrackerGPSService getService() {
             // Return this instance of LocalService so clients can call public methods
             return TrackerGPSService.this;
         }

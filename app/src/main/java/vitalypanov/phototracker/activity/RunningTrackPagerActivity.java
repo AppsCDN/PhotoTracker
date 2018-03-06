@@ -1,8 +1,11 @@
 package vitalypanov.phototracker.activity;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,10 +17,17 @@ import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.RunningTrackGoogleMapFragment;
 import vitalypanov.phototracker.RunningTrackShortInfoFragment;
+import vitalypanov.phototracker.TrackerGPSService;
+import vitalypanov.phototracker.others.BindTrackerGPSService;
 import vitalypanov.phototracker.others.ViewPageUpdater;
+import vitalypanov.phototracker.utilities.Utils;
 
 
 /**
@@ -29,10 +39,15 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
     // Pages
     private static final int PAGE_SHORT_INFO = 0;
     private static final int PAGE_GOOGLE_MAP = 1;
-    private static final int PAGES_COUNT = PAGE_GOOGLE_MAP + 1;
+    private static final int PAGES_COUNT = 2;
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
     private Button mLeftButton;
+    private HashMap<String, Fragment> mFragmentHashMap = new HashMap<String, Fragment>();
+
+    private TrackerGPSService mService;
+    private ServiceConnection mConnection ; // Defines callbacks for service binding, passed to bindService()
+    private boolean mIsBound;
 
     public static Intent newIntent(Context packageContext){
         Intent intent = new Intent(packageContext, RunningTrackPagerActivity.class);
@@ -47,18 +62,41 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
         mViewPager = (ViewPager)findViewById(R.id.activity_pager_running_track_view_pager);
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPagerAdapter =new FragmentStatePagerAdapter(fragmentManager) {
+            private Fragment mCurrentFragment;
+
+            public Fragment getCurrentFragment() {
+                return mCurrentFragment;
+            }
+
             @Override
             public Fragment getItem(int position) {
+                Fragment fragment = null;
                 switch (position){
                     case PAGE_SHORT_INFO:
-                        // short info page of current track
-                        return RunningTrackShortInfoFragment.newInstance();
+                        fragment = mFragmentHashMap.get(RunningTrackShortInfoFragment.class.getName());
+                        if (Utils.isNull(fragment)) {
+                            fragment = RunningTrackShortInfoFragment.newInstance();
+                            mFragmentHashMap.put(RunningTrackShortInfoFragment.class.getName(), fragment);
+                        }
+                        return fragment;
                     case PAGE_GOOGLE_MAP:
-                        // google map page of current track
-                        return RunningTrackGoogleMapFragment.newInstance();
+                        fragment = mFragmentHashMap.get(RunningTrackGoogleMapFragment.class.getName());
+                        if (Utils.isNull(fragment)) {
+                            fragment = RunningTrackGoogleMapFragment.newInstance();
+                            mFragmentHashMap.put(RunningTrackGoogleMapFragment.class.getName(), fragment);
+                        }
+                        return fragment;
                     default:
                         return null; // Oooops!
                 }
+            }
+
+            @Override
+            public void setPrimaryItem(ViewGroup container, int position, Object object) {
+                if (getCurrentFragment() != object) {
+                    mCurrentFragment = ((Fragment) object);
+                }
+                super.setPrimaryItem(container, position, object);
             }
 
             @Override
@@ -93,7 +131,49 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
                 int i = 0;
             }
         });
+
+        // GPS Service binding...
+        Intent i = TrackerGPSService.newIntent(this);
+        mConnection = new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder service) {
+                // We've bound to LocalService, cast the IBinder and get LocalService instance
+                TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
+                mService = binder.getService();
+                // need to update current visible page...
+                List<Fragment> allFragments = new LinkedList<Fragment>();
+                for (int i = 0; i < mPagerAdapter.getCount(); i++) {
+                    BindTrackerGPSService fragment = (BindTrackerGPSService)mPagerAdapter.getItem(i);
+                    fragment.onBindService(mService);
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                mService = null;
+            }
+
+
+        };
+
+        doBindService();
+
         mViewPager.setCurrentItem(PAGE_SHORT_INFO);
+    }
+
+    private void doBindService() {
+        Intent i = TrackerGPSService.newIntent(this);
+        bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
+        mIsBound = true;
+    }
+
+    private void doUnbindService() {
+        if (mIsBound) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsBound = false;
+        }
     }
 
     @Override
@@ -103,9 +183,15 @@ public class RunningTrackPagerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // pressing back on google map cause returning to short info page
+        // pressing back on google map causing return to short info page
         if (mViewPager.getCurrentItem() == PAGE_GOOGLE_MAP){
             mViewPager.setCurrentItem(PAGE_SHORT_INFO);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        doUnbindService();
     }
 }

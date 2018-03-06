@@ -1,12 +1,9 @@
 package vitalypanov.phototracker;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,6 +21,7 @@ import java.util.HashMap;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.model.TrackPhoto;
+import vitalypanov.phototracker.others.BindTrackerGPSService;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
@@ -33,17 +31,15 @@ import vitalypanov.phototracker.utilities.Utils;
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, GoogleMap.OnMarkerClickListener {
+public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, BindTrackerGPSService, GoogleMap.OnMarkerClickListener {
     private static final String TAG = "PhotoTracker";
 
     private SupportMapFragment mapFragment = null;
     private RelativeLayout mLoadingFrame;
-
     private GoogleMap mGoogleMap;
-    private TrackerGPSService mService;
     private HashMap<String, Bitmap> mBitmapHashMap;
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection ;
+
+    private TrackerGPSService mService;
 
     public static RunningTrackGoogleMapFragment newInstance() {
         return new RunningTrackGoogleMapFragment();
@@ -94,42 +90,11 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        //getActivity().invalidateOptionsMenu();
-        Intent i = TrackerGPSService.newIntent(getActivity());
-        mConnection = new ServiceConnection() {
-
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                TrackerGPSService.LocalBinder binder = (TrackerGPSService.LocalBinder) service;
-                mService = binder.getService();
-                // ...and update map
-                loadBitmapsAndUpdateMapAssync();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-
-            }
-
-
-        };
-        getActivity().bindService(i, mConnection, 0); //Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getActivity().unbindService(mConnection);
-    }
-
     private void loadBitmapsAndUpdateMapAssync(){
         AssyncLoaderAndUpdateMapTask assyncLoaderTask = new AssyncLoaderAndUpdateMapTask();
         assyncLoaderTask.execute();
     }
+
     /**
      * Updating assync google map and save map object into local variable
      * for future drawing
@@ -157,6 +122,11 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         // load photo bitmaps for showing on google map
         // and redraw map when selecting tab
         loadBitmapsAndUpdateMapAssync();
+    }
+
+    @Override
+    public void onBindService(TrackerGPSService service) {
+        mService = service;
     }
 
     @Override
