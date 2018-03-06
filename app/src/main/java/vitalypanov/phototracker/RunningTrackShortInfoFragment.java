@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -49,6 +50,8 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public class RunningTrackShortInfoFragment  extends Fragment implements ViewPageUpdater, BindTrackerGPSService {
     private static final String TAG = "PhotoTracker";
+    private static final String SAVED_PARAM_CURRENT_PHOTO_FILE = "PARAM_CURRENT_PHOTO_FILE";
+
     private static final int UPDATE_INTERVAL = 1000*1;// each second update interface
     private static final int REQUEST_PHOTO = 1;
 
@@ -97,6 +100,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mCurrentPhotoFileName = savedInstanceState.getString(SAVED_PARAM_CURRENT_PHOTO_FILE);
+        }
         setRetainInstance(true);// !!!! MUST HAVE THIS LINE
                                 // (or should save/restore all members of this fragment - for example: mCurrentPhotoFileName)
                                 // for properly working with camera intent
@@ -273,6 +279,12 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 super.onActivityResult(requestCode, resultCode, data);;
         }
 
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString(SAVED_PARAM_CURRENT_PHOTO_FILE, mCurrentPhotoFileName);
+        super.onSaveInstanceState(outState);
     }
 
     /**
