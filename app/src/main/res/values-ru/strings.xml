@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_version_title">Версия:</string>
+    <string name="app_comment">Записывайте ваши GPS маршруты и делайте фото с привязкой к координатам.</string>
+    <string name="app_feedback_email_title">Отзыв о PhotoTraker</string>
+    <string name="app_feedback_send_title">Отзыв о PhotoTraker</string>
+    <string name="app_feedback_send_failed">В системе нет установленных email клиентов.</string>
+    <string name="app_about_title">О программе...</string>
+    <string name="photo_tracker_process_text">PhotoTraker записывает Ваш маршрут.</string>
+    <string name="track_start_time">Время начала</string>
+    <string name="track_time">Длительность</string>
+    <string name="track_distance">Расстояние</string>
+    <string name="track_images">Картинки</string>
+    <string name="track_comment">Комментарии</string>
+    <string name="track_comment_hint">Введите комментарии</string>
+    <string name="track_start_tooltip">Старт записывания маршрута...</string>
+    <string name="alert_gps_title">Настройки GPS</string>
+    <string name="alert_gps_message">Служба GPS не включена. Вы хотите перейти в настройки и включить настройку \"Определения местоположения\"?</string>
+    <string name="remove_track_confirm_title">Удаление маршрута</string>
+    <string name="remove_track_confirm_message">Вы уверены что хотите удалить выбранный маршрут?</string>
+    <string name="remove_track_confirm_button_ok">Удалить</string>
+    <string name="duration">Время</string>
+    <string name="distance_metrics">Км</string>
+    <string name="no_location_title">Положение не определенно</string>
+    <string name="no_location_message">Местположение по координатам GPS еще не определено. Пожалуйста подождите немного и попробуйте еще раз.</string>
+    <string name="ok">ОК</string>
+    <string name="gps_settings">Настройки</string>
+    <string name="gps_cancel">Отмена</string>
+    <string name="progress_dialog_title">Пожалуйста подождите</string>
+    <string name="progress_dialog_message">Загрузка информации по маршруту... Пожалуйста подождите.</string>
+    <string name="continue_track_confirm_title">Продолжение маршрута</string>
+    <string name="continue_track_confirm_message">Вы уверены, что хотите продолжить записывать выбранный маршрут?</string>
+    <string name="continue_track_confirm_button_ok">Поехали</string>
+    <string name="action_start">Старт</string>
+    <string name="action_track_list">Список маршрутов</string>
+    <string name="menu_start">Старт</string>
+    <string name="menu_track_list">Записанные маршруты</string>
+    <string name="menu_send_feedback">Отправить отзыв</string>
+    <string name="menu_rate_play_market">Оценить на Play Market</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_about">О программе...</string>
+    <string name="pause_service_confirm_title">Пауза в записи</string>
+    <string name="pause_service_confirm_message">Вы уверены, что хотие остановить запись текущего маршрута? (маршрут можно будет продолжить записывать позже)</string>
+    <string name="pause_service_confirm_button_ok">Пауза</string>
+    <string name="app_copyright_text">© 2018 Виталий Панов</string>
+</resources>

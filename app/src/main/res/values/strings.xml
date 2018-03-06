@@ -1,16 +1,16 @@
 <resources>
-    <string name="app_name">PhotoTracker</string>
+    <string name="app_name" translatable="false">PhotoTracker</string>
     <string name="app_comment">Recording your own GPS tracks with taking pictures what you would like.</string>
     <string name="app_version_title">Version:</string>
     <string name="app_copyright_text">\u00A9 2018 Vitaly Panov</string>
-    <string name="app_playmarket_link">https://play.google.com/store/apps/details?id=vitalypanov.phototracker </string>
-    <string name="app_feedback_email_text">panovvitalik@gmail.com</string>
+    <string name="app_playmarket_link" translatable="false">https://play.google.com/store/apps/details?id=vitalypanov.phototracker </string>
+    <string name="app_feedback_email_text" translatable="false">panovvitalik@gmail.com</string>
     <string name="app_feedback_email_title">Feedback PhotoTracker</string>
     <string name="app_feedback_send_title">Feedback PhotoTracker</string>
     <string name="app_feedback_send_failed">There are no email clients installed.</string>
     <string name="app_about_title">About...</string>
-    <string name="photo_folder">PhotoTracker</string>
-    <string name="photo_tracker_process_text">Photo tracker are recording your track.</string>
+    <string name="photo_folder" translatable="false">PhotoTracker</string>
+    <string name="photo_tracker_process_text">PhotoTraker are recording your track.</string>
     <string name="track_start_time">Start time</string>
     <string name="track_time">Duration time</string>
     <string name="track_distance">Distance covered</string>
@@ -44,6 +44,6 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About </string>
     <string name="pause_service_confirm_title">Pause recording</string>
-    <string name="pause_service_confirm_message">Are you sure to pause recording of the current track?</string>
+    <string name="pause_service_confirm_message">Are you sure to pause recording of the current track? (you can continue recording later)</string>
     <string name="pause_service_confirm_button_ok">Pause</string>
 </resources>
