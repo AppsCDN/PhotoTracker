@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.HashMap;
 import java.util.List;
 
 import vitalypanov.phototracker.R;
@@ -26,12 +27,12 @@ import vitalypanov.phototracker.model.TrackPhoto;
 
 public class GoogleMapUtils {
     private static final String TAG = "PhotoTracker";
-    private static int SCALE_SMALL_SIZE = 150;
+    public final static int SCALE_SMALL_SIZE = 150;
 
     /**
      Draw on google map
      */
-    public static void updateGoogleMapUI(final GoogleMap googleMap, final Track track, final Context context){
+    public static void updateGoogleMapUI(final GoogleMap googleMap, final Track track, final Context context, HashMap<String, Bitmap> bitmapHashMap){
         if (googleMap == null || track == null){
             return;
         }
@@ -60,13 +61,14 @@ public class GoogleMapUtils {
 
         // all bitmap markers
         for (TrackPhoto trackPhoto :  track.getPhotoFiles()){
+
             TrackLocation trackLocation = trackPhoto.getTrackLocation();
             if (trackLocation == null){
                 // Not possible situation!
                 // At the moment of taking photo at least one location should be defined.
                 Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
             }
-            Bitmap bitmap = BitmapHandler.get(context).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), SCALE_SMALL_SIZE);
+            Bitmap bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
             if (bitmap!= null) {
                 BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
                 MarkerOptions photoMarker = new MarkerOptions()

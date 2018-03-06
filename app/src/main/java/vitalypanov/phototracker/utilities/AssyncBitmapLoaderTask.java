@@ -32,6 +32,9 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(Void... params) {
+        if (StringUtils.isNullOrBlank(mTrackPhotoFileName)){
+            return null;
+        }
         return BitmapHandler.get(mContext).getBitmapScaleToFitWidth(mTrackPhotoFileName, mScaleWidth);
     }
 
@@ -39,7 +42,7 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
     protected void onPreExecute() {
         // show loading progress image only if photos exists in track
         if (mLoadingPanel!=null) {
-            mLoadingPanel.setVisibility(mTrackPhotoFileName!=null && !mTrackPhotoFileName.isEmpty()? View.VISIBLE : View.GONE);
+            mLoadingPanel.setVisibility(!StringUtils.isNullOrBlank(mTrackPhotoFileName)? View.VISIBLE : View.GONE);
         }
         mImageView.setImageBitmap(null);
     }

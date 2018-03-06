@@ -6,12 +6,28 @@
     android:layout_height="match_parent"
     android:paddingLeft="7dp">
     <!-- Left padding is Very!!! needed to swipe from google map back - to another view page -->
-    <fragment
-        android:id="@+id/google_map_fragment"
+    <LinearLayout
+        android:id="@+id/google_map_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.google.android.gms.maps.SupportMapFragment"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        />
-
+        android:background="@color/md_black_1000"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/google_map_loading_data_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center" >
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+        </RelativeLayout>
+        <fragment
+            android:id="@+id/google_map_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            />
+    </LinearLayout>
 </LinearLayout>

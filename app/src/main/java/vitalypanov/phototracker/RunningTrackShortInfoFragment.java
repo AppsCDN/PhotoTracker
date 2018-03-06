@@ -43,6 +43,7 @@ import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.FileUtils;
 import vitalypanov.phototracker.utilities.MessageUtils;
+import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Created by Vitaly on 23.02.2018.
@@ -339,7 +340,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void run() {
                 Track currentTrack = mService.getCurrentTrack();
-                mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(),  mTrackPhotoImage.getWidth()));
+                if ( !Utils.isNull(currentTrack) && !Utils.isNull(currentTrack.getLastPhotoItem())) {
+                    mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
+                }
                 mPhotoCounterTextView.setVisibility(currentTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
                 mPhotoCounterTextView.setText(" " + String.valueOf(currentTrack.getPhotoFiles().size()) + " ");
                 mPhotoCounterTextView.bringToFront();
