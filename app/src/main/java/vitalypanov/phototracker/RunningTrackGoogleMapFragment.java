@@ -73,8 +73,10 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                         )
                 ) {
                 mBitmapHashMap = new HashMap<String, Bitmap>();
-                for (TrackPhoto trackPhoto : mService.getCurrentTrack().getPhotoFiles()) {
-                    mBitmapHashMap.put(trackPhoto.getPhotoFileName(), BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE ));
+                if (!Settings.get(getActivity()).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
+                    for (TrackPhoto trackPhoto : mService.getCurrentTrack().getPhotoFiles()) {
+                        mBitmapHashMap.put(trackPhoto.getPhotoFileName(), BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE));
+                    }
                 }
             }
             return null;

@@ -39,7 +39,7 @@
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="24sp"
-            android:textColor="@color/md_white_1000"
+            android:textColor="#FFFFFF"
             android:background="@drawable/button_border_start"
             android:drawableLeft="@mipmap/ic_steps_white"
             android:drawablePadding = "-110dp"

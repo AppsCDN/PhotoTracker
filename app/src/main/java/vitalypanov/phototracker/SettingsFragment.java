@@ -1,38 +1,40 @@
 package vitalypanov.phototracker;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 
 /**
  * Created by Vitaly on 03.03.2018.
  */
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String TAG = "PhotoTracker";
 
     public static SettingsFragment newInstance() {
-
         return new SettingsFragment();
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.preferences, rootKey);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // change title and show back button
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.track_toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.settings_toolbar);
         AppCompatActivity parentActivity =(AppCompatActivity)getActivity();
         parentActivity.setSupportActionBar(toolbar);
         parentActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        parentActivity.getSupportActionBar().setTitle("Settings");
+        parentActivity.getSupportActionBar().setTitle(R.string.menu_settings);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -40,6 +42,5 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        return view;
     }
 }

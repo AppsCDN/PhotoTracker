@@ -81,10 +81,13 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
             // if bitmaps not loaded yet...
             if (mBitmapHashMap == null) {
                 mBitmapHashMap = new HashMap<String, Bitmap>();
-                // load all bitmaps of the track
-                for (TrackPhoto trackPhoto : mTrack.getPhotoFiles()) {
-                    Bitmap bitmap = BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE);
-                    mBitmapHashMap.put(trackPhoto.getPhotoFileName(), bitmap);
+                // performance setting
+                if (!Settings.get(getActivity()).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
+                    // load all bitmaps of the track
+                    for (TrackPhoto trackPhoto : mTrack.getPhotoFiles()) {
+                        Bitmap bitmap = BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE);
+                        mBitmapHashMap.put(trackPhoto.getPhotoFileName(), bitmap);
+                    }
                 }
             }
             return null;

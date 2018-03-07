@@ -32,7 +32,6 @@
         <activity android:name=".activity.StartScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -41,7 +40,9 @@
         <activity android:name=".activity.TrackImagesPagerActivity"></activity>
         <activity android:name=".activity.GoogleMapActivity"></activity>
         <activity android:name=".activity.AboutDialogActivity"></activity>
-        <activity android:name=".activity.SettingsActivity"></activity>
+        <activity android:name=".activity.SettingsActivity"
+            android:theme="@style/NoTitleThemeSettings">
+        </activity>
         <service
             android:name=".TrackerGPSService"
             android:enabled="true"></service>

@@ -43,4 +43,6 @@
     <string name="pause_service_confirm_message">Вы уверены, что хотие остановить запись текущего маршрута? (маршрут можно будет продолжить записывать позже)</string>
     <string name="pause_service_confirm_button_ok">Пауза</string>
     <string name="app_copyright_text">© 2018 Виталий Панов</string>
+    <string name="setting_map_performance_switch">Ускорение работы карт</string>
+    <string name="setting_map_performance_hint">Показывать простые иконки вместо фото-миниатюр на картах</string>
 </resources>

@@ -10,6 +10,14 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <style name="NoTitleThemeSettings" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="preferenceTheme">@style/SettingsTheme.PreferenceThemeOverlay</item>
+    </style>
+    <style name="SettingsTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
+        <item name="android:layout">@layout/fragment_settings</item>
+    </style>
+
     <style name="ActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColorPrimary">#000000</item>
         <item name="colorControlNormal">#000000</item>

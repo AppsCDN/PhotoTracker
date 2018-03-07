@@ -2,6 +2,7 @@ package vitalypanov.phototracker.utilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import vitalypanov.phototracker.R;
+import vitalypanov.phototracker.Settings;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.model.TrackPhoto;
@@ -28,6 +30,7 @@ import vitalypanov.phototracker.model.TrackPhoto;
 public class GoogleMapUtils {
     private static final String TAG = "PhotoTracker";
     public final static int SCALE_SMALL_SIZE = 150;
+    public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // for sample bitmap - small size
 
     /**
      Draw on google map
@@ -59,6 +62,9 @@ public class GoogleMapUtils {
                 .position(myPoint);
         googleMap.addMarker(myMarker);
 
+        Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
+        bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_SMALL_SAMPLE_SIZE);
+
         // all bitmap markers
         for (TrackPhoto trackPhoto :  track.getPhotoFiles()){
 
@@ -69,18 +75,20 @@ public class GoogleMapUtils {
                 Log.e(TAG, "trackBitmap.getTrackPhoto().getTrackLocation() not defined!");
             }
 
-            // if has bitmaps for showing on map
-            if (!Utils.isNull(bitmapHashMap)) {
-                Bitmap bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
-                if (!Utils.isNull(bitmap)) {
-                    BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
-                    MarkerOptions photoMarker = new MarkerOptions()
-                            .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
-                            .icon(itemBitmap)
-                            .snippet(trackPhoto.getPhotoFileName());
-                    googleMap.addMarker(photoMarker);
-                }
+            Bitmap bitmap = bitmapDefault;
+
+            if (!Utils.isNull(bitmapHashMap)
+                    && !Settings.get(context).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
+                bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
             }
+
+            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
+            MarkerOptions photoMarker = new MarkerOptions()
+                    .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
+                    .icon(itemBitmap)
+                    .snippet(trackPhoto.getPhotoFileName());
+            googleMap.addMarker(photoMarker);
+
         }
 
         PolylineOptions lines = new PolylineOptions();
