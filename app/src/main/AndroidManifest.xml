@@ -1,55 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="vitalypanov.phototracker">
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    package="vitalypanov.phototracker">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18"/>
-    <uses-feature android:name="android.hardware.camera"
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="false" />
+
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true"
         android:theme="@style/NoTitleTheme">
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyA3Tzc7nldsAOW6KM7T9Dl4R3qCQ7rb3Hk">
-        </meta-data>
-        <activity
-            android:name=".activity.StartScreenActivity">
+            android:value="AIzaSyA3Tzc7nldsAOW6KM7T9Dl4R3qCQ7rb3Hk"></meta-data>
+
+        <activity android:name=".activity.StartScreenActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.RunningTrackPagerActivity">
-        </activity>
-        <activity
-            android:name=".activity.TrackListActivity">
-        </activity>
-        <activity
-            android:name=".activity.TrackImagesPagerActivity">
-        </activity>
-        <activity
-            android:name=".activity.GoogleMapActivity">
-        </activity>
-        <activity
-            android:name=".activity.AboutDialogActivity">
-        </activity>
+        <activity android:name=".activity.RunningTrackPagerActivity"></activity>
+        <activity android:name=".activity.TrackListActivity"></activity>
+        <activity android:name=".activity.TrackImagesPagerActivity"></activity>
+        <activity android:name=".activity.GoogleMapActivity"></activity>
+        <activity android:name=".activity.AboutDialogActivity"></activity>
+        <activity android:name=".activity.SettingsActivity"></activity>
         <service
             android:name=".TrackerGPSService"
-            android:enabled="true" >
-        </service>
+            android:enabled="true"></service>
+
         <provider
             android:name=".others.GenericFileProvider"
             android:authorities="${applicationId}.vitalypanov.phototracker.provider"
@@ -57,8 +53,9 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
+
     </application>
 
 </manifest>

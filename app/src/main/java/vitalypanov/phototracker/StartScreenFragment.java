@@ -27,6 +27,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import vitalypanov.phototracker.activity.AboutDialogActivity;
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
+import vitalypanov.phototracker.activity.SettingsActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.utilities.ServiceUtils;
@@ -102,7 +103,7 @@ public class StartScreenFragment extends Fragment {
 
         mMenuStartTrack = new PrimaryDrawerItem().withName(R.string.menu_start).withIcon(R.mipmap.ic_steps).withSelectable(false).withIdentifier(MENU_ITEM_START_TRACK);
         mMenuTrackList = new PrimaryDrawerItem().withName(R.string.menu_track_list).withIcon(R.mipmap.ic_list).withSelectable(false).withIdentifier(MENU_ITEM_TRACK_LIST);
-        mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS).withEnabled(false);
+        mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS);
         mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK);
         mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET);
         mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
@@ -133,6 +134,7 @@ public class StartScreenFragment extends Fragment {
                                             showTrackList();
                                             break;
                                         case MENU_ITEM_SETTINGS:
+                                            showSettingsDialog();
                                             break;
                                         case MENU_ITEM_SEND_FEEDBACK:
                                             sendFeedback();
@@ -202,6 +204,14 @@ public class StartScreenFragment extends Fragment {
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(getActivity(), getResources().getString(R.string.app_feedback_send_failed), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Show Settings dialog
+     */
+    private void showSettingsDialog(){
+        Intent intent = SettingsActivity.newIntent(getActivity());
+        startActivity(intent);
     }
 
     /**

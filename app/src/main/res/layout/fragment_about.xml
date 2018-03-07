@@ -5,15 +5,15 @@
     android:layout_height="wrap_content">
 
     <android.support.v7.widget.Toolbar
-        android:tooltipText="About"
-        android:theme="@style/ActionBarWhite"
-        android:id="@+id/track_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:minHeight="?attr/actionBarSize"
-        android:transitionName="actionBar"/>
+    android:tooltipText="About"
+    android:theme="@style/ActionBarWhite"
+    android:id="@+id/track_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:minHeight="?attr/actionBarSize"
+    android:transitionName="actionBar"/>
 
     <ImageView
         android:id="@+id/app_image"
