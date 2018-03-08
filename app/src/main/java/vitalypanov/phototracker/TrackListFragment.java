@@ -130,6 +130,10 @@ public class TrackListFragment  extends Fragment {
                 public void onClick(View view) {
                     // Run service within existing track object
 
+                    // first check location services
+                    if (!LocationServices.get(getActivity()).checkLocaionServices()){
+                        return;
+                    }
                     // show warning message before continue recording of the track
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setCancelable(true);

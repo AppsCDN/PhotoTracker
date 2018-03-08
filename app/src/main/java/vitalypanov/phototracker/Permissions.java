@@ -9,7 +9,7 @@ import android.support.v4.app.Fragment;
  * Created by Vitaly on 05.03.2018.
  */
 
-public class PhotoTrackerPermissions {
+public class Permissions {
     Fragment mParentContextFragment;
 
     private static final int PERMISSIONS_REQUEST = 1;
@@ -19,7 +19,7 @@ public class PhotoTrackerPermissions {
             Manifest.permission.WRITE_EXTERNAL_STORAGE      // Writing photo into public media directory
     };
 
-    public PhotoTrackerPermissions(Fragment context) {
+    public Permissions(Fragment context) {
         mParentContextFragment = context;
     }
 

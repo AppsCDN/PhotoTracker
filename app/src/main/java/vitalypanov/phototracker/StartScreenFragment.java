@@ -1,14 +1,9 @@
 package vitalypanov.phototracker;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -55,7 +50,7 @@ public class StartScreenFragment extends Fragment {
     PrimaryDrawerItem  mMenuAbout;
 
     private Button mTrackStart;
-    private PhotoTrackerPermissions mPhotoTrackerPermissions;
+    private Permissions mPhotoTrackerPermissions;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -67,7 +62,7 @@ public class StartScreenFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPhotoTrackerPermissions = new PhotoTrackerPermissions(this);
+        mPhotoTrackerPermissions = new Permissions(this);
         if (!mPhotoTrackerPermissions.hasPermissions()){
             mPhotoTrackerPermissions.requestPermissions();
         }
@@ -232,67 +227,15 @@ public class StartScreenFragment extends Fragment {
      * Start recording track
      */
     private void startTrack() {
-        // first check permissions of location services
-        if (!checkLocaionServices()){
-            // if no permissions - exit
+        // first check location services
+        if (!LocationServices.get(getActivity()).checkLocaionServices()){
             return;
         }
-        // otherwise start GPS service
+        // start Tracker GPS service
         Intent i = TrackerGPSService.newIntent(getActivity());
         getActivity().startService(i);
         Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
         startActivity(intent);
     }
 
-    /**
-     * Check of GPS and network location permissions
-     * @return  true - if permissions granted
-     *          false - if not - and user should grant permissions in shown dialog
-     */
-    private boolean checkLocaionServices(){
-        LocationManager locationManager = (LocationManager) getActivity()
-                .getSystemService(Context.LOCATION_SERVICE);
-        // getting GPS status
-        if (!locationManager
-                .isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-            !locationManager
-                .isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            // GPS or Network is not enabled. Ask user to enable GPS/network in settings
-            showLocationServicesSettingsAlert();
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Function to show settings alert dialog
-     * On pressing Settings button will lauch Settings Options
-     * */
-    private void showLocationServicesSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-
-        // Setting Dialog Title
-        alertDialog.setTitle(R.string.alert_gps_title);
-
-        // Setting Dialog Message
-        alertDialog.setMessage(R.string.alert_gps_message);
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton(getResources().getString(R.string.gps_settings), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton(getResources().getString(R.string.gps_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
 }
