@@ -29,13 +29,19 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyA3Tzc7nldsAOW6KM7T9Dl4R3qCQ7rb3Hk"></meta-data>
 
-        <activity android:name=".activity.StartScreenActivity">
+        <activity android:name=".activity.StartScreenActivity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.RunningTrackPagerActivity"></activity>
+        <activity android:name=".activity.RunningTrackPagerActivity"
+            android:parentActivityName=".activity.StartScreenActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.StartScreenActivity"/>
+        </activity>
         <activity android:name=".activity.TrackListActivity"></activity>
         <activity android:name=".activity.TrackImagesPagerActivity"></activity>
         <activity android:name=".activity.GoogleMapActivity"></activity>

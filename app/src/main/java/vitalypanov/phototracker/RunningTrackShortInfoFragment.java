@@ -213,6 +213,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                                 // confirm pausing - do it
                                 stopTrack();
                                 getActivity().finish();
+                                /* if start screen not shown yet - show it
+                                    to avoid multiple running startscreen activities we have android:launchMode="singleInstance" flag in manifest
+                                 */
                                 Intent intent = StartScreenActivity.newIntent(getActivity());
                                 startActivity(intent);
                             }
