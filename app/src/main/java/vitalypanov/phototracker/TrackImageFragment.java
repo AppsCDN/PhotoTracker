@@ -7,13 +7,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.AssyncBitmapLoaderTask;
+import vitalypanov.phototracker.utilities.TouchImageView;
 
 /**
  * Created by Vitaly on 01.03.2018.
@@ -23,7 +23,7 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
     private static final String TAG = "PhotoTracker";
     private static final String ARG_BITMAP_FILENAME = "bitmap_filename";
     private SupportMapFragment mapFragment = null;
-    private ImageView mTrackPhotoImageView;
+    private TouchImageView mTrackPhotoImageView;
     private RelativeLayout mLoadingPanel;
     private String mBitmapFileName;
 
@@ -48,7 +48,7 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
         View v = layoutInflater.inflate(R.layout.fragment_image, container, false);
-        mTrackPhotoImageView = (ImageView) v.findViewById(R.id.track_photo_image);
+        mTrackPhotoImageView = (TouchImageView) v.findViewById(R.id.track_photo_image);
         mLoadingPanel = (RelativeLayout) v.findViewById(R.id.track_loading_photo);
         updatePhotoUI();
         return v;
@@ -62,7 +62,8 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
     private void updatePhotoUI(){
         Point size = new Point();
         getActivity().getWindowManager().getDefaultDisplay().getSize(size);
-        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, size.x, getContext(), mLoadingPanel);
+        //AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, size.x, getContext(), mLoadingPanel);
+        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, 0, getContext(), mLoadingPanel);
         assyncImageViewUpdater.execute();
     }
 

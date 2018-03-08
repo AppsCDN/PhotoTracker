@@ -35,7 +35,15 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
         if (StringUtils.isNullOrBlank(mTrackPhotoFileName)){
             return null;
         }
-        return BitmapHandler.get(mContext).getBitmapScaleToFitWidth(mTrackPhotoFileName, mScaleWidth);
+        Bitmap bitmap = null;
+        if (mScaleWidth == 0) {
+            // if no scale provided - load original bitmap
+            // Attention!!! it takes much more memory than with scaling
+            bitmap = BitmapHandler.get(mContext).getBitmapOriginal(mTrackPhotoFileName);
+        } else {
+            bitmap = BitmapHandler.get(mContext).getBitmapScaleToFitWidth(mTrackPhotoFileName, mScaleWidth);
+        }
+        return bitmap;
     }
 
     @Override
