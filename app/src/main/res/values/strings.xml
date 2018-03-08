@@ -48,4 +48,7 @@
     <string name="pause_service_confirm_button_ok">Pause</string>
     <string name="setting_map_performance_switch">Map performance improve</string>
     <string name="setting_map_performance_hint">Show simple icons instead of photos on maps</string>
+    <string name="confirm_delete_image_title">Delete photo</string>
+    <string name="confirm_delete_image_message">Are you sure you want to delet this photo?</string>
+    <string name="confirm_delete_image_button_ok">Delete</string>
 </resources>

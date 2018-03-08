@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public class TrackListFragment  extends Fragment {
     private static final String TAG = "PhotoTracker";
+    private static final int REQUEST_CODE_IMAGES_PAGER = 0;
     private RecyclerView mTrackRecyclerView;
     private TrackAdapter mAdapter;
     private Callbacks mCallbacks;
@@ -149,7 +151,7 @@ public class TrackListFragment  extends Fragment {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    // confirmed to continue existing service!
+                                    // confirmed to continue existing track!
 
                                     // Run track recording service and provide them our selected track to continue
                                     Intent i = TrackerGPSService.newIntent(getActivity(), mTrack.getUUID());
@@ -180,8 +182,8 @@ public class TrackListFragment  extends Fragment {
                 @Override
                 public void onClick(View view) {
                     if (mTrack.getPhotoFiles().size()>0) {
-                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList< TrackPhoto>) mTrack.getPhotoFiles(), null);
-                        startActivity(intent);
+                        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID(), (ArrayList< TrackPhoto>) mTrack.getPhotoFiles(), null);
+                        startActivityForResult(intent, REQUEST_CODE_IMAGES_PAGER);
                     }
                 }
             });
@@ -227,6 +229,7 @@ public class TrackListFragment  extends Fragment {
             });
         }
 
+
         public void bindTrack(Track track, TrackAdapter trackAdapter){
             mTrack = track;
             mTrackAdapter = trackAdapter;
@@ -259,6 +262,28 @@ public class TrackListFragment  extends Fragment {
         public void onClick(View v) {
 
             //mCallbacks.onTrackSelected(mTrack);
+        }
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        switch (requestCode){
+            case REQUEST_CODE_IMAGES_PAGER:
+                /*
+                if (Utils.isNull(data)) {
+                    return;
+                }
+                */
+                mAdapter.setTracks(TrackDbHelper.get(getActivity()).getTracks());
+                mAdapter.notifyDataSetChanged();
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);;
         }
     }
 

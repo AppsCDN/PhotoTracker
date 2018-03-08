@@ -45,4 +45,7 @@
     <string name="app_copyright_text">© 2018 Виталий Панов</string>
     <string name="setting_map_performance_switch">Ускорение работы карт</string>
     <string name="setting_map_performance_hint">Показывать простые иконки вместо фото-миниатюр на картах</string>
+    <string name="confirm_delete_image_title">Удаление фото</string>
+    <string name="confirm_delete_image_message">Вы уверены, что хотите удалить данное фото?</string>
+    <string name="confirm_delete_image_button_ok">Удалить</string>
 </resources>

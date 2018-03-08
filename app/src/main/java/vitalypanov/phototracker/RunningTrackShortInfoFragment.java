@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,9 +52,9 @@ import vitalypanov.phototracker.utilities.Utils;
 public class RunningTrackShortInfoFragment  extends Fragment implements ViewPageUpdater, BindTrackerGPSService {
     private static final String TAG = "PhotoTracker";
     private static final String SAVED_PARAM_CURRENT_PHOTO_FILE = "PARAM_CURRENT_PHOTO_FILE";
-
     private static final int UPDATE_INTERVAL = 1000*1;// each second update interface
     private static final int REQUEST_PHOTO = 1;
+    private static final int REQUEST_CODE_IMAGES_PAGER = 0;
 
     private TextView mStartTimeTextView;
     private TextView mDurationTimeTextView;
@@ -175,8 +176,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 if (mService.getCurrentTrack().getPhotoFiles().size()>0) {
-                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), null);
-                    startActivity(intent);
+                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), null);
+                    startActivityForResult(intent, REQUEST_CODE_IMAGES_PAGER);
                 }
             }
         });
@@ -278,6 +279,13 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 AssyncUpdatePhotoAfterTakePhotoTask assyncUpdatePhotoAfterTakePhotoTask = new AssyncUpdatePhotoAfterTakePhotoTask();
                 assyncUpdatePhotoAfterTakePhotoTask.execute();
                 break;
+            case REQUEST_CODE_IMAGES_PAGER:
+                if (Utils.isNull(data)) {
+                    return;
+                }
+                mService.getCurrentTrack().setPhotoFiles(TrackImagesPagerActivity.getTrackPhotos(data));
+                updatePhotoUI();
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);;
         }
@@ -348,14 +356,20 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void run() {
                 final Track currentTrack = mService.getCurrentTrack();
-                if (!Utils.isNull(currentTrack) && !Utils.isNull(currentTrack.getLastPhotoItem())) {
-                    mTrackPhotoImage.post(new Runnable() {
+                // update bitmap
+                final Bitmap bitmap =
+                        Utils.isNull(currentTrack.getLastPhotoItem())?
+                                null
+                                :
+                                BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth());
+                mTrackPhotoImage.post(new Runnable() {
                         @Override
                         public void run() {
-                            mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
-                        }
-                    });
-                }
+                        mTrackPhotoImage.setImageBitmap(bitmap);
+                    }
+                });
+
+                // update photo counter
                 mPhotoCounterTextView.setVisibility(currentTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
                 mPhotoCounterTextView.setText(" " + String.valueOf(currentTrack.getPhotoFiles().size()) + " ");
                 mPhotoCounterTextView.bringToFront();

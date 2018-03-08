@@ -140,7 +140,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 || mService.getCurrentTrack().getPhotoFiles().isEmpty()) {
             return false;
         }
-        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), photoFileName);
+        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), photoFileName);
         startActivity(intent);
         return false;
     }

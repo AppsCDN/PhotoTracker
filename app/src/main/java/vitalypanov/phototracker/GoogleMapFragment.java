@@ -139,7 +139,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
     public boolean onMarkerClick(Marker marker) {
         String photoFileName = marker.getSnippet();
         if (photoFileName!= null && mTrack.getPhotoFiles().size()>0) {
-            Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), (ArrayList<TrackPhoto>) mTrack.getPhotoFiles(), photoFileName);
+            Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID(), (ArrayList<TrackPhoto>) mTrack.getPhotoFiles(), photoFileName);
             startActivity(intent);
         }
         return false;

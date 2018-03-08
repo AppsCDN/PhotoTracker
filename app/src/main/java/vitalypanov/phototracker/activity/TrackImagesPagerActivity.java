@@ -1,25 +1,37 @@
 package vitalypanov.phototracker.activity;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.TrackImageFragment;
+import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.ViewPageUpdater;
+import vitalypanov.phototracker.utilities.FileUtils;
 
 /**
  * Images of the track pages
@@ -34,11 +46,14 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private FragmentStatePagerAdapter mPagerAdapter;
     private TextView mCounterTextView;
+    private ImageButton mDeleteButton;
     private ArrayList<TrackPhoto> mTrackPhotos;
     private String mPhotoToSelectName;
+    private UUID mTrackUUID;
 
-    public static Intent newIntent(Context packageContext, ArrayList<TrackPhoto> trackPhotos, String photoToSelectName){
+    public static Intent newIntent(Context packageContext, UUID trackUUID, ArrayList<TrackPhoto> trackPhotos, String photoToSelectName){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
+        intent.putExtra(EXTRA_TRACK_UUID, trackUUID);
         intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
         intent.putExtra(EXTRA_PHOTO_TO_SELECT, photoToSelectName);
         return intent;
@@ -52,12 +67,62 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_pager_images);
 
+        mTrackUUID= (UUID)getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
         mTrackPhotos = (ArrayList<TrackPhoto>)getIntent().getSerializableExtra(EXTRA_PHOTO_LIST);
         mPhotoToSelectName= getIntent().getStringExtra(EXTRA_PHOTO_TO_SELECT);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_pager_images_view_pager);
         mCounterTextView = (TextView) findViewById(R.id.activity_pager_counter_textview);
         mCounterTextView.bringToFront();
+
+        final Activity activity = this;
+        mDeleteButton = (ImageButton) findViewById(R.id.activity_pager_delete_button);
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setCancelable(true);
+                builder.setTitle(R.string.confirm_delete_image_title);
+                builder.setMessage(getResources().getString(R.string.confirm_delete_image_message));
+                builder.setPositiveButton(R.string.confirm_delete_image_button_ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                int currentIndex = mViewPager.getCurrentItem();
+                                // getting file name before delete...
+                                TrackPhoto trackPhoto = mTrackPhotos.get(currentIndex);
+                                String trackPhotoFileName = trackPhoto.getPhotoFileName();
+                                // delete current photo item from list...
+                                mTrackPhotos.remove(currentIndex);
+                                // remove photo in db...
+                                Track track = TrackDbHelper.get(activity).getTrack(mTrackUUID);
+                                track.setPhotoFiles(mTrackPhotos);
+                                TrackDbHelper.get(activity).updateTrack(track);
+                                // remove photo from internal storage...
+                                File currentPhotoFile = FileUtils.getPhotoFile(activity, trackPhotoFileName);
+                                currentPhotoFile.delete();
+                                // need update viewpager within new data...
+                                mPagerAdapter.notifyDataSetChanged();
+                                updateCounterTextView();
+                                // say parent activities that they need to update UI
+                                setActivityResultOK();
+                                // if was deleted the last one - close activity
+                                if (mPagerAdapter.getCount() == 0){
+                                    activity.finish();
+                                }
+                            }
+                        });
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // cancel confirmation dialog - do nothing
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                mViewPager.getCurrentItem();
+            }
+        });
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPagerAdapter = new FragmentStatePagerAdapter(fragmentManager) {
@@ -76,6 +141,11 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
             public void startUpdate(ViewGroup container) {
                 super.startUpdate(container);
             }
+
+            @Override
+            public int getItemPosition(@NonNull Object object) {
+                return PagerAdapter.POSITION_NONE;
+            }
         };
         mViewPager.setAdapter(mPagerAdapter);
 
@@ -92,8 +162,7 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
                 if (fragment != null) {
                     fragment.onPageSelected();
                 }
-                updateCounter(position);
-
+                updateCounterTextView();
             }
 
             @Override
@@ -113,32 +182,11 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
             }
         }
         mViewPager.setCurrentItem(position);
-        updateCounter(position);
-
-        /*
-        mHandler = MessageUtils.ShowProgressDialog(
-                R.string.progress_dialog_title,
-                R.string.progress_dialog_message,
-                this);
-
-        final Context context = this;
-        new Runnable() {
-            @Override
-            public void run() {
-                // loading bitmpas
-                UUID uuid = (UUID) getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
-                Track track = TrackDbHelper.get(getParent()).getTrack(uuid);
-                track.loadCashedBitmaps(context);
-                mBitmaps = track.getCashedBitmaps();
-                mHandler.sendEmptyMessage(0); // after finishing loading bitmpas send empty message to progress dialog to close
-            }
-        };
-        */
-
+        updateCounterTextView();
     }
-    private void updateCounter(int position){
-        //mCounterTextView.setVisibility(View.VISIBLE);
-        mCounterTextView.setText(String.valueOf(position+1) + "/" + mPagerAdapter.getCount());
+    private void updateCounterTextView(){
+        mCounterTextView.setVisibility(mPagerAdapter.getCount() > 0? View.VISIBLE : View.GONE);
+        mCounterTextView.setText(String.valueOf(mViewPager.getCurrentItem()+1) + "/" + mPagerAdapter.getCount());
         /*
         // after some second - hide counter
         final Handler handler = new Handler();
@@ -157,4 +205,22 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         this.finish();
     }
 
+    /**
+     * Save result OK for this activity.
+     * It means that we need update some data in parent activity.
+     */
+    private void setActivityResultOK(){
+        Intent data = new Intent();
+        data.putExtra(EXTRA_PHOTO_LIST, mTrackPhotos);
+        data.putExtra(EXTRA_TRACK_UUID, mTrackUUID);
+        setResult(RESULT_OK, data);
+    }
+
+    public static ArrayList<TrackPhoto> getTrackPhotos(Intent data){
+        return (ArrayList<TrackPhoto>)data.getSerializableExtra(EXTRA_PHOTO_LIST);
+    }
+
+    public static UUID getTrackID(Intent data){
+        return (UUID)data.getSerializableExtra(EXTRA_TRACK_UUID);
+    }
 }
