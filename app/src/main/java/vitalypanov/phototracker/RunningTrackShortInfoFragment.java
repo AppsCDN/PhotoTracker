@@ -357,15 +357,16 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             public void run() {
                 final Track currentTrack = mService.getCurrentTrack();
                 // update bitmap
-                final Bitmap bitmap =
-                        Utils.isNull(currentTrack.getLastPhotoItem())?
-                                null
-                                :
-                                BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth());
                 mTrackPhotoImage.post(new Runnable() {
                         @Override
                         public void run() {
-                        mTrackPhotoImage.setImageBitmap(bitmap);
+                            // Need post method here due to mTrackPhotoImage.getWidth() using. Before post - it always is 0.
+                            Bitmap bitmap =
+                                    Utils.isNull(currentTrack.getLastPhotoItem())?
+                                            null
+                                            :
+                                            BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth());
+                            mTrackPhotoImage.setImageBitmap(bitmap);
                     }
                 });
 
