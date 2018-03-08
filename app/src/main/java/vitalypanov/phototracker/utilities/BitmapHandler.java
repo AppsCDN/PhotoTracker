@@ -85,6 +85,9 @@ public class BitmapHandler {
      */
     public Bitmap getBitmapScaleToFitWidth(String sKeyPhotoFileName, int scaleWidth) {
         Bitmap bitmap = this.getBitmapOriginal(sKeyPhotoFileName);
+        if (Utils.isNull(bitmap)){
+            return null;
+        }
         float factor = scaleWidth / (float) bitmap.getWidth();
         return Bitmap.createScaledBitmap(bitmap, scaleWidth, (int) (bitmap.getHeight() * factor), true);
     }
@@ -98,6 +101,9 @@ public class BitmapHandler {
      */
     public Bitmap getBitmapScaleToFitHeight(String sKeyPhotoFileName, int scaleHeight) {
         Bitmap bitmap = this.getBitmapOriginal(sKeyPhotoFileName);
+        if (Utils.isNull(bitmap)){
+            return null;
+        }
         float factor = scaleHeight / (float) bitmap.getHeight();
         return Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * factor), scaleHeight, true);
     }

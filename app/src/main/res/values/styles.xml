@@ -21,6 +21,7 @@
     <style name="ActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColorPrimary">#000000</item>
         <item name="colorControlNormal">#000000</item>
+        <item name="android:background">#90ddf5</item>
     </style>
     <style name="ActionBarWhite" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColorPrimary">#ffffff</item>

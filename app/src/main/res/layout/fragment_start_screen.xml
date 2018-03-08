@@ -3,18 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.StartScreenActivity"
-    android:background="@drawable/new_york">
+    tools:context=".activity.StartScreenActivity">
 
     <android.support.v7.widget.Toolbar
-        android:theme="@style/ActionBarWhite"
         android:id="@+id/track_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:minHeight="?attr/actionBarSize"
-        android:transitionName="actionBar"/>
+        android:theme="@style/ActionBarWhite"
+        android:transitionName="actionBar" />
     <!--android:background="#90ddf5" light blue-->
     <LinearLayout
         android:id="@+id/track_buttons_frame"
@@ -36,15 +35,16 @@
             android:layout_height="wrap_content"
             android:tooltipText="@string/track_start_tooltip"
             android:text="@string/action_start"
-            android:textAllCaps="false"
+            android:textAllCaps="true"
             android:textStyle="bold"
-            android:textSize="24sp"
-            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textColor="@color/md_white_1000"
             android:background="@drawable/button_border_start"
-            android:drawableLeft="@mipmap/ic_steps_white"
-            android:drawablePadding = "-110dp"
-            android:paddingLeft="90dp"
             />
+            <!-- android:drawableLeft="@mipmap/ic_steps"
+             android:drawablePadding = "-110dp"
+             android:paddingLeft="90dp"
+            -->
 
     </LinearLayout>
 
