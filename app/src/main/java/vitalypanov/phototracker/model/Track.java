@@ -179,6 +179,9 @@ public class Track {
         mDistance = getRealDistance();
     }
 
+    public long getDuration(){
+        return mEndTime.getTime() - mStartTime.getTime();
+    }
     /**
      * Duration time of the track
      * difference between startTime and endTime

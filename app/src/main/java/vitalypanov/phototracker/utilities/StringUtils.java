@@ -9,4 +9,5 @@ public class StringUtils {
     {
         return (s==null || s.trim().equals(""));
     }
+    public static String noNullStr(String s) { return ("null".equals(s)) ? null : s; }
 }
