@@ -46,10 +46,10 @@
     <string name="pause_service_confirm_title">Pause recording</string>
     <string name="pause_service_confirm_message">Are you sure to pause recording of the current track? (you can continue recording later)</string>
     <string name="pause_service_confirm_button_ok">Pause</string>
-    <string name="setting_group_performance">Performance settings</string>
+    <string name="setting_group_performance">Performance</string>
     <string name="setting_map_performance_switch">Map performance improve</string>
     <string name="setting_map_performance_hint">Show simple icons instead of photos on maps</string>
-    <string name="setting_group_export">Export settings</string>
+    <string name="setting_group_export">Export</string>
     <string name="setting_runkeeper" translatable="false">RunKeeper</string>
     <string name="setting_runkeeper_hint">Please touch to configure</string>
     <string name="confirm_delete_image_title">Delete photo</string>
