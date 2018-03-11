@@ -61,4 +61,8 @@
     <string name="runkeeper_progress_message">Загрузка данных на RunKeeper. Пожалуйста подождите...</string>
     <string name="runkeeper_upload_confirm_message">Вы уверены, что хотите загрузить выбранный маршрут на сайт RunKeeper?</string>
     <string name="runkeeper_upload_confirm_title">Выгрузка маршрута</string>
+    <string name="loading">Загрузка...</string>
+    <string name="setting_runkeeper_hint">Пожалуйста коснитесь для настройки</string>
+    <string name="setting_group_export">Настройки экспорта</string>
+    <string name="setting_group_performance">Настройки быстродействия</string>
 </resources>
