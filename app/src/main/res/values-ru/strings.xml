@@ -48,4 +48,17 @@
     <string name="confirm_delete_image_title">Удаление фото</string>
     <string name="confirm_delete_image_message">Вы уверены, что хотите удалить данное фото?</string>
     <string name="confirm_delete_image_button_ok">Удалить</string>
+    <string name="runkeeper_already_configured_button_ok">Настроить</string>
+    <string name="runkeeper_already_configured_message">Доступ к RunKeeper уже настроен. Вы хотите настроить доступ заново и перезаписать настройки?</string>
+    <string name="runkeeper_already_configured_title">RunKeeper уже настроен</string>
+    <string name="runkeeper_confirm_button_ok">Загрузить</string>
+    <string name="runkeeper_fininsh_fail_message">Загрузка на RunKeeper не удалась. Попробуйте снова.</string>
+    <string name="runkeeper_fininsh_fail_title">Ошибка загрузки</string>
+    <string name="runkeeper_fininsh_message">Загрузка на RunKeeper успешно завершена.</string>
+    <string name="runkeeper_fininsh_title">Загрузка завершена</string>
+    <string name="runkeeper_not_setup_message">RunKeeper еще не настроен для выгрузки данных. Вначале Вы должны настроить доступ в меню Настроек. После этого можно попробовать выгрузить данные снова.</string>
+    <string name="runkeeper_not_setup_title">Ошибка загрузки</string>
+    <string name="runkeeper_progress_message">Загрузка данных на RunKeeper. Пожалуйста подождите...</string>
+    <string name="runkeeper_upload_confirm_message">Вы уверены, что хотите загрузить выбранный маршрут на сайт RunKeeper?</string>
+    <string name="runkeeper_upload_confirm_title">Выгрузка маршрута</string>
 </resources>

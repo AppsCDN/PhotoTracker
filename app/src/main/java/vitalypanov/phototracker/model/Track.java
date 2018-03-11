@@ -169,7 +169,8 @@ public class Track {
                 }
             }
         }
-        return new TrackLocation(longitude, latitude);
+        // for this object it doesnt matter which altitude or timestamp
+        return new TrackLocation(longitude, latitude, 0, new Date());
     }
 
     /**

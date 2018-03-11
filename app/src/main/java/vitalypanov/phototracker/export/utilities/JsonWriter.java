@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.export.utilities;
 
 import java.io.IOException;
 import java.io.Writer;

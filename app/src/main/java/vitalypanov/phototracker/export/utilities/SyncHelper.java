@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.export.utilities;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
+import android.os.Build;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -197,4 +199,51 @@ public final class SyncHelper {
         }
         return null;
     }
+
+    @TargetApi(Build.VERSION_CODES.FROYO)
+    private class Part<Value extends Writable> {
+
+        String name = null;
+        String filename = null;
+        String contentType = null;
+        String contentTransferEncoding = null;
+        Value value = null;
+
+        public Part(String name, Value value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+        public void setFilename(String filename) {
+            this.filename = filename;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public void setContentType(String contentType) {
+            this.contentType = contentType;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+        public void setContentTransferEncoding(String contentTransferEncoding) {
+            this.contentTransferEncoding = contentTransferEncoding;
+        }
+
+        public String getContentTransferEncoding() {
+            return contentTransferEncoding;
+        }
+
+        public Value getValue() {
+            return value;
+        }
+    }
+
 }

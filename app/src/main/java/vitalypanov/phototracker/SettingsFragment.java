@@ -1,12 +1,25 @@
 package vitalypanov.phototracker;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import vitalypanov.phototracker.export.utilities.OAuth2Activity;
+import vitalypanov.phototracker.utilities.StringUtils;
 
 
 /**
@@ -15,6 +28,9 @@ import android.view.View;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String TAG = "PhotoTracker";
+    private static final int REQUEST_CODE_RUNKEEPER_AUTH = 1;
+
+    private ImageButton mRunkeeperButton;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -23,6 +39,53 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Preference pref = findPreference("runkeeper_access_token");
+        pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                if (!StringUtils.isNullOrBlank(Settings.get(getActivity()).getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN))) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.runkeeper_already_configured_title);
+                    builder.setMessage(getResources().getString(R.string.runkeeper_already_configured_message));
+                    builder.setPositiveButton(R.string.runkeeper_already_configured_button_ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // confirmed - do it
+                                    runAuthRunkeeper();
+                                }
+                            });
+                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // cancel confirmation dialog - do nothing
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    return false;
+                }
+
+                runAuthRunkeeper();
+                return false;
+            }
+        });
+    }
+
+    /**
+     * Running auth RunKeeper dialog
+     */
+    private void runAuthRunkeeper(){
+        Intent intent = OAuth2Activity.newIntent(getActivity());
+        startActivityForResult(intent, REQUEST_CODE_RUNKEEPER_AUTH);
     }
 
     @Override
@@ -41,6 +104,30 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 getActivity().finish();
             }
         });
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+        switch (requestCode){
+            case REQUEST_CODE_RUNKEEPER_AUTH:
+                String authConfig = data.getStringExtra("auth_config");
+
+                try {
+                    JSONObject obj = new JSONObject(authConfig);
+                    String accessToken  = obj.getString("access_token");
+                    if (!StringUtils.isNullOrBlank(accessToken)) {
+                        // save token to preference
+                        Settings.get(getActivity()).setString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN, accessToken);
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);;
+        }
     }
 }

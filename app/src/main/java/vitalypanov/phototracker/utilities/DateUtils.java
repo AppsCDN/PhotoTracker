@@ -4,6 +4,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Vitaly on 26.02.2018.
@@ -58,5 +59,15 @@ public class DateUtils {
     public static String getDateFormatted(Date dDate) {
         Format formatter = new SimpleDateFormat("dd MMMM yyyy");
         return formatter.format(dDate);
+    }
+
+    /**
+     * Format millisecond to normal time
+     * @param time
+     * @return
+     */
+    public static String formatTime(long time) {
+        return new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.US)
+                .format(new Date(time));
     }
 }

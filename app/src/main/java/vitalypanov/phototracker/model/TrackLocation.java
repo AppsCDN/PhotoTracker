@@ -1,9 +1,10 @@
 package vitalypanov.phototracker.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Custom Location class for storing longitude and latitude.
+ * Custom Location class for storing longitude, latitude a.
  *
  * p.s.
  * It made because of application was somtimes crashed,  when I trying to process standard Location objects with Gson
@@ -14,31 +15,51 @@ import java.io.Serializable;
 
 public class TrackLocation implements Serializable{
 
+    private Date mTimeStamp;
     private double mLongitude;
     private double mLatitude;
+    private double mAltitude;
 
     public TrackLocation() {
     }
 
-    public TrackLocation(double mLongitude, double mLatitude) {
-        this.mLongitude = mLongitude;
-        this.mLatitude = mLatitude;
+    public TrackLocation(double longitude, double latitude, double altitude, Date timeStamp) {
+        this.mLongitude = longitude;
+        this.mLatitude = latitude;
+        this.mAltitude = altitude;
+        this.mTimeStamp = timeStamp;
     }
 
     public double getLongitude() {
         return mLongitude;
     }
 
-    public void setLongitude(double mLongitude) {
-        this.mLongitude = mLongitude;
+    public void setLongitude(double longitude) {
+        this.mLongitude = longitude;
     }
 
     public double getLatitude() {
         return mLatitude;
     }
 
-    public void setLatitude(double mLatitude) {
-        this.mLatitude = mLatitude;
+    public void setLatitude(double latitude) {
+        this.mLatitude = latitude;
+    }
+
+    public Date getTimeStamp() {
+        return mTimeStamp;
+    }
+
+    public void setTimeStamp(Date timeStamp) {
+        mTimeStamp = timeStamp;
+    }
+
+    public double getAltitude() {
+        return mAltitude;
+    }
+
+    public void setAltitude(double altitude) {
+        mAltitude = altitude;
     }
 
     /**
@@ -56,13 +77,15 @@ public class TrackLocation implements Serializable{
             // second location not provided - exit
             return distance;
         }
+        // this point
         double lat1 = this.getLatitude();
         double lon1 = this.getLongitude();
+        double el1 = this.getAltitude();
+
+        // location to which we want to calc distance
         double lat2 = toLocation.getLatitude();
         double lon2 = toLocation.getLongitude();
-        // Altitudes not using
-        double el1 = 0; // altitude of this location point
-        double el2 = 0; // altitude of toLocation point
+        double el2 = toLocation.getAltitude();
 
         final int R = 6371; // Radius of the earth
 

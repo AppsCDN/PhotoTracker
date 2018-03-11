@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 jonas.oreland@gmail.com
+ * Copyright (C) 2014 jonas.oreland@gmail.com
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,27 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.export.utilities;
 
-public interface OAuth2Server {
-    /**
-     * Used as title when opening authorization dialog
-     * 
-     * @return
-     */
-    public String getName();
+import java.io.IOException;
+import java.io.OutputStream;
 
-    public String getClientId();
-
-    public String getRedirectUri();
-
-    public String getClientSecret();
-
-    public String getAuthUrl();
-
-    public String getAuthExtra();
-
-    public String getTokenUrl();
-
-    public String getRevokeUrl();
+public interface Writable {
+    void write(OutputStream out) throws IOException;
 }

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.export.utilities;
 
 import android.annotation.TargetApi;
 import android.os.Build;

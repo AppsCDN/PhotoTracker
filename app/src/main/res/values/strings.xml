@@ -51,20 +51,20 @@
     <string name="confirm_delete_image_title">Delete photo</string>
     <string name="confirm_delete_image_message">Are you sure you want to delet this photo?</string>
     <string name="confirm_delete_image_button_ok">Delete</string>
-
-    <!-- Begin runnerup values: -->
-    <string name="pref_audio_lang">pref_audio_lang</string>
-    <string name="pref_unit">pref_unit</string>
-    <string name="metrics_distance_km">km</string>
-    <string name="metrics_distance_mi">mi</string>
-    <string name="metrics_elapsed_h">h</string>
-    <string name="metrics_elapsed_m">m</string>
-    <string name="metrics_elapsed_min">min</string>
-    <string name="metrics_elapsed_s">s</string>
-    <string name="heart_rate_zone">heart rate zone</string>
-    <string name="Downloading_from_1s">Downloading from %1$s</string>
-    <string name="Uploading_to_1s">Uploading to %1$s</string>
-    <string name="pref_autolap_active">pref_autolap_active</string>
-    <string name="pref_autolap">pref_autolap</string>
-    <!-- End runnerup values: -->
+    <string name="runkeeper_progress_message">Uploading track data to RunKeeper.\nPlease wait a moment...</string>
+    <string name="runkeeper_fininsh_title">Upload success</string>
+    <string name="runkeeper_fininsh_message">Uploading to RunKeeper is finished successfully.</string>
+    <string name="runkeeper_fininsh_fail_title">Failed uploading</string>
+    <string name="runkeeper_fininsh_fail_message">Uploading to RunKeeper is failed. Try again.</string>
+    <string name="loading">Loading</string>
+    <string name="runkeeper_not_setup_title">Upload error</string>
+    <string name="runkeeper_not_setup_message">RunKeeper is not configured for uploading.\nFirst you should setup access to runkeeper.com in the Settings menu.\nThen you can try again.</string>
+    <string name="runkeeper_upload_confirm_title">Upload track"</string>
+    <string name="runkeeper_upload_confirm_message">Are you sure you want to upload the selected track to RunKeeper?</string>
+    <string name="runkeeper_confirm_button_ok">Upload</string>
+    <string name="runkeeper_already_configured_title">RunKeeper is already configured</string>
+    <string name="runkeeper_already_configured_message">Access to RunKeeper is successfully configured already.\nDo you want to overwrite this setting?</string>
+    <string name="runkeeper_already_configured_button_ok">Configure</string>
+    <string name="s1" translatable="false">8Wu+oaZm25rOVr/BwwWxtMETnsiQtDgMSGFUu1Mc2Z9XXqonuwOYRTWmuu5gNVX8</string>
+    <string name="s2" translatable="false">dt8/JN8gdkTrcm7JLuH+TTAO3iXiMUGFwSOBgmwUFpPcRUiRiVxBwIFTi1PLpyi5</string>
 </resources>

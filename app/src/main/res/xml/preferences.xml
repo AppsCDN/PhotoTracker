@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <SwitchPreference
-        android:defaultValue="false"
-        android:title="@string/setting_map_performance_switch"
-        android:maxLines="3"
-        android:key="map_performance_switch"
-        android:summary="@string/setting_map_performance_hint" />
+    <PreferenceCategory android:title="Perfomance settings">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/setting_map_performance_switch"
+            android:maxLines="3"
+            android:key="map_performance_switch"
+            android:summary="@string/setting_map_performance_hint" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Export settings">
+        <Preference
+            android:key="runkeeper_access_token"
+            android:title="Runkeeper"
+            android:summary="Please press runkeeper button to setup"
+            android:icon="@mipmap/ic_runkeeper"
+            ></Preference>
+    </PreferenceCategory>
 </PreferenceScreen>

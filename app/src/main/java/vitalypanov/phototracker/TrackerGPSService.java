@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -45,6 +46,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
     private static final String TAG = "PhotoTracker GPSService";
     private static final String NOTIFICATION_CHANNEL_ID = "TrackerGPSService_ID";
     private static final int UPDATE_INTERVAL = 1000*10;// 10 seconds (10 seconds is for emulator device. On real android device minimum value is 60 seconds :( )
+    private static final int DELAY_INTERVAL = 1000*3;// 3 seconds delay before time start
     private static final int UPDATE_DB_INTERVAL = 1000*60*5;// is 5 minutes interval for updating in Db
     public static final String ACTION_SHOW_NOTIFICATION = "photogallery.SHOW_NOTIFICATION";
     public static final String PERM_PRIVATE = "photogallery.PRIVATE";
@@ -100,7 +102,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
     public void startTimer() {
         timer = new Timer();
         initializeTimerTask();
-        timer.schedule(timerTask, 0, UPDATE_INTERVAL); //
+        timer.schedule(timerTask, DELAY_INTERVAL, UPDATE_INTERVAL); //DELAY_INTERVAL should be provided
     }
 
     public void initializeTimerTask() {
@@ -275,6 +277,7 @@ public class TrackerGPSService extends Service  implements LocationListener {
     /**
      * Getting and storing into array gps coordinates of current location
      */
+    @SuppressLint("MissingPermission")
     public void putCurrentGPSLocation() {
         try {
             Location location = null; // location
@@ -340,7 +343,8 @@ public class TrackerGPSService extends Service  implements LocationListener {
                     }
                 }
                 // processing location...
-                TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude());
+                TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude(),
+                        location.getAltitude(), Calendar.getInstance().getTime());
                 processLocation(trackLocation);
 
             }

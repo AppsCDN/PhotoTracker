@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package vitalypanov.phototracker;
+package vitalypanov.phototracker.export.utilities;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -42,12 +42,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+
+import vitalypanov.phototracker.R;
+import vitalypanov.phototracker.utilities.AESCrypt;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
 @SuppressLint("SetJavaScriptEnabled")
 public class OAuth2Activity extends AppCompatActivity {
-    private static String CLIENT_ID = "1093200920e5495bbb7eedfe7bcd68e7";
-    private static String CLIENT_SECRET = "a3d4a4012dd54c15b66c03f5f08b441f";
+    private static String CLIENT_ID = null;
+    private static String CLIENT_SECRET = null;
     private static final String AUTH_URL = "https://runkeeper.com/apps/authorize";
     private static final String TOKEN_URL = "https://runkeeper.com/apps/token";
     private static final String REDIRECT_URI = "http://localhost:8080/runnerup/runkeeper";
@@ -58,8 +62,13 @@ public class OAuth2Activity extends AppCompatActivity {
     public static Intent newIntent(Activity activity) {
         Intent intent = new Intent(activity, OAuth2Activity.class);
         Bundle b = new Bundle();
-        b.putString(OAuth2ServerCredentials.CLIENT_ID, CLIENT_ID);
-        b.putString(OAuth2ServerCredentials.CLIENT_SECRET, CLIENT_SECRET);
+
+        try {
+            b.putString(OAuth2ServerCredentials.CLIENT_ID, AESCrypt.decrypt("RunKeeper", activity.getResources().getString(R.string.s1)));
+            b.putString(OAuth2ServerCredentials.CLIENT_SECRET, AESCrypt.decrypt("RunKeeper", activity.getResources().getString(R.string.s2)));
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
         b.putString(OAuth2ServerCredentials.AUTH_URL, AUTH_URL);
         b.putString(OAuth2ServerCredentials.TOKEN_URL, TOKEN_URL);
         b.putString(OAuth2ServerCredentials.REDIRECT_URI, REDIRECT_URI);
@@ -120,7 +129,7 @@ public class OAuth2Activity extends AppCompatActivity {
 
         mSpinner = new ProgressDialog(this);
         mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mSpinner.setMessage("Loading");
+        mSpinner.setMessage(getBaseContext().getResources().getString(R.string.loading));
         
         final WebView wv = new WebView(this);
         wv.setVerticalScrollBarEnabled(false);
