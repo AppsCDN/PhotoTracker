@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -176,7 +175,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             @Override
             public void onClick(View view) {
                 if (mService.getCurrentTrack().getPhotoFiles().size()>0) {
-                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), null);
+                    Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), (String)mTrackPhotoImage.getTag());
                     startActivityForResult(intent, REQUEST_CODE_IMAGES_PAGER);
                 }
             }
@@ -313,6 +312,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 @Override
                 public void run() {
                     mTrackPhotoImage.setImageBitmap(null);
+                    mTrackPhotoImage.setTag(null);
                 }
             });
         }
@@ -361,12 +361,14 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                         @Override
                         public void run() {
                             // Need post method here due to mTrackPhotoImage.getWidth() using. Before post - it always is 0.
-                            Bitmap bitmap =
-                                    Utils.isNull(currentTrack.getLastPhotoItem())?
-                                            null
-                                            :
-                                            BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth());
-                            mTrackPhotoImage.setImageBitmap(bitmap);
+                            if (Utils.isNull(currentTrack.getLastPhotoItem())){
+                                mTrackPhotoImage.setImageBitmap(null);
+                                mTrackPhotoImage.setTag(null);
+                            } else {
+                                mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
+                                mTrackPhotoImage.setTag(currentTrack.getLastPhotoItem().getPhotoFileName());
+                            }
+
                     }
                 });
 

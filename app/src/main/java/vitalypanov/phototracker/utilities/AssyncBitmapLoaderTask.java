@@ -53,6 +53,7 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
             mLoadingPanel.setVisibility(!StringUtils.isNullOrBlank(mTrackPhotoFileName)? View.VISIBLE : View.GONE);
         }
         mImageView.setImageBitmap(null);
+        mImageView.setTag(null);
     }
 
     @Override
@@ -61,5 +62,6 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
             mLoadingPanel.setVisibility(View.GONE);
         }
         mImageView.setImageBitmap(bitmap);
+        mImageView.setTag(mTrackPhotoFileName);
     }
 }
