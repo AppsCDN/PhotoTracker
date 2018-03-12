@@ -35,5 +35,12 @@
             android:layout_gravity="left"
             android:src="@mipmap/ic_trash"
             android:background="@drawable/button"/>
+        <ImageButton
+            android:id="@+id/activity_pager_share_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="25dp"
+            android:src="@mipmap/ic_share"
+            android:background="@drawable/button"/>
     </android.support.v7.widget.Toolbar>
 </RelativeLayout>

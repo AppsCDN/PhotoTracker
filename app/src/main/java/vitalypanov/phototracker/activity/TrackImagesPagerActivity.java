@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -47,6 +49,7 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     private FragmentStatePagerAdapter mPagerAdapter;
     private TextView mCounterTextView;
     private ImageButton mDeleteButton;
+    private ImageButton mShareButton;
     private ArrayList<TrackPhoto> mTrackPhotos;
     private String mPhotoToSelectName;
     private UUID mTrackUUID;
@@ -124,6 +127,14 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
             }
         });
 
+        mShareButton = (ImageButton) findViewById(R.id.activity_pager_share_button);
+        mShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shareCurrentPhoto();
+            }
+        });
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPagerAdapter = new FragmentStatePagerAdapter(fragmentManager) {
             @Override
@@ -184,19 +195,45 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         mViewPager.setCurrentItem(position);
         updateCounterTextView();
     }
+
+    /**
+     * Sharing photos functionality
+     */
+    private void shareCurrentPhoto(){
+        // One current photo:
+            int currentIndex = mViewPager.getCurrentItem();
+            // getting file name before delete...
+            TrackPhoto trackPhoto = mTrackPhotos.get(currentIndex);
+            final String trackPhotoFileName = trackPhoto.getPhotoFileName();
+            //Uri uri = Uri.fromFile(FileUtils.getPhotoFile(activity, trackPhotoFileName));
+            Uri uri = FileProvider.getUriForFile(getBaseContext(), getBaseContext().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", FileUtils.getPhotoFile(this, trackPhotoFileName));
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            //shareIntent.setPackage("com.instagram.android");
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            shareIntent.setType("image/*");
+            startActivity(shareIntent);
+
+        // Multiple photos - all photos of the track (not working for instagram :((( so not need it):
+            /*
+            ArrayList<Uri> files = new ArrayList<Uri>();
+            for(TrackPhoto trackPhoto : mTrackPhotos ) {
+                Uri uri = FileProvider.getUriForFile(getBaseContext(), getBaseContext().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", FileUtils.getPhotoFile(activity, trackPhoto.getPhotoFileName()));
+                files.add(uri);
+            }
+            Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            //shareIntent.setPackage("com.instagram.android");
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            //shareIntent.putExtra(Intent.EXTRA_STREAM, files);
+            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+            shareIntent.setType("image/*");
+            startActivity(shareIntent);
+            */
+    }
+
     private void updateCounterTextView(){
         mCounterTextView.setVisibility(mPagerAdapter.getCount() > 0? View.VISIBLE : View.GONE);
         mCounterTextView.setText(String.valueOf(mViewPager.getCurrentItem()+1) + "/" + mPagerAdapter.getCount());
-        /*
-        // after some second - hide counter
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mCounterTextView.setVisibility(View.GONE);
-            }
-        }, 2000);
-        */
     }
 
     @Override
