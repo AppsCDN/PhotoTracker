@@ -35,6 +35,7 @@ import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
+import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Created by Vitaly on 25.08.2017.
@@ -62,10 +63,10 @@ public class TrackerGPSService extends Service  implements LocationListener {
     private boolean canGetLocation = false;         // flag for GPS status
     private final IBinder mBinder = new LocalBinder();  // Binder given to clients
     private Notification mStubNotification; // stub notification for getting service to foreground mode to prevent ActivityManager to stop our service
-    private Timer timer;    // Timer for getting GPS coordinates
-    private TimerTask timerTask;
-    private Timer dbTimer;  // Timer for updating data in database
-    private TimerTask dbTimerTask;
+    private Timer mTimer;    // Timer for getting GPS coordinates
+    private TimerTask mTimerTask;
+    private Timer mDbTimer;  // Timer for updating data in database
+    private TimerTask mDbTimerTask;
 
     // Service protected:
     protected LocationManager locationManager;  // Declaring a Location Manager
@@ -99,15 +100,15 @@ public class TrackerGPSService extends Service  implements LocationListener {
      * Timer for regular requesting gps coordinates
      */
     public void startTimer() {
-        timer = new Timer();
+        mTimer = new Timer();
         initializeTimerTask();
-        timer.schedule(timerTask, DELAY_INTERVAL, UPDATE_INTERVAL); //DELAY_INTERVAL should be provided
+        mTimer.schedule(mTimerTask, DELAY_INTERVAL, UPDATE_INTERVAL); //DELAY_INTERVAL should be provided
     }
 
     public void initializeTimerTask() {
         buildStubNotification();
         startForeground(1, mStubNotification);
-        timerTask = new TimerTask() {
+        mTimerTask = new TimerTask() {
             public void run() {
                 // Foreground mode should be set for the service mandatory!!! (this line is the main line of the service! :) )
                 // Staying in foreground to prevent service from closing by Android system
@@ -121,14 +122,14 @@ public class TrackerGPSService extends Service  implements LocationListener {
      */
     public void startDbTimer() {
         //set a new Timer
-        dbTimer = new Timer();
+        mDbTimer = new Timer();
         initializeDbTimerTask();
-        dbTimer.schedule(dbTimerTask, UPDATE_DB_INTERVAL, UPDATE_DB_INTERVAL);
+        mDbTimer.schedule(mDbTimerTask, UPDATE_DB_INTERVAL, UPDATE_DB_INTERVAL);
     }
 
     public void initializeDbTimerTask() {
         buildStubNotification();
-        dbTimerTask = new TimerTask() {
+        mDbTimerTask = new TimerTask() {
             public void run() {
                 TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
             }
@@ -164,6 +165,12 @@ public class TrackerGPSService extends Service  implements LocationListener {
 
     @Override
     public void onDestroy() {
+        if (!Utils.isNull(mTimer)) {
+            mTimer.cancel();
+        }
+        if (!Utils.isNull(mDbTimer)) {
+            mDbTimer.cancel();
+        }
         // track is ended
         currentTrack.setEndTime(Calendar.getInstance().getTime());
         // Last update data in db before exiting from service
