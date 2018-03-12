@@ -202,13 +202,10 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     private void shareCurrentPhoto(){
         // One current photo:
             int currentIndex = mViewPager.getCurrentItem();
-            // getting file name before delete...
             TrackPhoto trackPhoto = mTrackPhotos.get(currentIndex);
             final String trackPhotoFileName = trackPhoto.getPhotoFileName();
-            //Uri uri = Uri.fromFile(FileUtils.getPhotoFile(activity, trackPhotoFileName));
             Uri uri = FileProvider.getUriForFile(getBaseContext(), getBaseContext().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", FileUtils.getPhotoFile(this, trackPhotoFileName));
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            //shareIntent.setPackage("com.instagram.android");
             shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.setType("image/*");
