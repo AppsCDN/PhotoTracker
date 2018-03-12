@@ -79,18 +79,18 @@ public class RunKeeperExport {
     private class AssyncUploadRunKeeper extends AsyncTask<Void, Void, Void> {
 
         private ProgressDialog mSpinner;
-        private boolean mUploadResult;
+        private String mUploadErrorMessage;
 
         @Override
         protected Void doInBackground(Void... params) {
             // if bitmaps not loaded yet...
-            mUploadResult = upload(1);
+            mUploadErrorMessage = upload(1);
             return null;
         }
 
         @Override
         protected void onPreExecute() {
-            mUploadResult = false;
+            mUploadErrorMessage = null;
             mSpinner = new ProgressDialog(mContext);
             mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
             mSpinner.setMessage(mContext.getResources().getString(R.string.runkeeper_progress_message));
@@ -101,8 +101,13 @@ public class RunKeeperExport {
         protected void onPostExecute(Void aVoid) {
             mSpinner.dismiss();
             AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
-            alertDialog.setTitle(mContext.getResources().getString(mUploadResult ? R.string.runkeeper_fininsh_title : R.string.runkeeper_fininsh_fail_title));
-            alertDialog.setMessage(mContext.getResources().getString(mUploadResult ? R.string.runkeeper_fininsh_message : R.string.runkeeper_fininsh_fail_message));
+            alertDialog.setTitle(mContext.getResources().getString(StringUtils.isNullOrBlank(mUploadErrorMessage) ? R.string.runkeeper_fininsh_title : R.string.runkeeper_fininsh_fail_title));
+            alertDialog.setMessage(StringUtils.isNullOrBlank(mUploadErrorMessage)
+                    ?
+                    mContext.getResources().getString( R.string.runkeeper_fininsh_message)
+                    :
+                    mContext.getResources().getString( R.string.runkeeper_fininsh_fail_message)
+                            + "\n\n" + mUploadErrorMessage);
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, mContext.getResources().getString(R.string.ok),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -168,16 +173,23 @@ public class RunKeeperExport {
         return false;
     }
 
-    public boolean upload(final long mID) {
+    /**
+     * return empty string if success
+     * overwise error description
+     * @param mID
+     * @return
+     */
+    public String upload(final long mID) {
 
         if (!connect()) {
-            return false;
+            return "Can't connect to runkeeper.com";
         }
 
         /**
          * Get the fitnessActivities end-point
          */
         HttpURLConnection conn = null;
+        String sErrorMessage = null;
         Exception ex;
         try {
             URL newurl = new URL(REST_URL + mFitnessActivitiesUrl);
@@ -200,22 +212,22 @@ public class RunKeeperExport {
             conn = null;
 
             if (responseCode >= HttpURLConnection.HTTP_OK && responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
-                return true;
+                return null; // null is success :)
             }
-            Log.e(TAG, "Error code: " + responseCode + ", amsg: " + amsg);
-            ex = new Exception(amsg);
+            ex = new Exception("Error: " + responseCode + ", " + amsg);
         } catch (Exception e) {
             ex = e;
         }
 
         if (ex != null) {
-            Log.e(TAG, "Failed to upload: " + ex.getMessage());
+            sErrorMessage = ex.getMessage();
+            Log.e(TAG, sErrorMessage);
         }
 
         if (conn != null) {
             conn.disconnect();
         }
-        return false;
+        return sErrorMessage;
     }
 
     private void export(long activityId, Writer writer) throws IOException {

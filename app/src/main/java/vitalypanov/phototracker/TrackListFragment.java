@@ -295,7 +295,12 @@ public class TrackListFragment  extends Fragment {
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
             mDurationTextView.setText(mTrack.getDurationTimeFormatted());
             mCommentTextView.setText(mTrack.getComment());
+
+            // uploading to runkeeper means only for not empty tracks
+            mRunKeeperButton.setVisibility(mTrack.getTrackData().size()> 1? View.VISIBLE : View.GONE);
+
             mTrackPhotoLayout.setVisibility(mTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
+
             mImageCounterTextView.setText(" " + String.valueOf(mTrack.getPhotoFiles().size()) + " ");
             mImageCounterTextView.bringToFront();
             updatePhotoUI();
