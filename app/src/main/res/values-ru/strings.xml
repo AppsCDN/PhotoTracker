@@ -65,4 +65,6 @@
     <string name="setting_runkeeper_hint">Пожалуйста коснитесь для настройки</string>
     <string name="setting_group_export">Экспорт</string>
     <string name="setting_group_performance">Производительность</string>
+    <string name="action_continue">Продолжить</string>
+    <string name="track_continue_tooltip">Продолжить записывание последнего не завершенного маршрута</string>
 </resources>
