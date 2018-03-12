@@ -32,7 +32,11 @@ public class TrackCursorWrapper extends CursorWrapper {
     public Track getTrack(){
         Track track = new Track(UUID.fromString(getString(getColumnIndex(TracksTable.Cols.UUID))));
         track.setStartTime(new Date(getLong(getColumnIndex(TracksTable.Cols.START_TIME))));
-        track.setEndTime(new Date(getLong(getColumnIndex(TracksTable.Cols.END_TIME))));
+        if (getLong(getColumnIndex(TracksTable.Cols.END_TIME)) == 0){
+            track.setEndTime(null);
+        } else {
+            track.setEndTime(new Date(getLong(getColumnIndex(TracksTable.Cols.END_TIME))));
+        }
         track.setDistance(getDouble(getColumnIndex(TracksTable.Cols.DISTANCE)));
         track.setComment(getString(getColumnIndex(TracksTable.Cols.COMMENT)));
         track.setTrackData(parseTrackDataJSON(getString(getColumnIndex(TracksTable.Cols.TRACK_DATA))));

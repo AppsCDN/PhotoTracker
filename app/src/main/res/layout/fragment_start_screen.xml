@@ -30,6 +30,22 @@
             android:layout_weight="1">
         </FrameLayout>
         <Button
+            android:id="@+id/track_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:tooltipText="@string/track_continue_tooltip"
+            android:text="@string/action_continue"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/md_white_1000"
+            android:background="@drawable/button_border_start"
+            />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="12dp">
+        </FrameLayout>
+        <Button
             android:id="@+id/track_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

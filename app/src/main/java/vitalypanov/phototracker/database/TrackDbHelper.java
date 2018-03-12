@@ -18,6 +18,7 @@ import vitalypanov.phototracker.database.DbSchema.TracksTable;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.model.TrackPhoto;
+import vitalypanov.phototracker.utilities.Utils;
 
 import static vitalypanov.phototracker.database.DbSchema.TracksTable.Cols;
 
@@ -53,7 +54,7 @@ public class TrackDbHelper {
         ContentValues values = new ContentValues();
         values.put(Cols.UUID, track.getUUID().toString());
         values.put(Cols.START_TIME, track.getStartTime().getTime());
-        values.put(Cols.END_TIME, track.getEndTime().getTime());
+        values.put(Cols.END_TIME, Utils.isNull(track.getEndTime())? null : track.getEndTime().getTime());
         values.put(Cols.DISTANCE, track.getDistance());
         values.put(Cols.COMMENT, track.getComment());
         // track data store in json format in one database field
@@ -152,5 +153,26 @@ public class TrackDbHelper {
      */
     public long getTracksCount(){
         return DatabaseUtils.queryNumEntries(mDatabase, TracksTable.NAME);
+    }
+
+    /**
+     * Reading all tracks from db to list
+     * @return  Track list
+     */
+    public Track getNotEndedTrack(){
+        Track track = null;
+        TrackCursorWrapper cursor =queryTracks(Cols.END_TIME + " IS NULL", null);
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                track = cursor.getTrack();
+                break;
+            }
+        }catch (Exception ex) {
+            Log.d(TAG, "getNotEndedTrack: " +ex.toString());
+        } finally {
+            cursor.close();
+        }
+        return track;
     }
 }

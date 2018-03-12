@@ -27,7 +27,6 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -149,12 +148,13 @@ public class TrackerGPSService extends Service  implements LocationListener {
         if (uuid != null)
         {   // Continue already existing track
             currentTrack = TrackDbHelper.get(getApplicationContext()).getTrack(uuid);
-            currentTrack.setEndTime(new Date());
+            currentTrack.setEndTime(null);
             TrackDbHelper.get(getApplicationContext()).updateTrack(currentTrack);
         } else {
             // Create new track
             currentTrack = new Track();
             currentTrack.setStartTime(Calendar.getInstance().getTime());
+            currentTrack.setEndTime(null);
             TrackDbHelper.get(getApplicationContext()).insertTrack(currentTrack);
         }
         startTimer();

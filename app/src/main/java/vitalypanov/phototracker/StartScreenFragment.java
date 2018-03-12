@@ -20,12 +20,16 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.util.UUID;
+
 import vitalypanov.phototracker.activity.AboutDialogActivity;
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
 import vitalypanov.phototracker.activity.SettingsActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.ServiceUtils;
+import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Created by Vitaly on 29.08.2017.
@@ -49,8 +53,10 @@ public class StartScreenFragment extends Fragment {
     PrimaryDrawerItem  mMenuRatePlayMarket;
     PrimaryDrawerItem  mMenuAbout;
 
+    private Button mTrackContinue;
     private Button mTrackStart;
     private Permissions mPhotoTrackerPermissions;
+    private Track mNotEndedTrack;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection ;
@@ -75,11 +81,21 @@ public class StartScreenFragment extends Fragment {
 
         initNavigationDrawer(view);
 
+        mTrackContinue = (Button) view.findViewById(R.id.track_continue);
+        mTrackContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!Utils.isNull(mNotEndedTrack)) {
+                    startTrack(mNotEndedTrack.getUUID());
+                }
+            }
+        });
+
         mTrackStart =  (Button) view.findViewById(R.id.track_start);
         mTrackStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startTrack();
+                startTrack(null);
             }
         });
 
@@ -123,7 +139,7 @@ public class StartScreenFragment extends Fragment {
                                 public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                                     switch ((int)drawerItem.getIdentifier()) {
                                         case MENU_ITEM_START_TRACK:
-                                            startTrack();
+                                            startTrack(null);
                                             break;
                                         case MENU_ITEM_TRACK_LIST:
                                             showTrackList();
@@ -165,6 +181,7 @@ public class StartScreenFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateTrackListCounterUI();
+        checkNotEndedTrackAndUpdateUI();
     }
 
     /**
@@ -183,6 +200,20 @@ public class StartScreenFragment extends Fragment {
         //mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
         mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
         mMenuTrackList.withEnabled(tracksCount > 0);
+    }
+
+    /**
+     * Check not ended tracks and update "continue" button
+     */
+    private void checkNotEndedTrackAndUpdateUI(){
+        mNotEndedTrack = TrackDbHelper.get(getActivity()).getNotEndedTrack();
+        if (Utils.isNull(mNotEndedTrack)){
+            mTrackContinue.setVisibility(View.GONE);
+        } else {
+            mTrackContinue.setText(getResources().getText(R.string.action_continue) + ": " + mNotEndedTrack.getStartTimeShortFormatted() + " " + mNotEndedTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics));
+            mTrackContinue.setVisibility(View.VISIBLE);
+        }
+
     }
 
     /**
@@ -226,13 +257,19 @@ public class StartScreenFragment extends Fragment {
    /**
      * Start recording track
      */
-    private void startTrack() {
+    private void startTrack(UUID trackUUID) {
         // first check location services
         if (!LocationServices.get(getActivity()).checkLocaionServices()){
             return;
         }
-        // start Tracker GPS service
-        Intent i = TrackerGPSService.newIntent(getActivity());
+        Intent i = null;
+        if (Utils.isNull(trackUUID)) {
+            // start new Tracker GPS service
+            i = TrackerGPSService.newIntent(getActivity());
+        } else {
+            // continue existing track and run Tracker GPS service
+            i = TrackerGPSService.newIntent(getActivity(), trackUUID);
+        }
         getActivity().startService(i);
         Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
         startActivity(intent);

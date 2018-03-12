@@ -40,7 +40,7 @@ public class Track {
     public Track(UUID UUID) {
         mUUID = UUID;
         mStartTime = new Date();
-        mEndTime = new Date();
+        mEndTime = null;
         mTrackData = new ArrayList<>();
         mPhotoFiles = new ArrayList<>();
     }
