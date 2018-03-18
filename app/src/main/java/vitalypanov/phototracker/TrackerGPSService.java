@@ -383,6 +383,9 @@ public class TrackerGPSService extends Service  implements LocationListener {
         // add gps location to current track if it differ from last already stored value
         if (trackLastLocation.getLatitude() != trackLocation.getLatitude() || trackLastLocation.getLongitude() != trackLocation.getLongitude()) {
             currentTrack.addTrackItem(trackLocation);
+        } else {
+            // overwise - if coordinates are equal, refresh timestamp of last item
+            trackLastLocation.setTimeStamp(trackLocation.getTimeStamp());
         }
     }
 

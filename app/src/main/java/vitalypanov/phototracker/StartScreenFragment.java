@@ -20,6 +20,7 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.util.Date;
 import java.util.UUID;
 
 import vitalypanov.phototracker.activity.AboutDialogActivity;
@@ -28,6 +29,8 @@ import vitalypanov.phototracker.activity.SettingsActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.utilities.DateUtils;
+import vitalypanov.phototracker.utilities.ListUtils;
 import vitalypanov.phototracker.utilities.ServiceUtils;
 import vitalypanov.phototracker.utilities.Utils;
 
@@ -212,7 +215,16 @@ public class StartScreenFragment extends Fragment {
         if (Utils.isNull(mNotEndedTrack)){
             mTrackContinue.setVisibility(View.GONE);
         } else {
-            mTrackContinue.setText(getResources().getText(R.string.action_continue) + ": " + mNotEndedTrack.getStartTimeShortFormatted() + " " + mNotEndedTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics));
+            Date lastTimeStamp = null;
+            // first trying to get last activity from the track
+            if (!Utils.isNull(mNotEndedTrack.getTrackData()) && !Utils.isNull(ListUtils.getLast(mNotEndedTrack.getTrackData()))) {
+                lastTimeStamp = ListUtils.getLast(mNotEndedTrack.getTrackData()).getTimeStamp();
+            }
+            // if not found yet - get start time of the track simply
+            if (Utils.isNull(lastTimeStamp)){
+                lastTimeStamp = mNotEndedTrack.getStartTime();
+            }
+            mTrackContinue.setText(getResources().getText(R.string.action_continue) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mNotEndedTrack.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
             mTrackContinue.setVisibility(View.VISIBLE);
         }
 

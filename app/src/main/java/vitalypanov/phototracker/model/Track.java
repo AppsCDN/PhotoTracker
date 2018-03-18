@@ -25,6 +25,7 @@ public class Track {
 
     // Distance format
     private final String DISTANCE_COVERED_FORMAT ="%.03f";
+    private final String DISTANCE_COVERED_SHORT_FORMAT ="%.02f";
 
     /**
      * For newlly created tracks - generate Id
@@ -211,6 +212,14 @@ public class Track {
      */
     public String getDistanceFormatted(){
         return String.format(DISTANCE_COVERED_FORMAT, getDistance());
+    }
+
+    /**
+     * Distance formatted shortly in kilometers
+     * @return
+     */
+    public String getDistanceShortFormatted(){
+        return String.format(DISTANCE_COVERED_SHORT_FORMAT, getDistance());
     }
 
     /**

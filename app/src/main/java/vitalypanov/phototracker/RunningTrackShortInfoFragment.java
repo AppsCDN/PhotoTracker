@@ -103,10 +103,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         if (savedInstanceState != null) {
             mCurrentPhotoFileName = savedInstanceState.getString(SAVED_PARAM_CURRENT_PHOTO_FILE);
         }
-        setRetainInstance(true);// !!!! MUST HAVE THIS LINE
-                                // (or should save/restore all members of this fragment - for example: mCurrentPhotoFileName)
-                                // for properly working with camera intent
-                                // TODO Additional: Sometimes the Fragment unloaded unexpected - so need to save/restore mCurrentPhotoFileName variable!!!!
+        setRetainInstance(true);
         startTimer();
     }
 
