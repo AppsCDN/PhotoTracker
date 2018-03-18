@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_delete_item"
+        android:icon="@mipmap/ic_delete_gray"
+        android:title="@string/menu_action_delete" />
+    <item
+        android:id="@+id/menu_runkeeper_item"
+        android:icon="@mipmap/ic_runkeeper"
+        android:title="@string/menu_action_runkeeper" />
+</menu>

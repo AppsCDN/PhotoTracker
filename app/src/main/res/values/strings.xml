@@ -73,4 +73,6 @@
     <string name="runkeeper_already_configured_button_ok">Configure</string>
     <string name="s1" translatable="false">8Wu+oaZm25rOVr/BwwWxtMETnsiQtDgMSGFUu1Mc2Z9XXqonuwOYRTWmuu5gNVX8</string>
     <string name="s2" translatable="false">dt8/JN8gdkTrcm7JLuH+TTAO3iXiMUGFwSOBgmwUFpPcRUiRiVxBwIFTi1PLpyi5</string>
+    <string name="menu_action_delete">Remove track</string>
+    <string name="menu_action_runkeeper">Upload to RunKeeper</string>
 </resources>

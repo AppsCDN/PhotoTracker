@@ -45,6 +45,8 @@ public class StartScreenFragment extends Fragment {
     private static final int MENU_ITEM_RATE_PLAY_MARKET = 5;
     private static final int MENU_ITEM_ABOUT = 6;
 
+    // Main menu:
+    Drawer mMenu;
     // Main menu items:
     PrimaryDrawerItem  mMenuStartTrack;
     PrimaryDrawerItem  mMenuTrackList;
@@ -119,7 +121,7 @@ public class StartScreenFragment extends Fragment {
         mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET);
         mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
 
-        new DrawerBuilder()
+        mMenu = new DrawerBuilder()
             .withActivity(parentActivity)
             .withToolbar(toolbar)
             .withActionBarDrawerToggle(true)
@@ -197,9 +199,9 @@ public class StartScreenFragment extends Fragment {
      */
     private void updateTrackListCounterUI(){
         long tracksCount =  TrackDbHelper.get(getContext()).getTracksCount();
-        //mTrackList.setText(getResources().getString(R.string.action_track_list) + (tracksCount > 0 ? " (" + String.valueOf(tracksCount) + ")" :""));
         mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
         mMenuTrackList.withEnabled(tracksCount > 0);
+        mMenu.updateItem(mMenuTrackList);
     }
 
     /**

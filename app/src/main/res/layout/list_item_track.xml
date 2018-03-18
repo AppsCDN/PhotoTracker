@@ -13,12 +13,12 @@
         android:layout_alignParentRight="true"
         android:padding="8dp">
         <ImageButton
-            android:id="@+id/list_item_track_delete_button"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@mipmap/ic_delete_gray"
-            android:background="@drawable/button"
+            android:id="@+id/list_item_menu_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@mipmap/ic_menu"
             android:scaleType="fitXY"
+            android:background="@drawable/button"
             />
     </LinearLayout>
 
@@ -131,16 +131,7 @@
             android:scaleType="fitXY"
             android:background="@drawable/button"
             />
-        <ImageButton
-            android:id="@+id/list_item_runkeeper_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/ic_runkeeper"
-            android:scaleType="fitXY"
-            android:background="@drawable/button"
-            />
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/image_frame"

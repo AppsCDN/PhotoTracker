@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,10 +10,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -102,12 +107,11 @@ public class TrackListFragment  extends Fragment {
         TrackAdapter mTrackAdapter;
         private TextView mStartDateTextView;
         private TextView mStartTimeTextView;
-        private ImageButton mDeleteButton;
         private TextView mDistanceTextView;
         private TextView mDurationTextView;
         private ImageButton mTrackMapButton;
         private ImageButton mTrackContinueButton;
-        private ImageButton mRunKeeperButton;
+        private ImageButton mMenuButton;
         private RelativeLayout mTrackPhotoLayout;
         private ImageView mTrackPhotoImageView;
         private TextView mImageCounterTextView;
@@ -179,57 +183,42 @@ public class TrackListFragment  extends Fragment {
                 }
             });
 
-            mRunKeeperButton = (ImageButton) itemView.findViewById(R.id.list_item_runkeeper_button);
-            mRunKeeperButton.setOnClickListener(new View.OnClickListener() {
+            mMenuButton = (ImageButton) itemView.findViewById(R.id.list_item_menu_button);
+            mMenuButton.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("RestrictedApi")
                 @Override
                 public void onClick(View view) {
-                    // get acces token
-                    final String accessToken = Settings.get(getActivity()).getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN);
-                    if (StringUtils.isNullOrBlank(accessToken)) {
-                        // if empty - inform user that he should define it...
-                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(getActivity()).create();
-                        alertDialog.setTitle(getResources().getString(R.string.runkeeper_not_setup_title));
-                        alertDialog.setMessage(getResources().getString(R.string.runkeeper_not_setup_message));
-                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        alertDialog.show();
-                        return;
-                    }
-
-                    // if has access token ask confirmation to upload...
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setCancelable(true);
-                    builder.setTitle(R.string.runkeeper_upload_confirm_title);
-                    String sMessage = getResources().getString(R.string.runkeeper_upload_confirm_message) +
-                            "\n" +
-                            "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
-                            "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
-                            mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
-                            (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
-                    builder.setMessage(sMessage);
-                    builder.setPositiveButton(R.string.runkeeper_confirm_button_ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // confirmed uploading - do it
-                                    exportRunKeeper(mTrack, accessToken);
-                                }
-                            });
-                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    MenuBuilder menuBuilder =new MenuBuilder(getActivity());
+                    MenuInflater inflater = new MenuInflater(getActivity());
+                    inflater.inflate(R.menu.menu_track_list, menuBuilder);
+                    MenuPopupHelper menuPopupHelper = new MenuPopupHelper(getActivity(), menuBuilder, view);
+                    menuPopupHelper.setForceShowIcon(true);
+                    menuBuilder.setCallback(new MenuBuilder.Callback() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // cancel confirmation dialog - do nothing
+                        public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+                            switch (item.getItemId()) {
+                                case R.id.menu_delete_item:
+                                    deleteTrack();
+                                    break;
+                                case R.id.menu_runkeeper_item:
+                                    runRunkeeperUpload();
+                                    break;
+                            }
+                            return false;
+                        }
+
+                        @Override
+                        public void onMenuModeChange(MenuBuilder menu) {
                         }
                     });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
 
+                    // uploading to runkeeper means only for not empty tracks
+                    menuBuilder.findItem(R.id.menu_runkeeper_item).setEnabled(!Utils.isNull(mTrack) && mTrack.getTrackData().size() > 1);
+
+                    menuPopupHelper.show();
                 }
             });
+
 
             // photo layout elements:
             mTrackPhotoLayout = (RelativeLayout) itemView.findViewById(R.id.list_item_track_photo_layout);
@@ -249,40 +238,94 @@ public class TrackListFragment  extends Fragment {
             mLoadingPanel = (RelativeLayout) itemView.findViewById(R.id.list_item_track_loading_photo);
 
             mCommentTextView = (TextView) itemView.findViewById(R.id.list_item_comment_text_view);
+        }
 
-            mDeleteButton= (ImageButton) itemView.findViewById(R.id.list_item_track_delete_button);
-            mDeleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setCancelable(true);
-                    builder.setTitle(R.string.remove_track_confirm_title);
-                    String sMessage = getResources().getString(R.string.remove_track_confirm_message) +
-                            "\n" +
-                            "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
-                            "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
-                            mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
-                            (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
-                    builder.setMessage(sMessage);
-                    builder.setPositiveButton(R.string.remove_track_confirm_button_ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // confirm deleting - do it
-                                    TrackDbHelper.get(getContext()).deleteTrack(mTrack);
-                                    mTrackAdapter.removeAt(getAdapterPosition());
-                                }
-                            });
-                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+        /**
+         * Delete track
+         */
+        private void deleteTrack(){
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setCancelable(true);
+            builder.setTitle(R.string.remove_track_confirm_title);
+            String sMessage = getResources().getString(R.string.remove_track_confirm_message) +
+                    "\n" +
+                    "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
+                    "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
+                    mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
+                    (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
+            builder.setMessage(sMessage);
+            builder.setPositiveButton(R.string.remove_track_confirm_button_ok,
+                    new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // cancel confirmation dialog - do nothing
+                            // confirm deleting - do it
+                            TrackDbHelper.get(getContext()).deleteTrack(mTrack);
+                            mTrackAdapter.removeAt(getAdapterPosition());
                         }
                     });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // cancel confirmation dialog - do nothing
                 }
             });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        /**
+         * Upload track data to runkeeper.com
+         */
+        private void runRunkeeperUpload(){
+            // get acces token
+            final String accessToken = Settings.get(getActivity()).getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN);
+            if (StringUtils.isNullOrBlank(accessToken)) {
+                // if empty - inform user that he should configure runkeeper setup settings and exit
+                android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(getActivity()).create();
+                alertDialog.setTitle(getResources().getString(R.string.runkeeper_not_setup_title));
+                alertDialog.setMessage(getResources().getString(R.string.runkeeper_not_setup_message));
+                alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+                return;
+            }
+
+            // if has access token - ask confirmation to upload...
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setCancelable(true);
+            builder.setTitle(R.string.runkeeper_upload_confirm_title);
+            String sMessage = getResources().getString(R.string.runkeeper_upload_confirm_message) +
+                    "\n" +
+                    "\n" + mTrack.getStartDateFormatted() + " " + mTrack.getStartTimeFormatted()+
+                    "\n" + mTrack.getDistanceFormatted() + " " + getResources().getString(R.string.distance_metrics) + ". " +
+                    mTrack.getDurationTimeFormatted() + " " + getResources().getString(R.string.duration) + "." +
+                    (mTrack.getComment()!= null? "\n" + mTrack.getComment() : "");
+            builder.setMessage(sMessage);
+            builder.setPositiveButton(R.string.runkeeper_confirm_button_ok,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // confirmed uploading - do it
+                            exportRunKeeper(mTrack, accessToken);
+                        }
+                    });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // cancel confirmation dialog - do nothing
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
+        @SuppressLint("RestrictedApi")
+        private void showPopupMenu(View v)
+        {
+
         }
 
 
@@ -295,10 +338,6 @@ public class TrackListFragment  extends Fragment {
             mDistanceTextView.setText(mTrack.getDistanceFormatted());
             mDurationTextView.setText(mTrack.getDurationTimeFormatted());
             mCommentTextView.setText(mTrack.getComment());
-
-            // uploading to runkeeper means only for not empty tracks
-            mRunKeeperButton.setVisibility(mTrack.getTrackData().size()> 1? View.VISIBLE : View.GONE);
-
             mTrackPhotoLayout.setVisibility(mTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
 
             mImageCounterTextView.setText(" " + String.valueOf(mTrack.getPhotoFiles().size()) + " ");

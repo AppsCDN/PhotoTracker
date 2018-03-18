@@ -67,4 +67,6 @@
     <string name="setting_group_performance">Производительность</string>
     <string name="action_continue">Продолжить</string>
     <string name="track_continue_tooltip">Продолжить записывание последнего не завершенного маршрута</string>
+    <string name="menu_action_runkeeper">Загрузить на RunKeeper</string>
+    <string name="menu_action_delete">Удалить маршрут</string>
 </resources>
