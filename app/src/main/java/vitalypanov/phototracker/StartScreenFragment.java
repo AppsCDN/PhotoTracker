@@ -40,6 +40,9 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public class StartScreenFragment extends Fragment {
     private static final String TAG = "PhotoTracker";
+
+    // Main menu:
+    Drawer mMenu;
     // menu items id's:
     private static final int MENU_ITEM_START_TRACK = 1;
     private static final int MENU_ITEM_TRACK_LIST = 2;
@@ -48,16 +51,12 @@ public class StartScreenFragment extends Fragment {
     private static final int MENU_ITEM_RATE_PLAY_MARKET = 5;
     private static final int MENU_ITEM_ABOUT = 6;
 
-    // Main menu:
-    Drawer mMenu;
+    private Button mTrackResume;    // Resume existing track button
+    private Track mTrackToResume;   // Track which will resume
 
-    private Button mTrackContinue;
-    private Button mTrackStart;
-    private Permissions mPhotoTrackerPermissions;
-    private Track mNotEndedTrack;
+    private Button mTrackStart;     // Start new track button
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection ;
+    private ServiceConnection mConnection ; // Service of recording track
 
     public static StartScreenFragment newInstance() {
         return new StartScreenFragment();
@@ -66,9 +65,10 @@ public class StartScreenFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPhotoTrackerPermissions = new Permissions(this);
-        if (!mPhotoTrackerPermissions.hasPermissions()){
-            mPhotoTrackerPermissions.requestPermissions();
+        // app permissions - check and grant if need it
+        Permissions permissions = new Permissions(this);
+        if (!permissions.hasPermissions()){
+            permissions.requestPermissions();
         }
     }
 
@@ -79,12 +79,12 @@ public class StartScreenFragment extends Fragment {
 
         initNavigationDrawer(view);
 
-        mTrackContinue = (Button) view.findViewById(R.id.track_continue);
-        mTrackContinue.setOnClickListener(new View.OnClickListener() {
+        mTrackResume = (Button) view.findViewById(R.id.track_continue);
+        mTrackResume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!Utils.isNull(mNotEndedTrack)) {
-                    startTrack(mNotEndedTrack.getUUID());
+                if (!Utils.isNull(mTrackToResume)) {
+                    startTrack(mTrackToResume.getUUID());
                 }
             }
         });
@@ -206,21 +206,21 @@ public class StartScreenFragment extends Fragment {
      * Check not ended tracks and update "continue" button
      */
     private void checkNotEndedTrackAndUpdateUI(){
-        mNotEndedTrack = TrackDbHelper.get(getActivity()).getNotEndedTrack();
-        if (Utils.isNull(mNotEndedTrack)){
-            mTrackContinue.setVisibility(View.GONE);
+        mTrackToResume = TrackDbHelper.get(getActivity()).getNotEndedTrack();
+        if (Utils.isNull(mTrackToResume)){
+            mTrackResume.setVisibility(View.GONE);
         } else {
             Date lastTimeStamp = null;
             // first trying to get last activity from the track
-            if (!Utils.isNull(mNotEndedTrack.getTrackData()) && !Utils.isNull(ListUtils.getLast(mNotEndedTrack.getTrackData()))) {
-                lastTimeStamp = ListUtils.getLast(mNotEndedTrack.getTrackData()).getTimeStamp();
+            if (!Utils.isNull(mTrackToResume.getTrackData()) && !Utils.isNull(ListUtils.getLast(mTrackToResume.getTrackData()))) {
+                lastTimeStamp = ListUtils.getLast(mTrackToResume.getTrackData()).getTimeStamp();
             }
             // if not found yet - get start time of the track simply
             if (Utils.isNull(lastTimeStamp)){
-                lastTimeStamp = mNotEndedTrack.getStartTime();
+                lastTimeStamp = mTrackToResume.getStartTime();
             }
-            mTrackContinue.setText(getResources().getText(R.string.action_resume) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mNotEndedTrack.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
-            mTrackContinue.setVisibility(View.VISIBLE);
+            mTrackResume.setText(getResources().getText(R.string.action_resume) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mTrackToResume.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
+            mTrackResume.setVisibility(View.VISIBLE);
         }
 
     }
