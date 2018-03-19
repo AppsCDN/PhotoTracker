@@ -1,7 +1,9 @@
 package vitalypanov.phototracker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,6 +16,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
@@ -58,6 +66,9 @@ public class StartScreenFragment extends Fragment {
 
     private ServiceConnection mConnection ; // Service of recording track
 
+    private SupportMapFragment mapFragment = null;
+    private GoogleMap mGoogleMap;
+
     public static StartScreenFragment newInstance() {
         return new StartScreenFragment();
     }
@@ -97,7 +108,37 @@ public class StartScreenFragment extends Fragment {
             }
         });
 
+        mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
+
+        // first check location services
+        if (LocationServices.get(getActivity()).checkLocaionServices()){
+            updatMapAsync();
+        }
+
         return view;
+    }
+
+    /**
+     * Updating assync google map and save map object into local variable
+     * for future drawing
+     */
+    private void updatMapAsync(){
+        if (mapFragment==null){
+            return;
+        }
+        final Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mGoogleMap = googleMap;
+                mGoogleMap.setMyLocationEnabled(true);
+                //mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), 15);
+                mGoogleMap.moveCamera(cameraUpdate);
+                //GoogleMapUtils.drawLocationOnGoogleMap(mGoogleMap, location, getContext());
+            }
+        });
     }
 
     /**

@@ -114,7 +114,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 if (mService == null){
                     return;
                 }
-                GoogleMapUtils.updateGoogleMapUI(mGoogleMap, mService.getCurrentTrack(), getContext(), mBitmapHashMap);
+                GoogleMapUtils.drawTrackOnGoogleMap(mGoogleMap, mService.getCurrentTrack(), getContext(), mBitmapHashMap);
             }
         });
     }

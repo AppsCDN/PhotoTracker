@@ -1,6 +1,5 @@
 package vitalypanov.phototracker;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,17 +13,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Timer;
@@ -41,7 +36,7 @@ import vitalypanov.phototracker.utilities.Utils;
  * Created by Vitaly on 25.08.2017.
  */
 
-public class TrackerGPSService extends Service  implements LocationListener {
+public class TrackerGPSService extends Service{
     // Service constants:
     private static final String TAG = "PhotoTracker GPSService";
     private static final String NOTIFICATION_CHANNEL_ID = "TrackerGPSService_ID";
@@ -53,8 +48,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
     public static final String REQUEST_CODE = "REQUEST_CODE";
     public static final String NOTIFICATION = "NOTIFICATION";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // The minimum distance to change Updates in meters
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 10; // The minimum time between updates in milliseconds
 
     // Service private:
     private Track currentTrack;
@@ -207,14 +200,6 @@ public class TrackerGPSService extends Service  implements LocationListener {
     }
 
     /**
-     * Function to check GPS/wifi enabled
-     * @return boolean
-     * */
-    public boolean canGetLocation() {
-        return this.canGetLocation;
-    }
-
-    /**
      * Function to show settings alert dialog
      * On pressing Settings button will lauch Settings Options
      * */
@@ -284,81 +269,12 @@ public class TrackerGPSService extends Service  implements LocationListener {
     /**
      * Getting and storing into array gps coordinates of current location
      */
-    @SuppressLint("MissingPermission")
-    public void putCurrentGPSLocation() {
-        try {
-            Location location = null; // location
-            double latitude; // latitude
-            double longitude; // longitude
-
-            locationManager = (LocationManager) this
-                    .getSystemService(LOCATION_SERVICE);
-
-            // getting GPS status
-            isGPSEnabled = locationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            // getting network status
-            isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                // no network provider is enabled
-            } else {
-                this.canGetLocation = true;
-
-                // First get GPS lat/long using GPS Services
-                if (isGPSEnabled) {
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                                this,
-                                Looper.getMainLooper());
-                        Log.d("GPS Enabled", "GPS Enabled");
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            }
-                        }
-                    }
-                }
-
-                // get location from Network Provider
-                if (isNetworkEnabled) {
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.NETWORK_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                                this,
-                                Looper.getMainLooper());
-                        Log.d("Network", "Network");
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                            if (location != null) {
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            }
-
-                        }
-                    }
-                }
-                // processing location...
-                TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude(),
-                        location.getAltitude(), Calendar.getInstance().getTime());
-                processLocation(trackLocation);
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void putCurrentGPSLocation() {
+        // processing location...
+        Location location = LocationServices.get(this).getCurrentGPSLocation();
+        TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude(),
+                location.getAltitude(), Calendar.getInstance().getTime());
+        processLocation(trackLocation);
     }
 
     /**
@@ -387,25 +303,5 @@ public class TrackerGPSService extends Service  implements LocationListener {
             // overwise - if coordinates are equal, refresh timestamp of last item
             trackLastLocation.setTimeStamp(trackLocation.getTimeStamp());
         }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
     }
 }

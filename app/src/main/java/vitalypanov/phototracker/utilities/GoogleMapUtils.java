@@ -3,6 +3,7 @@ package vitalypanov.phototracker.utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,12 +32,13 @@ public class GoogleMapUtils {
     private static final String TAG = "PhotoTracker";
     public final static int SCALE_SMALL_SIZE = 150;
     public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // for sample bitmap - small size
+    public final static double MAP_SIZE_DEGREES = 0.03; // size of map in degrees when showing current gps location
 
     /**
-     Draw on google map
+     Draw track data and track bitmaps on google map
      */
-    public static void updateGoogleMapUI(final GoogleMap googleMap, final Track track, final Context context, HashMap<String, Bitmap> bitmapHashMap){
-        if (googleMap == null || track == null){
+    public static void drawTrackOnGoogleMap(final GoogleMap googleMap, final Track track, final Context context, HashMap<String, Bitmap> bitmapHashMap){
+        if (Utils.isNull(googleMap )|| Utils.isNull(track)){
             return;
         }
 
@@ -129,5 +131,33 @@ public class GoogleMapUtils {
                     }
                 });
         */
+    }
+
+    public static void drawLocationOnGoogleMap(final GoogleMap googleMap, final Location location, final Context context){
+        if (Utils.isNull(googleMap)|| Utils.isNull(location)){
+            return;
+        }
+
+        LatLng itemPoint = new LatLng(
+                location.getLatitude(), location.getLongitude());
+
+        googleMap.clear();
+
+        // start point marker
+        MarkerOptions itemMarker = new MarkerOptions()
+                .position(itemPoint);
+        googleMap.addMarker(itemMarker);
+
+        LatLng minPoint = new LatLng(location.getLatitude() - MAP_SIZE_DEGREES/2, location.getLongitude() - MAP_SIZE_DEGREES/2);
+        LatLng maxPoint = new LatLng(location.getLatitude() + MAP_SIZE_DEGREES/2, location.getLongitude() + MAP_SIZE_DEGREES/2);
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(minPoint)
+                .include(maxPoint)
+                .build();
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        int height = context.getResources().getDisplayMetrics().heightPixels;
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+
     }
 }

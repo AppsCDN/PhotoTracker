@@ -125,7 +125,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
             public void onMapReady(GoogleMap googleMap) {
                 mGoogleMap = googleMap;
                 mGoogleMap.setOnMarkerClickListener(thisForCallback);
-                GoogleMapUtils.updateGoogleMapUI(mGoogleMap, mTrack, getContext(), mBitmapHashMap);
+                GoogleMapUtils.drawTrackOnGoogleMap(mGoogleMap, mTrack, getContext(), mBitmapHashMap);
             }
         });
     }
