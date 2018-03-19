@@ -134,7 +134,7 @@ public class StartScreenFragment extends Fragment {
                 mGoogleMap = googleMap;
                 mGoogleMap.setMyLocationEnabled(true);
                 //mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), 15);
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), (float) 16);
                 mGoogleMap.moveCamera(cameraUpdate);
                 //GoogleMapUtils.drawLocationOnGoogleMap(mGoogleMap, location, getContext());
             }
