@@ -38,6 +38,7 @@ import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.DateUtils;
+import vitalypanov.phototracker.utilities.GoogleMapUtils;
 import vitalypanov.phototracker.utilities.ListUtils;
 import vitalypanov.phototracker.utilities.ServiceUtils;
 import vitalypanov.phototracker.utilities.Utils;
@@ -126,16 +127,17 @@ public class StartScreenFragment extends Fragment {
         if (mapFragment==null){
             return;
         }
-        final Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+        
+        GoogleMapUtils.initMapControls(mapFragment);
+
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @SuppressLint("MissingPermission")
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mGoogleMap = googleMap;
-                mGoogleMap.setMyLocationEnabled(true);
-                //mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+                Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+                // move to current location
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), (float) 16);
-                mGoogleMap.moveCamera(cameraUpdate);
+                googleMap.moveCamera(cameraUpdate);
                 //GoogleMapUtils.drawLocationOnGoogleMap(mGoogleMap, location, getContext());
             }
         });

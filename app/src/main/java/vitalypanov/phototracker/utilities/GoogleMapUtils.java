@@ -1,13 +1,18 @@
 package vitalypanov.phototracker.utilities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -33,6 +38,44 @@ public class GoogleMapUtils {
     public final static int SCALE_SMALL_SIZE = 150;
     public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // for sample bitmap - small size
     public final static double MAP_SIZE_DEGREES = 0.03; // size of map in degrees when showing current gps location
+
+    public static final String GOOGLEMAP_COMPASS = "GoogleMapCompass";                   // [4]
+    public static final String GOOGLEMAP_TOOLBAR = "GoogleMapToolbar";                   // [3]
+    public static final String GOOGLEMAP_ZOOMIN_BUTTON = "GoogleMapZoomInButton";        // [2]child[0]
+    public static final String GOOGLEMAP_ZOOMOUT_BUTTON = "GoogleMapZoomOutButton";      // [2]child[1]
+    public static final String GOOGLEMAP_MYLOCATION_BUTTON = "GoogleMapMyLocationButton";// [0]
+
+    /**
+     * Init google map controls:
+     * My location button
+     * Zoom in/out buttons
+     * @param mapFragment
+     */
+    public static void initMapControls(final SupportMapFragment mapFragment){
+        if (Utils.isNull(mapFragment)){
+            return;
+        }
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                googleMap.setMyLocationEnabled(true);
+                //mGoogleMap.setPadding(0,0,0, 100);
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+                // do moving some controls on google map - it possible only after UI will be ready - so use post method
+                mapFragment.getView().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // move zoom controls to bottom of my location control
+                        if (!Utils.isNull(mapFragment) && !Utils.isNull(mapFragment.getView())){
+                            View locationView = mapFragment.getView().findViewWithTag(GoogleMapUtils.GOOGLEMAP_MYLOCATION_BUTTON);
+                            GoogleMapUtils.moveZoomControls(mapFragment.getView(), locationView.getLeft(), locationView.getHeight() + locationView.getTop() * 2, -1, -1, false, false);
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     /**
      Draw track data and track bitmaps on google map
@@ -159,5 +202,76 @@ public class GoogleMapUtils {
         int height = context.getResources().getDisplayMetrics().heightPixels;
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
 
+    }
+
+    public static void moveZoomControls(View mapView, int left, int top, int right, int bottom, boolean horizontal, boolean vertical) {
+
+        assert mapView != null;
+
+        View zoomIn = mapView.findViewWithTag(GOOGLEMAP_ZOOMIN_BUTTON);
+
+        // we need the parent view of the zoomin/zoomout buttons - it didn't have a tag
+        // so we must get the parent reference of one of the zoom buttons
+        View zoomInOut = (View) zoomIn.getParent();
+
+        if (zoomInOut != null) {
+            moveView(zoomInOut,left,top,right,bottom,horizontal,vertical);
+        }
+    }
+
+    /**
+     * Move the View according to the passed params.  A -1 means to skip that one.
+     *
+     * NOTE:  this expects the view to be inside a RelativeLayout.
+     *
+     * @param view - a valid view
+     * @param left - the distance from the left side
+     * @param top - the distance from the top
+     * @param right - the distance from the right side
+     * @param bottom - the distance from the bottom
+     * @param horizontal - boolean, center horizontally if true
+     * @param vertical - boolean, center vertically if true
+     */
+    private static void moveView(View view, int left, int top, int right, int bottom, boolean horizontal, boolean vertical) {
+        try {
+            assert view != null;
+
+            // replace existing layout params
+            RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+            if (left >= 0) {
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_START, RelativeLayout.TRUE);
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            }
+
+            if (top >= 0) {
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+            }
+
+            if (right >= 0) {
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE);
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            }
+
+            if (bottom >= 0) {
+                rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            }
+
+            if (horizontal) {
+                rlp.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+            }
+
+            if (vertical) {
+                rlp.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+            }
+
+            rlp.setMargins(left, top, right, bottom);
+
+            view.setLayoutParams(rlp);
+        } catch (Exception ex) {
+            Log.e(TAG, "moveView() - failed: " + ex.getLocalizedMessage());
+            ex.printStackTrace();
+        }
     }
 }

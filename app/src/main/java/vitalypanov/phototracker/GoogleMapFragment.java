@@ -119,6 +119,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
         if (mMapFragment ==null){
             return;
         }
+        GoogleMapUtils.initMapControls(mMapFragment);
         final GoogleMapFragment thisForCallback = this;
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override

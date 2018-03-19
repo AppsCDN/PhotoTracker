@@ -105,6 +105,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         if (mapFragment==null){
             return;
         }
+        GoogleMapUtils.initMapControls(mapFragment);
         final RunningTrackGoogleMapFragment thisForCallback = this;
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
