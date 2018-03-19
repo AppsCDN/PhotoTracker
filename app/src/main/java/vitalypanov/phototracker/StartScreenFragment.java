@@ -50,13 +50,6 @@ public class StartScreenFragment extends Fragment {
 
     // Main menu:
     Drawer mMenu;
-    // Main menu items:
-    PrimaryDrawerItem  mMenuStartTrack;
-    PrimaryDrawerItem  mMenuTrackList;
-    PrimaryDrawerItem  mMenuSettings;
-    PrimaryDrawerItem  mMenuSendFeedback;
-    PrimaryDrawerItem  mMenuRatePlayMarket;
-    PrimaryDrawerItem  mMenuAbout;
 
     private Button mTrackContinue;
     private Button mTrackStart;
@@ -117,27 +110,27 @@ public class StartScreenFragment extends Fragment {
         parentActivity.setSupportActionBar(toolbar);
         parentActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mMenuStartTrack = new PrimaryDrawerItem().withName(R.string.menu_start).withIcon(R.mipmap.ic_steps).withSelectable(false).withIdentifier(MENU_ITEM_START_TRACK);
-        mMenuTrackList = new PrimaryDrawerItem().withName(R.string.menu_track_list).withIcon(R.mipmap.ic_list).withSelectable(false).withIdentifier(MENU_ITEM_TRACK_LIST);
-        mMenuSettings = new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS);
-        mMenuSendFeedback = new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK);
-        mMenuRatePlayMarket = new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET);
-        mMenuAbout = new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT);
-
+        // Main menu
         mMenu = new DrawerBuilder()
             .withActivity(parentActivity)
             .withToolbar(toolbar)
             .withActionBarDrawerToggle(true)
             .withHeader(R.layout.drawer_header)
             .addDrawerItems(
-                    mMenuStartTrack,
-                    mMenuTrackList,
-                    mMenuSettings,
+
+                    new PrimaryDrawerItem().withName(R.string.menu_start).withIcon(R.mipmap.ic_steps).withSelectable(false).withIdentifier(MENU_ITEM_START_TRACK),
+                    new PrimaryDrawerItem().withName(R.string.menu_track_list).withIcon(R.mipmap.ic_list).withSelectable(false).withIdentifier(MENU_ITEM_TRACK_LIST),
+                    new PrimaryDrawerItem().withName(R.string.menu_settings).withIcon(R.mipmap.ic_settings).withSelectable(false).withIdentifier(MENU_ITEM_SETTINGS),
+
                     new DividerDrawerItem(),
-                    mMenuSendFeedback,
-                    mMenuRatePlayMarket,
+
+                    new PrimaryDrawerItem().withName(R.string.menu_send_feedback).withIcon(R.mipmap.ic_feedback).withSelectable(false).withIdentifier(MENU_ITEM_SEND_FEEDBACK),
+                    new PrimaryDrawerItem().withName(R.string.menu_rate_play_market).withIcon(R.mipmap.ic_playmarket).withSelectable(false).withIdentifier(MENU_ITEM_RATE_PLAY_MARKET),
+
                     new DividerDrawerItem(),
-                    mMenuAbout
+
+                    new PrimaryDrawerItem().withName(R.string.menu_about).withIcon(R.mipmap.ic_about).withSelectable(false).withIdentifier(MENU_ITEM_ABOUT)
+
                     ).withOnDrawerItemClickListener(
                             new Drawer.OnDrawerItemClickListener() {
                                 @Override
@@ -197,14 +190,16 @@ public class StartScreenFragment extends Fragment {
         intent.setData(Uri.parse(getResources().getString(R.string.app_playmarket_link)));
         startActivity(intent);
     }
+
     /**
      * Update tracks count value on button and other UI
      */
     private void updateTrackListCounterUI(){
         long tracksCount =  TrackDbHelper.get(getContext()).getTracksCount();
-        mMenuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
-        mMenuTrackList.withEnabled(tracksCount > 0);
-        mMenu.updateItem(mMenuTrackList);
+        PrimaryDrawerItem menuTrackList = (PrimaryDrawerItem)mMenu.getDrawerItem(MENU_ITEM_TRACK_LIST);
+        menuTrackList.withEnabled(tracksCount > 0);
+        menuTrackList.withBadge(tracksCount > 0 ? String.valueOf(tracksCount) :"");
+        mMenu.updateItem(menuTrackList);
     }
 
     /**
@@ -224,7 +219,7 @@ public class StartScreenFragment extends Fragment {
             if (Utils.isNull(lastTimeStamp)){
                 lastTimeStamp = mNotEndedTrack.getStartTime();
             }
-            mTrackContinue.setText(getResources().getText(R.string.action_continue) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mNotEndedTrack.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
+            mTrackContinue.setText(getResources().getText(R.string.action_resume) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mNotEndedTrack.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
             mTrackContinue.setVisibility(View.VISIBLE);
         }
 
@@ -261,6 +256,7 @@ public class StartScreenFragment extends Fragment {
         Intent intent = AboutDialogActivity.newIntent(getActivity());
         startActivity(intent);
     }
+
     /**
      * Show track list
      */
@@ -268,8 +264,10 @@ public class StartScreenFragment extends Fragment {
         Intent intent = TrackListActivity.newIntent(getActivity());
         startActivity(intent);
     }
-   /**
+
+    /**
      * Start recording track
+     * @param trackUUID - If we want to resume existing track - provide it's uuid
      */
     private void startTrack(UUID trackUUID) {
         // first check location services

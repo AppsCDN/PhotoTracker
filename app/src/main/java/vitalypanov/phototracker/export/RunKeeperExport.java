@@ -44,7 +44,7 @@ public class RunKeeperExport {
 
     private String mAccessToken;            // Access to runkeeper rest api
     private String mFitnessActivitiesUrl;   // uri
-    private String mExternalId;             // if of the created activity in runkeeper.com (not using yet)
+    private String mExternalId;             // id of the created activity in runkeeper.com (not using yet)
 
     public RunKeeperExport(Track track, Context context) {
         mTrack = track;
@@ -68,7 +68,7 @@ public class RunKeeperExport {
             return;
         }
 
-        // start export
+        // start export in background
         AssyncUploadRunKeeper assyncUploadRunKeeper = new AssyncUploadRunKeeper();
         assyncUploadRunKeeper.execute();
     }
@@ -179,7 +179,7 @@ public class RunKeeperExport {
      * @param mID
      * @return
      */
-    public String upload(final long mID) {
+    private String upload(final long mID) {
 
         if (!connect()) {
             return "Can't connect to runkeeper.com";
