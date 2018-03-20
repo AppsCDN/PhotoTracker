@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Created by Vitaly on 27.02.2018.
  */
 
-public class TrackPhoto implements Serializable{
+public class TrackPhoto implements Serializable, BasePhoto{
     String mPhotoFileName;
     TrackLocation mTrackLocation;
 
@@ -33,5 +33,10 @@ public class TrackPhoto implements Serializable{
 
     public void setPhotoFileName(String photoFileName) {
         this.mPhotoFileName = photoFileName;
+    }
+
+    @Override
+    public String getName() {
+        return getPhotoFileName();
     }
 }

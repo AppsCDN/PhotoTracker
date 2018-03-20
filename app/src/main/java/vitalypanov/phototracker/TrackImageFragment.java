@@ -62,8 +62,7 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
     private void updatePhotoUI(){
         Point size = new Point();
         getActivity().getWindowManager().getDefaultDisplay().getSize(size);
-        //AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, size.x, getContext(), mLoadingPanel);
-        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, 0, getContext(), mLoadingPanel);
+        AssyncBitmapLoaderTask assyncImageViewUpdater = new AssyncBitmapLoaderTask(mBitmapFileName, mTrackPhotoImageView, size.x, getContext(), mLoadingPanel);
         assyncImageViewUpdater.execute();
     }
 

@@ -1,6 +1,5 @@
 package vitalypanov.phototracker;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
@@ -16,26 +15,33 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import vitalypanov.phototracker.activity.AboutDialogActivity;
 import vitalypanov.phototracker.activity.RunningTrackPagerActivity;
 import vitalypanov.phototracker.activity.SettingsActivity;
+import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.flickr.FlickrPhoto;
+import vitalypanov.phototracker.flickr.FlickrSearchTask;
+import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.utilities.DateUtils;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
@@ -47,7 +53,7 @@ import vitalypanov.phototracker.utilities.Utils;
  * Created by Vitaly on 29.08.2017.
  */
 
-public class StartScreenFragment extends Fragment {
+public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskCompleted, GoogleMap.OnMarkerClickListener {
     private static final String TAG = "PhotoTracker";
 
     // Main menu:
@@ -68,7 +74,8 @@ public class StartScreenFragment extends Fragment {
     private ServiceConnection mConnection ; // Service of recording track
 
     private SupportMapFragment mapFragment = null;
-    private GoogleMap mGoogleMap;
+    private List<FlickrPhoto> mFlickrPhotos = null;
+    LatLngBounds mCurrentBounds;
 
     public static StartScreenFragment newInstance() {
         return new StartScreenFragment();
@@ -111,13 +118,52 @@ public class StartScreenFragment extends Fragment {
 
         mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
 
+
+
         // first check location services
         if (LocationServices.get(getActivity()).checkLocaionServices()){
-            updatMapAsync();
+            updatMapAsyncInit();
         }
 
         return view;
     }
+
+    private void updatMapAsyncInit(){
+        if (mapFragment==null){
+            return;
+        }
+
+        final StartScreenFragment thisForCallback = this;
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                GoogleMapUtils.initMapControls(mapFragment);
+                Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+                LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2);
+                LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2);
+                LatLngBounds bounds = new LatLngBounds.Builder()
+                        .include(minPoint)
+                        .include(maxPoint)
+                        .build();
+                int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+                int width = getResources().getDisplayMetrics().widthPixels;
+                int height = getResources().getDisplayMetrics().heightPixels;
+                googleMap.setOnMarkerClickListener(thisForCallback);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+                googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                    @Override
+                    public void onCameraIdle() {
+                        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+                        if (!bounds.equals(mCurrentBounds)) {
+                            mCurrentBounds = bounds;
+                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
 
     /**
      * Updating assync google map and save map object into local variable
@@ -127,18 +173,13 @@ public class StartScreenFragment extends Fragment {
         if (mapFragment==null){
             return;
         }
-        
-        GoogleMapUtils.initMapControls(mapFragment);
-
         mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @SuppressLint("MissingPermission")
             @Override
-            public void onMapReady(GoogleMap googleMap) {
-                Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
-                // move to current location
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), (float) 16);
-                googleMap.moveCamera(cameraUpdate);
-                //GoogleMapUtils.drawLocationOnGoogleMap(mGoogleMap, location, getContext());
+            public void onMapReady(final GoogleMap googleMap) {
+               if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
+                   googleMap.clear();
+                   GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
+               }
             }
         });
     }
@@ -330,4 +371,16 @@ public class StartScreenFragment extends Fragment {
         startActivity(intent);
     }
 
+    @Override
+    public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
+        mFlickrPhotos = flickrPhotos;
+        updatMapAsync();
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), null, (ArrayList<FlickrPhoto>) mFlickrPhotos, marker.getSnippet());
+        startActivity(intent);
+        return false;
+    }
 }

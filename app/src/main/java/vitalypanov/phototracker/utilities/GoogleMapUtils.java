@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -17,14 +16,17 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.Settings;
+import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.model.TrackPhoto;
@@ -36,9 +38,11 @@ import vitalypanov.phototracker.model.TrackPhoto;
 public class GoogleMapUtils {
     private static final String TAG = "PhotoTracker";
     public final static int SCALE_SMALL_SIZE = 150;
-    public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // for sample bitmap - small size
+    public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // sample bitmap - small size
+    public final static int SCALE_FLICKR_SMALL_SAMPLE_SIZE = 50; // sample bitmap for photos from flickr - muvh more small size
     public final static double MAP_SIZE_DEGREES = 0.03; // size of map in degrees when showing current gps location
 
+    // Google map controls:
     public static final String GOOGLEMAP_COMPASS = "GoogleMapCompass";                   // [4]
     public static final String GOOGLEMAP_TOOLBAR = "GoogleMapToolbar";                   // [3]
     public static final String GOOGLEMAP_ZOOMIN_BUTTON = "GoogleMapZoomInButton";        // [2]child[0]
@@ -176,31 +180,26 @@ public class GoogleMapUtils {
         */
     }
 
-    public static void drawLocationOnGoogleMap(final GoogleMap googleMap, final Location location, final Context context){
-        if (Utils.isNull(googleMap)|| Utils.isNull(location)){
-            return;
+    public static ArrayList<Marker> addFlickrPhotosOnGoogleMap(final GoogleMap googleMap, final List<FlickrPhoto> flickrPhotos, final Context context){
+        ArrayList<Marker> markers = new ArrayList<Marker>();
+        if (Utils.isNull(googleMap)|| Utils.isNull(flickrPhotos)){
+            return null;
         }
 
-        LatLng itemPoint = new LatLng(
-                location.getLatitude(), location.getLongitude());
+        Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
+        bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_FLICKR_SMALL_SAMPLE_SIZE);
+        for (FlickrPhoto flickrPhoto:  flickrPhotos){
 
-        googleMap.clear();
+            Bitmap bitmap = bitmapDefault;
 
-        // start point marker
-        MarkerOptions itemMarker = new MarkerOptions()
-                .position(itemPoint);
-        googleMap.addMarker(itemMarker);
-
-        LatLng minPoint = new LatLng(location.getLatitude() - MAP_SIZE_DEGREES/2, location.getLongitude() - MAP_SIZE_DEGREES/2);
-        LatLng maxPoint = new LatLng(location.getLatitude() + MAP_SIZE_DEGREES/2, location.getLongitude() + MAP_SIZE_DEGREES/2);
-        LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(minPoint)
-                .include(maxPoint)
-                .build();
-        int margin = context.getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-        int width = context.getResources().getDisplayMetrics().widthPixels;
-        int height = context.getResources().getDisplayMetrics().heightPixels;
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
+            MarkerOptions photoMarker = new MarkerOptions()
+                    .position(new LatLng(flickrPhoto.getLatitude(), flickrPhoto.getLongitude()))
+                    .icon(itemBitmap)
+                    .snippet(flickrPhoto.getUrl());
+            markers.add(googleMap.addMarker(photoMarker));
+        }
+        return markers;
 
     }
 

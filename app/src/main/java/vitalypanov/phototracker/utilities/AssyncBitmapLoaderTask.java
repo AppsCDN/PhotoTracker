@@ -41,7 +41,13 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
             // Attention!!! it takes much more memory than with scaling
             bitmap = BitmapHandler.get(mContext).getBitmapOriginal(mTrackPhotoFileName);
         } else {
-            bitmap = BitmapHandler.get(mContext).getBitmapScaleToFitWidth(mTrackPhotoFileName, mScaleWidth);
+            if (mImageView.getClass().equals(TouchImageView.class)){
+                // TouchImageView - load original and zoom it in PostExecute
+                bitmap = BitmapHandler.get(mContext).getBitmapOriginal(mTrackPhotoFileName);
+            } else {
+                // ImageView
+                bitmap = BitmapHandler.get(mContext).getBitmapScaleToFitWidth(mTrackPhotoFileName, mScaleWidth);
+            }
         }
         return bitmap;
     }
@@ -62,6 +68,15 @@ public class AssyncBitmapLoaderTask extends AsyncTask<Void, Void, Bitmap> {
             mLoadingPanel.setVisibility(View.GONE);
         }
         mImageView.setImageBitmap(bitmap);
+        if (mImageView.getClass().equals(TouchImageView.class)) {
+            float zoomLevel = (float)mScaleWidth/(float)bitmap.getWidth();
+            if(zoomLevel > 1) {// only to zoom in
+                ((TouchImageView) mImageView).setMinZoom(zoomLevel);
+                ((TouchImageView) mImageView).setZoom(zoomLevel);
+            } else {
+                ((TouchImageView) mImageView).setMinZoom(1);
+            }
+        }
         mImageView.setTag(mTrackPhotoFileName);
     }
 }

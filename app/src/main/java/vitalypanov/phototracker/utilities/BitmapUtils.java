@@ -9,6 +9,8 @@ import android.media.ExifInterface;
 import java.io.File;
 import java.io.IOException;
 
+import vitalypanov.phototracker.flickr.FlickrFetchr;
+
 /**
  * Created by Vitaly on 27.02.2018.
  */
@@ -27,26 +29,30 @@ public class BitmapUtils {
         }
 
         Bitmap bitmap =null;
-        File currentPhotoFile = FileUtils.getPhotoFile(context, bitmapFileName);
-        if (currentPhotoFile != null && currentPhotoFile.exists()){
-            // read bitmap from file
-            bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
 
-            // to avoid: Caused by: java.lang.OutOfMemoryError: Failed to allocate a 48794892 byte allocation with 16777216 free bytes and 29MB until OOM
-            /*BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 2;
-            bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath(), options);
-            */
-
-            // Reading EXIF information from bitmap file and rotate if need it
-            ExifInterface exif = new ExifInterface(currentPhotoFile.getPath());
-            int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            if (rotation != 0f) {
-                // need to rotate loaded bitmap due to EXIF info
-                int rotationInDegrees = exifToDegrees(rotation);
-                Matrix matrix = new Matrix();
-                matrix.preRotate(rotationInDegrees);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        if (StringUtils.isValidUrl(bitmapFileName)){
+            // can process flickr uri
+            byte[] bytes = FlickrFetchr.getUrlBytes(bitmapFileName);
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            // TODO Check Exif of downloaded bitmap need
+        } else {
+            // or ordinary file
+            File currentPhotoFile = FileUtils.getPhotoFile(context, bitmapFileName);
+            if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                // read bitmap from file
+                bitmap = BitmapFactory.decodeFile(currentPhotoFile.getPath());
+                if (!Utils.isNull(bitmap)){
+                    // Reading EXIF information from bitmap file and rotate if need it
+                    ExifInterface exif = new ExifInterface(currentPhotoFile.getPath());
+                    int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    if (rotation != 0f) {
+                        // need to rotate loaded bitmap due to EXIF info
+                        int rotationInDegrees = exifToDegrees(rotation);
+                        Matrix matrix = new Matrix();
+                        matrix.preRotate(rotationInDegrees);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    }
+                }
             }
         }
         return bitmap;

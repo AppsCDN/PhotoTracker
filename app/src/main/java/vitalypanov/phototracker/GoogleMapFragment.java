@@ -14,33 +14,42 @@ import android.widget.RelativeLayout;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.flickr.FlickrPhoto;
+import vitalypanov.phototracker.flickr.FlickrSearchTask;
+import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
+import vitalypanov.phototracker.utilities.StringUtils;
+import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Created by Vitaly on 23.02.2018.
  */
 
-public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerClickListener {
+public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerClickListener, OnFlickrSearchTaskCompleted {
     private static final String TAG = "PhotoTracker";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
 
     private SupportMapFragment mMapFragment = null;
     private RelativeLayout mLoadingFrame;
 
-    private GoogleMap mGoogleMap;
     private Track mTrack= null;
     private HashMap <String, Bitmap> mBitmapHashMap = null;
+    private List<FlickrPhoto> mFlickrPhotos = null;
+    LatLngBounds mCurrentBounds = null;
+    ArrayList<Marker> mFlickerMarkers = null;
 
     public static GoogleMapFragment newInstance(UUID uuid) {
         Bundle args = new Bundle();
@@ -123,13 +132,42 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
         final GoogleMapFragment thisForCallback = this;
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mGoogleMap = googleMap;
-                mGoogleMap.setOnMarkerClickListener(thisForCallback);
-                GoogleMapUtils.drawTrackOnGoogleMap(mGoogleMap, mTrack, getContext(), mBitmapHashMap);
+            public void onMapReady(final GoogleMap googleMap) {
+                googleMap.setOnMarkerClickListener(thisForCallback);
+                GoogleMapUtils.drawTrackOnGoogleMap(googleMap, mTrack, getContext(), mBitmapHashMap);
+                googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                    @Override
+                    public void onCameraIdle() {
+                        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+                        if (!bounds.equals(mCurrentBounds)) {
+                            mCurrentBounds = bounds;
+                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                        }
+                    }
+                });
             }
         });
     }
+
+    private void updatFlickrMapAsync(){
+        if (mMapFragment ==null){
+            return;
+        }
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                if (!Utils.isNull(mFlickerMarkers)){
+                    for (Marker marker : mFlickerMarkers){
+                        marker.remove();
+                    }
+                }
+                if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
+                }
+            }
+        });
+    }
+
 
     @Override
     public void onResume() {
@@ -138,11 +176,30 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        String photoFileName = marker.getSnippet();
-        if (photoFileName!= null && mTrack.getPhotoFiles().size()>0) {
-            Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID(), (ArrayList<TrackPhoto>) mTrack.getPhotoFiles(), photoFileName);
-            startActivity(intent);
+        String photoName = marker.getSnippet();
+        if (StringUtils.isNullOrBlank(photoName)){
+            return false;
+        }
+        if (StringUtils.isValidUrl(photoName)) {
+            // photos from flicker
+            if (!mFlickrPhotos.isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mTrack.getUUID(), (ArrayList<FlickrPhoto>) mFlickrPhotos, photoName);
+                startActivity(intent);
+            }
+        } else {
+            // local photos of the track
+            if (!mTrack.getPhotoFiles().isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mTrack.getUUID(), (ArrayList<TrackPhoto>) mTrack.getPhotoFiles(), photoName);
+                startActivity(intent);
+            }
         }
         return false;
     }
+
+    @Override
+    public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
+        mFlickrPhotos = flickrPhotos;
+        updatFlickrMapAsync();
+    }
+
 }

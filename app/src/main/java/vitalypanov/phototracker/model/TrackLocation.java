@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Custom Location class for storing longitude, latitude a.
+ * Custom Location class for storing longitude, latitude and etc.
  *
  * p.s.
  * It made because of application was somtimes crashed,  when I trying to process standard Location objects with Gson
- *  I get following error: A/libc: Fatal signal 11 (SIGSEGV), code 128, fault addr 0x0 in tid 26221 (FinalizerDaemon)
+ * I got following error: A/libc: Fatal signal 11 (SIGSEGV), code 128, fault addr 0x0 in tid 26221 (FinalizerDaemon)
  *
  * Created by Vitaly on 25.02.2018.
  */

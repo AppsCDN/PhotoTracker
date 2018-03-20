@@ -14,32 +14,39 @@ import android.widget.RelativeLayout;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
+import vitalypanov.phototracker.flickr.FlickrPhoto;
+import vitalypanov.phototracker.flickr.FlickrSearchTask;
+import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.BindTrackerGPSService;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.GoogleMapUtils;
+import vitalypanov.phototracker.utilities.StringUtils;
 import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Created by Vitaly on 23.02.2018.
  */
 
-public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, BindTrackerGPSService, GoogleMap.OnMarkerClickListener {
+public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, BindTrackerGPSService, GoogleMap.OnMarkerClickListener, OnFlickrSearchTaskCompleted {
     private static final String TAG = "PhotoTracker";
 
-    private SupportMapFragment mapFragment = null;
+    private SupportMapFragment mMapFragment = null;
     private RelativeLayout mLoadingFrame;
-    private GoogleMap mGoogleMap;
     private HashMap<String, Bitmap> mBitmapHashMap;
-
     private TrackerGPSService mService;
+    private List<FlickrPhoto> mFlickrPhotos = null;
+    LatLngBounds mCurrentBounds = null;
+    ArrayList<Marker> mFlickerMarkers = null;
 
     public static RunningTrackGoogleMapFragment newInstance() {
         return new RunningTrackGoogleMapFragment();
@@ -54,7 +61,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
         View v = layoutInflater.inflate(R.layout.fragment_map_running_track, container, false);
-        mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
+        mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
         mLoadingFrame = (RelativeLayout) v.findViewById(R.id.google_map_loading_data_frame);
         loadBitmapsAndUpdateMapAssync();
         return v;
@@ -102,20 +109,48 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
      * for future drawing
      */
     private void updatMapAsync(){
-        if (mapFragment==null){
+        if (mMapFragment ==null){
             return;
         }
-        GoogleMapUtils.initMapControls(mapFragment);
+        GoogleMapUtils.initMapControls(mMapFragment);
         final RunningTrackGoogleMapFragment thisForCallback = this;
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mGoogleMap = googleMap;
-                mGoogleMap.setOnMarkerClickListener(thisForCallback);
+            public void onMapReady(final GoogleMap googleMap) {
+                googleMap.setOnMarkerClickListener(thisForCallback);
                 if (mService == null){
                     return;
                 }
-                GoogleMapUtils.drawTrackOnGoogleMap(mGoogleMap, mService.getCurrentTrack(), getContext(), mBitmapHashMap);
+                GoogleMapUtils.drawTrackOnGoogleMap(googleMap, mService.getCurrentTrack(), getContext(), mBitmapHashMap);
+                googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                    @Override
+                    public void onCameraIdle() {
+                        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+                        if (!bounds.equals(mCurrentBounds)) {
+                            mCurrentBounds = bounds;
+                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void updatFlickrMapAsync(){
+        if (mMapFragment ==null){
+            return;
+        }
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                if (!Utils.isNull(mFlickerMarkers)){
+                    for (Marker marker : mFlickerMarkers){
+                        marker.remove();
+                    }
+                }
+                if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
+                }
             }
         });
     }
@@ -134,16 +169,31 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        String photoFileName = marker.getSnippet();
-        if (    photoFileName == null
+        String photoName = marker.getSnippet();
+        if (StringUtils.isNullOrBlank(photoName)
                 || mService == null
-                || mService.getCurrentTrack() == null
-                || mService.getCurrentTrack().getPhotoFiles().isEmpty()) {
+                || mService.getCurrentTrack() == null) {
             return false;
         }
-        Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), photoFileName);
-        startActivity(intent);
+        if (StringUtils.isValidUrl(photoName)) {
+            // photos from flicker
+            if (!mFlickrPhotos.isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<FlickrPhoto>) mFlickrPhotos, photoName);
+                startActivity(intent);
+            }
+        } else {
+            if (!mService.getCurrentTrack().getPhotoFiles().isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<TrackPhoto>) mService.getCurrentTrack().getPhotoFiles(), photoName);
+                startActivity(intent);
+            }
+        }
         return false;
+    }
+
+    @Override
+    public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
+        mFlickrPhotos = flickrPhotos;
+        updatFlickrMapAsync();
     }
 
 }
