@@ -69,4 +69,6 @@
     <string name="menu_action_runkeeper">Загрузить на RunKeeper</string>
     <string name="menu_action_delete">Удалить маршрут</string>
     <string name="action_resume">Продолжить</string>
+    <string name="setting_flickr_photos_switch">Фотографии с Flickr</string>
+    <string name="setting_flickr_photos_hint">Показывать фотографии других пользователей с flickr.com</string>
 </resources>
