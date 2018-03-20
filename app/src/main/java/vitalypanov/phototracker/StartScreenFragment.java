@@ -139,21 +139,22 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             public void onMapReady(final GoogleMap googleMap) {
                 GoogleMapUtils.initMapControls(mapFragment);
                 Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
-                LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2);
-                LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2);
-                LatLngBounds bounds = new LatLngBounds.Builder()
-                        .include(minPoint)
-                        .include(maxPoint)
-                        .build();
-                int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-                int width = getResources().getDisplayMetrics().widthPixels;
-                int height = getResources().getDisplayMetrics().heightPixels;
+                if (!Utils.isNull(location)){
+                    LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2);
+                    LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2);
+                    LatLngBounds bounds = new LatLngBounds.Builder()
+                            .include(minPoint)
+                            .include(maxPoint)
+                            .build();
+                    int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+                    int width = getResources().getDisplayMetrics().widthPixels;
+                    int height = getResources().getDisplayMetrics().heightPixels;
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+                }
                 googleMap.setOnMarkerClickListener(thisForCallback);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
-
                         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
                         if (!bounds.equals(mCurrentBounds)) {
                             mCurrentBounds = bounds;
