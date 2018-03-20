@@ -12,8 +12,9 @@ import vitalypanov.phototracker.utilities.Utils;
  */
 
 public class Settings {
-    public static final String KEY_MAP_PERFOMANCE_SWITCH = "map_performance_switch";
-    public static final String KEY_MAP_RUNKEEPER_ACCESS_TOKEN = "runkeeper_access_token";
+    private static final String KEY_MAP_PERFOMANCE_SWITCH = "map_performance_switch";
+    private static final String KEY_MAP_FLICKR_PHOTOS_SWITCH = "flickr_switch";
+    private static final String KEY_MAP_RUNKEEPER_ACCESS_TOKEN = "runkeeper_access_token";
     private static Settings mSettings;
     private Context mContext;
 
@@ -22,6 +23,24 @@ public class Settings {
             mSettings = new Settings(context);
         }
         return mSettings;
+    }
+
+    public boolean isMapPerformance(){
+        Boolean defaultVale = mContext.getResources().getBoolean(R.bool.map_perfromance_default_false);
+        return getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH, defaultVale);
+    }
+
+    public boolean isFlickrPhotos(){
+        Boolean defaultVale = mContext.getResources().getBoolean(R.bool.flickr_photos_default_true);
+        return getBoolean(Settings.KEY_MAP_FLICKR_PHOTOS_SWITCH, defaultVale);
+    }
+
+    public String getRunkeeperAccessToken(){
+        return getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN);
+    }
+
+    public void setRunkeeperAccessToken(String accessToken){
+        setString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN, accessToken);
     }
 
     private Settings(Context context) {
@@ -33,10 +52,10 @@ public class Settings {
      * @param sKey
      * @return
      */
-    public boolean getBoolean(String sKey){
+    private boolean getBoolean(String sKey, boolean defaultValue){
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(mContext);
-        Boolean value = sharedPref.getBoolean(sKey, false);
+        Boolean value = sharedPref.getBoolean(sKey, defaultValue);
         return value;
     }
 
@@ -45,7 +64,7 @@ public class Settings {
      * @param sKey
      * @return
      */
-    public String getString(String sKey){
+    private String getString(String sKey){
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(mContext);
         String value = sharedPref.getString(sKey, "");
@@ -57,7 +76,7 @@ public class Settings {
      * @param sKey
      * @param sValue
      */
-    public void setString(String sKey, String sValue){
+    private void setString(String sKey, String sValue){
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor1 = settings.edit();
         editor1.putString(sKey, sValue);

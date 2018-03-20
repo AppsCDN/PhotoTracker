@@ -127,8 +127,11 @@ public class GoogleMapUtils {
             Bitmap bitmap = bitmapDefault;
 
             if (!Utils.isNull(bitmapHashMap)
-                    && !Settings.get(context).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
-                bitmap = bitmapHashMap.get(trackPhoto.getPhotoFileName());
+                    && !Settings.get(context).isMapPerformance()) {
+                Bitmap bitmapFromFile = bitmapHashMap.get(trackPhoto.getPhotoFileName());
+                if (!Utils.isNull(bitmapFromFile)){
+                    bitmap = bitmapFromFile;
+                }
             }
 
             BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);

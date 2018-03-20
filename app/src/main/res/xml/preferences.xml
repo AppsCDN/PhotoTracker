@@ -4,11 +4,17 @@
     <PreferenceCategory
         android:title="@string/setting_group_performance">
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="@bool/map_perfromance_default_false"
             android:title="@string/setting_map_performance_switch"
             android:maxLines="3"
             android:key="map_performance_switch"
             android:summary="@string/setting_map_performance_hint" />
+        <SwitchPreference
+            android:defaultValue="@bool/flickr_photos_default_true"
+            android:title="@string/setting_flickr_photos_switch"
+            android:maxLines="3"
+            android:key="flickr_switch"
+            android:summary="@string/setting_flickr_photos_hint" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/setting_group_export">

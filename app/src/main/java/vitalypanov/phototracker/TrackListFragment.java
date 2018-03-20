@@ -277,7 +277,7 @@ public class TrackListFragment  extends Fragment {
          */
         private void runRunkeeperUpload(){
             // get acces token
-            final String accessToken = Settings.get(getActivity()).getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN);
+            final String accessToken = Settings.get(getActivity()).getRunkeeperAccessToken();
             if (StringUtils.isNullOrBlank(accessToken)) {
                 // if empty - inform user that he should configure runkeeper setup settings and exit
                 android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(getActivity()).create();

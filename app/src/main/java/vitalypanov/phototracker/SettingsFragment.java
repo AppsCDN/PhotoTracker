@@ -50,7 +50,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceClick(Preference preference) {
 
-                if (!StringUtils.isNullOrBlank(Settings.get(getActivity()).getString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN))) {
+                if (!StringUtils.isNullOrBlank(Settings.get(getActivity()).getRunkeeperAccessToken())) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setCancelable(true);
                     builder.setTitle(R.string.runkeeper_already_configured_title);
@@ -120,7 +120,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     String accessToken  = obj.getString("access_token");
                     if (!StringUtils.isNullOrBlank(accessToken)) {
                         // save token to preference
-                        Settings.get(getActivity()).setString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN, accessToken);
+                        Settings.get(getActivity()).setRunkeeperAccessToken(accessToken);
                     }
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());

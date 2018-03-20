@@ -91,7 +91,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
             if (mBitmapHashMap == null) {
                 mBitmapHashMap = new HashMap<String, Bitmap>();
                 // performance setting
-                if (!Settings.get(getActivity()).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
+                if (!Settings.get(getActivity()).isMapPerformance()) {
                     // load all bitmaps of the track
                     for (TrackPhoto trackPhoto : mTrack.getPhotoFiles()) {
                         Bitmap bitmap = BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE);
@@ -141,7 +141,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
                         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
                         if (!bounds.equals(mCurrentBounds)) {
                             mCurrentBounds = bounds;
-                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                            new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
                         }
                     }
                 });

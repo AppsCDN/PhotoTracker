@@ -117,6 +117,9 @@ public class BitmapHandler {
      */
     public Bitmap getBitmapScaleToSize(String sKeyPhotoFileName, int scaleSize) {
         Bitmap bitmap = this.getBitmapOriginal(sKeyPhotoFileName);
+        if (Utils.isNull(bitmap)){
+            return null;
+        }
         return  bitmap.getWidth() < bitmap.getHeight() ?
                 BitmapUtils.scaleToFitHeight(bitmap, scaleSize) // portrait
                 :

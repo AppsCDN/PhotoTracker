@@ -80,7 +80,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                         )
                 ) {
                 mBitmapHashMap = new HashMap<String, Bitmap>();
-                if (!Settings.get(getActivity()).getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH)) {
+                if (!Settings.get(getActivity()).isMapPerformance()) {
                     for (TrackPhoto trackPhoto : mService.getCurrentTrack().getPhotoFiles()) {
                         mBitmapHashMap.put(trackPhoto.getPhotoFileName(), BitmapHandler.get(getContext()).getBitmapScaleToSize(trackPhoto.getPhotoFileName(), GoogleMapUtils.SCALE_SMALL_SIZE));
                     }
@@ -128,7 +128,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
                         if (!bounds.equals(mCurrentBounds)) {
                             mCurrentBounds = bounds;
-                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                            new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
                         }
                     }
                 });

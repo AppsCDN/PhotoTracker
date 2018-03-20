@@ -153,10 +153,11 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
+
                         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
                         if (!bounds.equals(mCurrentBounds)) {
                             mCurrentBounds = bounds;
-                            new FlickrSearchTask(thisForCallback).execute(bounds.southwest, bounds.northeast);
+                            new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
                         }
                     }
                 });
@@ -173,11 +174,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         if (mapFragment==null){
             return;
         }
+
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-               if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
-                   googleMap.clear();
+                googleMap.clear();
+                if (!Utils.isNull(mFlickrPhotos) && !mFlickrPhotos.isEmpty()) {
                    GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
                }
             }
@@ -264,6 +266,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         super.onResume();
         updateTrackListCounterUI();
         checkNotEndedTrackAndUpdateUI();
+        updatMapAsyncInit();
     }
 
     /**
@@ -379,6 +382,9 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        if (mFlickrPhotos.isEmpty()) {
+            return false;
+        }
         Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), null, (ArrayList<FlickrPhoto>) mFlickrPhotos, marker.getSnippet());
         startActivity(intent);
         return false;

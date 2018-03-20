@@ -75,4 +75,6 @@
     <string name="s2" translatable="false">dt8/JN8gdkTrcm7JLuH+TTAO3iXiMUGFwSOBgmwUFpPcRUiRiVxBwIFTi1PLpyi5</string>
     <string name="menu_action_delete">Remove track</string>
     <string name="menu_action_runkeeper">Upload to RunKeeper</string>
+    <string name="setting_flickr_photos_switch">Flickr photos</string>
+    <string name="setting_flickr_photos_hint">Show photos of other users from flickr.com</string>
 </resources>

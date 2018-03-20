@@ -362,8 +362,10 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                                 mTrackPhotoImage.setImageBitmap(null);
                                 mTrackPhotoImage.setTag(null);
                             } else {
-                                mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
-                                mTrackPhotoImage.setTag(currentTrack.getLastPhotoItem().getPhotoFileName());
+                                if (mTrackPhotoImage.getWidth() > 0) {
+                                    mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
+                                    mTrackPhotoImage.setTag(currentTrack.getLastPhotoItem().getPhotoFileName());
+                                }
                             }
 
                     }
