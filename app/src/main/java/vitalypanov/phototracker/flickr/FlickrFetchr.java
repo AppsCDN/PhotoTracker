@@ -76,32 +76,67 @@ public class FlickrFetchr {
 
     public static List<FlickrPhoto> fetchRecentPhotos(){
         String url = buildUrl(FETCH_RECENT_METHOD, null);
-        return downloadPhotos(url);
+        return downloadPhotoHeaders(url);
     }
 
     public static List<FlickrPhoto> searchPhotos(String query){
         String url = buildUrl(SEARCH_METHOD, query);
-        return downloadPhotos(url);
+        return downloadPhotoHeaders(url);
     }
 
     public static List<FlickrPhoto> searchPhotos(Location location){
         String url = buildUrl(location);
-        return downloadPhotos(url);
+        return downloadPhotoHeaders(url);
     }
 
+    /**
+     * Download photo headers
+     * ALL PAGES
+     * @param minPoint
+     * @param maxPoint
+     * @return
+     */
     public static List<FlickrPhoto> searchPhotos(LatLng minPoint, LatLng maxPoint){
-        String url = buildUrl(minPoint, maxPoint);
-        return downloadPhotos(url);
+        List<FlickrPhoto> resultItems = new ArrayList<>();
+        try {
+            int page = 1;
+            String url = buildUrl(minPoint, maxPoint, page);
+            String jsonString = getUrlString(url);
+            JSONObject jsonBody = new JSONObject(jsonString);
+            JSONObject photosJsonObject =jsonBody.getJSONObject("photos");
+            int pages = photosJsonObject.getInt("pages");
+            List<FlickrPhoto> items = new ArrayList<>();
+            parseItems(items, jsonBody);
+            resultItems.addAll(items);
+            for (page = 2; page <= pages; page++){
+                url = buildUrl(minPoint, maxPoint, page);
+                jsonString = getUrlString(url);
+                jsonBody = new JSONObject(jsonString);
+                items = new ArrayList<>();
+                parseItems(items, jsonBody);
+                resultItems.addAll(items);
+            }
+            Log.i(TAG,"");
+        } catch (IOException ex){
+            Log.e(TAG, "Failed to fetch items " + ex.toString());
+        } catch (JSONException ex) {
+            Log.e(TAG, "Failed to parse JSON " + ex.toString());
+        }
+        return resultItems;
     }
 
-    private static List<FlickrPhoto> downloadPhotos(String url){
+    /**
+     * Download photo headers
+     * ONLY FIRST RESULT PAGE
+     * @param url
+     * @return
+     */
+    private static List<FlickrPhoto> downloadPhotoHeaders(String url){
         List<FlickrPhoto> items = new ArrayList<>();
         try {
             String jsonString = getUrlString(url);
-            Log.i(TAG, "Recieved json:  " + jsonString);
             JSONObject jsonBody = new JSONObject(jsonString);
             parseItems(items, jsonBody);
-            Log.i(TAG, "Parsed json successfully");
         } catch (IOException ex){
             Log.e(TAG, "Failed to fetch items " + ex.toString());
         } catch (JSONException ex) {
@@ -133,11 +168,12 @@ public class FlickrFetchr {
      * @param maxPoint    right bottom conner
      * @return
      */
-    private static String buildUrl(LatLng minPoint, LatLng maxPoint){
+    private static String buildUrl(LatLng minPoint, LatLng maxPoint, int page){
         Uri.Builder uriBuilder = END_POINT.buildUpon()
                 .appendQueryParameter("method", SEARCH_METHOD)
                 .appendQueryParameter("bbox", minPoint.longitude + "," + minPoint.latitude + "," + maxPoint.longitude + "," + maxPoint.latitude) // box in which we are searching
-                .appendQueryParameter("extras", "geo, url_c, url_m, url_s"); // photo sizes
+                .appendQueryParameter("extras", "geo, url_c, url_m, url_s") // photo sizes
+                .appendQueryParameter("page", "" + page);                   // page number to return
         return uriBuilder.build().toString();
     }
 

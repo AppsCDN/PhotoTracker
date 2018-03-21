@@ -40,6 +40,7 @@ import vitalypanov.phototracker.activity.SettingsActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.activity.TrackListActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.flickr.FlickrHolder;
 import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.flickr.FlickrSearchTask;
 import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
@@ -60,6 +61,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LON1 = "SAVED_PARAM_CURRENT_BOUNDS_LON1";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT2 = "SAVED_PARAM_CURRENT_BOUNDS_LAT2";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LON2 = "SAVED_PARAM_CURRENT_BOUNDS_LON2";
+    private static LatLngBounds MAP_ZERO_BOUNDS = new LatLngBounds(new LatLng(0,0), new LatLng(0,0));
     // Main menu:
     Drawer mMenu;
     // menu items id's:
@@ -180,10 +182,10 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
-                if (!bounds.equals(mCurrentBounds)) {
+                if (!bounds.equals(MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
                     mCurrentBounds = bounds;
-                    new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
                 }
+                new FlickrSearchTask(getActivity(), thisForCallback).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }
@@ -408,6 +410,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         if (mFlickrPhotos.isEmpty()) {
             return false;
         }
+        FlickrHolder.get().setFlickrPhotos(mFlickrPhotos);
         Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), null, (ArrayList<FlickrPhoto>) mFlickrPhotos, marker.getSnippet());
         startActivity(intent);
         return false;
@@ -415,10 +418,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT1, mCurrentBounds.northeast.latitude);
-        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON1, mCurrentBounds.northeast.longitude);
-        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT2, mCurrentBounds.southwest.latitude);
-        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON2, mCurrentBounds.southwest.longitude);
+        if (!Utils.isNull(mCurrentBounds)) {
+            outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT1, mCurrentBounds.northeast.latitude);
+            outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON1, mCurrentBounds.northeast.longitude);
+            outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT2, mCurrentBounds.southwest.latitude);
+            outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON2, mCurrentBounds.southwest.longitude);
+        }
         super.onSaveInstanceState(outState);
     }
 }

@@ -31,6 +31,7 @@ import java.util.UUID;
 import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.TrackImageFragment;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.flickr.FlickrHolder;
 import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.model.BasePhoto;
 import vitalypanov.phototracker.model.Track;
@@ -76,7 +77,8 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
     public static Intent newIntentFlickr(Context packageContext, UUID trackUUID, ArrayList<FlickrPhoto> trackPhotos, String photoToSelectName){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
         intent.putExtra(EXTRA_TRACK_UUID, trackUUID);
-        intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
+        // app crached when use parameter below for not small list :(((
+        //intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
         intent.putExtra(EXTRA_PHOTO_TO_SELECT, photoToSelectName);
         intent.putExtra(EXTRA_MODE, Modes.MODE_FLICKR);
         return intent;
@@ -92,7 +94,13 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
 
         mMode = (Modes) getIntent().getSerializableExtra(EXTRA_MODE);
         mTrackUUID= (UUID)getIntent().getSerializableExtra(EXTRA_TRACK_UUID);
-        mTrackPhotos = (ArrayList<BasePhoto>)getIntent().getSerializableExtra(EXTRA_PHOTO_LIST);
+        if (mMode.equals(Modes.MODE_PHOTO_TRACKER)) {
+            mTrackPhotos = (ArrayList<BasePhoto>) getIntent().getSerializableExtra(EXTRA_PHOTO_LIST);
+        } else {
+            // getSerializableExtra doesnt work correctly for lists at least of 1000 items - it's terrible :(((
+            mTrackPhotos = new ArrayList<>();
+            mTrackPhotos.addAll(FlickrHolder.get().getFlickrPhotos());
+        }
         mPhotoToSelectName= getIntent().getStringExtra(EXTRA_PHOTO_TO_SELECT);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_pager_images_view_pager);

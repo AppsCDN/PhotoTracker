@@ -191,11 +191,8 @@ public class GoogleMapUtils {
 
         Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
         bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_FLICKR_SMALL_SAMPLE_SIZE);
+        BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmapDefault);
         for (FlickrPhoto flickrPhoto:  flickrPhotos){
-
-            Bitmap bitmap = bitmapDefault;
-
-            BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmap);
             MarkerOptions photoMarker = new MarkerOptions()
                     .position(new LatLng(flickrPhoto.getLatitude(), flickrPhoto.getLongitude()))
                     .icon(itemBitmap)
