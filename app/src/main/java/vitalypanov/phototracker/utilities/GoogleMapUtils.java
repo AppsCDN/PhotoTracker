@@ -65,7 +65,6 @@ public class GoogleMapUtils {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 googleMap.setMyLocationEnabled(true);
-                //mGoogleMap.setPadding(0,0,0, 100);
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
                 // do moving some controls on google map - it possible only after UI will be ready - so use post method
                 mapFragment.getView().post(new Runnable() {
@@ -78,6 +77,19 @@ public class GoogleMapUtils {
                         }
                     }
                 });
+            }
+        });
+    }
+
+    public static void shutdownMapControls(final SupportMapFragment mapFragment){
+        if (Utils.isNull(mapFragment)){
+            return;
+        }
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                googleMap.setMyLocationEnabled(false);
             }
         });
     }

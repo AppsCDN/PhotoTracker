@@ -149,7 +149,6 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-                GoogleMapUtils.initMapControls(mapFragment);
                 if (Utils.isNull(mCurrentBounds)) {
                     Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
                     if (!Utils.isNull(location)) {
@@ -175,6 +174,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             }
         });
     }
+
 
     private void startFlickrSearch(){
         final StartScreenFragment thisForCallback = this;
@@ -273,10 +273,11 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             .build();
     }
 
-      @Override
+    @Override
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
+        GoogleMapUtils.initMapControls(mapFragment);
         // if service already running we should start running activity above current
         if (ServiceUtils.isServiceRunning(
                   getActivity().getApplicationContext(),
@@ -284,6 +285,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
             startActivity(intent);
         };
+    }
+
+    @Override
+    public void onStop() {
+        GoogleMapUtils.shutdownMapControls(mapFragment);
+        super.onStop();
     }
 
     @Override
