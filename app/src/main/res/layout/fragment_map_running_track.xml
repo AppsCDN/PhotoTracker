@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="7dp">
     <!-- Left padding is Very!!! needed to swipe from google map back - to another view page -->
-    <LinearLayout
-        android:id="@+id/google_map_frame"
+    <RelativeLayout
+        android:id="@+id/google_map_loading_data_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:orientation="vertical">
-        <RelativeLayout
-            android:id="@+id/google_map_loading_data_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center" >
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true" />
-        </RelativeLayout>
-        <fragment
-            android:id="@+id/google_map_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.google.android.gms.maps.SupportMapFragment"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            />
-    </LinearLayout>
-</LinearLayout>
+        android:gravity="center" >
+        <ProgressBar
+            android:id="@+id/large_loading_progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </RelativeLayout>
+    <fragment
+        android:id="@+id/google_map_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        />
+    <ProgressBar
+        android:id="@+id/loading_progressbar"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        style="?android:attr/progressBarStyleSmall"
+        />
+</RelativeLayout>

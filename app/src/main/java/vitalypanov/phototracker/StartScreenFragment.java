@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -74,6 +75,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     private Track mTrackToResume;   // Track which will resume
 
     private Button mTrackStart;     // Start new track button
+    private ProgressBar mLoadingProgressbar;
 
     private ServiceConnection mConnection ; // Service of recording track
 
@@ -127,7 +129,8 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
         mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
 
-
+        mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
+        mLoadingProgressbar.setVisibility(View.GONE);
 
         // first check location services
         if (LocationServices.get(getActivity()).checkLocaionServices()){
@@ -182,7 +185,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
                 if (!bounds.equals(GoogleMapUtils.MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
                     mCurrentBounds = bounds;
                 }
-                new FlickrSearchTask(getActivity(), thisForCallback).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }

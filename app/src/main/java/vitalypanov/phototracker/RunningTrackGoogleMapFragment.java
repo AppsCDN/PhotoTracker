@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -47,6 +48,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     private TrackerGPSService mService;
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
+    private ProgressBar mLoadingProgressbar;
 
     public static RunningTrackGoogleMapFragment newInstance() {
         return new RunningTrackGoogleMapFragment();
@@ -60,11 +62,13 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
-        View v = layoutInflater.inflate(R.layout.fragment_map_running_track, container, false);
+        View view = layoutInflater.inflate(R.layout.fragment_map_running_track, container, false);
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
-        mLoadingFrame = (RelativeLayout) v.findViewById(R.id.google_map_loading_data_frame);
+        mLoadingFrame = (RelativeLayout) view.findViewById(R.id.google_map_loading_data_frame);
+        mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
+        mLoadingProgressbar.setVisibility(View.GONE);
         loadBitmapsAndUpdateMapAssync();
-        return v;
+        return view;
     }
 
     class AssyncLoaderAndUpdateMapTask extends AsyncTask<Void, Void, Void> {
@@ -141,7 +145,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 if (!bounds.equals(GoogleMapUtils.MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
                     mCurrentBounds = bounds;
                 }
-                new FlickrSearchTask(getActivity(), thisForCallback).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }
