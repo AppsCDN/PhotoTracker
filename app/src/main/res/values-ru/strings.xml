@@ -71,4 +71,6 @@
     <string name="action_resume">Продолжить</string>
     <string name="setting_flickr_photos_switch">Фотографии с Flickr</string>
     <string name="setting_flickr_photos_hint">Показывать фотографии других пользователей с flickr.com</string>
+    <string name="setting_flickr_photos_percent">Количество фото с Flickr</string>
+    <string name="setting_flickr_photos_percent_hint">Двигайте ползунок слева направо для увеличения количества отображаемых фото (используйте осторожно т.к. это влияет на производительность)</string>
 </resources>
