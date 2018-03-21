@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
+import vitalypanov.phototracker.flickr.FlickrHolder;
 import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.flickr.FlickrSearchTask;
 import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
@@ -44,7 +45,6 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     private RelativeLayout mLoadingFrame;
     private HashMap<String, Bitmap> mBitmapHashMap;
     private TrackerGPSService mService;
-    private List<FlickrPhoto> mFlickrPhotos = null;
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
 
@@ -96,6 +96,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         protected void onPostExecute(Void aVoid) {
             mLoadingFrame.setVisibility(View.GONE);
             updatMapAsync();
+            startFlickrSearch();
         }
     }
 
@@ -125,13 +126,22 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
-                        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
-                        if (!bounds.equals(mCurrentBounds)) {
-                            mCurrentBounds = bounds;
-                            new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
-                        }
+                        startFlickrSearch();
                     }
                 });
+            }
+        });
+    }
+    private void startFlickrSearch(){
+        final RunningTrackGoogleMapFragment thisForCallback = this;
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+                if (!bounds.equals(GoogleMapUtils.MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
+                    mCurrentBounds = bounds;
+                }
+                new FlickrSearchTask(getActivity(), thisForCallback).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }
@@ -148,8 +158,8 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                         marker.remove();
                     }
                 }
-                if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
-                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
+                if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && !FlickrHolder.get().getFlickrPhotos().isEmpty()) {
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
                 }
             }
         });
@@ -177,8 +187,8 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
         }
         if (StringUtils.isValidUrl(photoName)) {
             // photos from flicker
-            if (!mFlickrPhotos.isEmpty()) {
-                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mService.getCurrentTrack().getUUID(), (ArrayList<FlickrPhoto>) mFlickrPhotos, photoName);
+            if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && !FlickrHolder.get().getFlickrPhotos().isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mService.getCurrentTrack().getUUID(), photoName);
                 startActivity(intent);
             }
         } else {
@@ -192,7 +202,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
 
     @Override
     public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
-        mFlickrPhotos = flickrPhotos;
+        FlickrHolder.get().setFlickrPhotos(flickrPhotos);
         updatFlickrMapAsync();
     }
 

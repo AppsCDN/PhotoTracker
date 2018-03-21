@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
+import vitalypanov.phototracker.flickr.FlickrHolder;
 import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.flickr.FlickrSearchTask;
 import vitalypanov.phototracker.flickr.OnFlickrSearchTaskCompleted;
@@ -47,7 +48,6 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
 
     private Track mTrack= null;
     private HashMap <String, Bitmap> mBitmapHashMap = null;
-    private List<FlickrPhoto> mFlickrPhotos = null;
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
 
@@ -161,8 +161,8 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
                         marker.remove();
                     }
                 }
-                if (!Utils.isNull(mFlickrPhotos) && mFlickrPhotos.size() >0) {
-                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, mFlickrPhotos, getContext());
+                if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && FlickrHolder.get().getFlickrPhotos().size() >0) {
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
                 }
             }
         });
@@ -182,8 +182,8 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
         }
         if (StringUtils.isValidUrl(photoName)) {
             // photos from flicker
-            if (!mFlickrPhotos.isEmpty()) {
-                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mTrack.getUUID(), (ArrayList<FlickrPhoto>) mFlickrPhotos, photoName);
+            if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && !FlickrHolder.get().getFlickrPhotos().isEmpty()) {
+                Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), mTrack.getUUID(), photoName);
                 startActivity(intent);
             }
         } else {
@@ -198,7 +198,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
 
     @Override
     public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
-        mFlickrPhotos = flickrPhotos;
+        FlickrHolder.get().setFlickrPhotos(flickrPhotos);
         updatFlickrMapAsync();
     }
 

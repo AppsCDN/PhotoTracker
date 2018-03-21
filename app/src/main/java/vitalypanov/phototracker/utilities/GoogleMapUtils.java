@@ -41,6 +41,7 @@ public class GoogleMapUtils {
     public final static int SCALE_SMALL_SAMPLE_SIZE = 100; // sample bitmap - small size
     public final static int SCALE_FLICKR_SMALL_SAMPLE_SIZE = 50; // sample bitmap for photos from flickr - muvh more small size
     public final static double MAP_SIZE_DEGREES = 0.03; // size of map in degrees when showing current gps location
+    public final static LatLngBounds MAP_ZERO_BOUNDS = new LatLngBounds(new LatLng(0,0), new LatLng(0,0));
 
     // Google map controls:
     public static final String GOOGLEMAP_COMPASS = "GoogleMapCompass";                   // [4]

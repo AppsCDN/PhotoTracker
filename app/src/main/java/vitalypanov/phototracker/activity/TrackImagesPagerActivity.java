@@ -32,12 +32,12 @@ import vitalypanov.phototracker.R;
 import vitalypanov.phototracker.TrackImageFragment;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.flickr.FlickrHolder;
-import vitalypanov.phototracker.flickr.FlickrPhoto;
 import vitalypanov.phototracker.model.BasePhoto;
 import vitalypanov.phototracker.model.Track;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.FileUtils;
+import vitalypanov.phototracker.utilities.Utils;
 
 /**
  * Images of the track pages
@@ -74,10 +74,10 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         return intent;
     }
 
-    public static Intent newIntentFlickr(Context packageContext, UUID trackUUID, ArrayList<FlickrPhoto> trackPhotos, String photoToSelectName){
+    public static Intent newIntentFlickr(Context packageContext, UUID trackUUID, String photoToSelectName){
         Intent intent = new Intent(packageContext, TrackImagesPagerActivity.class);
         intent.putExtra(EXTRA_TRACK_UUID, trackUUID);
-        // app crached when use parameter below for not small list :(((
+        // app crached when use parameter below for lists about 1000 or more elements :( fu...ng android :(
         //intent.putExtra(EXTRA_PHOTO_LIST, trackPhotos);
         intent.putExtra(EXTRA_PHOTO_TO_SELECT, photoToSelectName);
         intent.putExtra(EXTRA_MODE, Modes.MODE_FLICKR);
@@ -99,7 +99,9 @@ public class TrackImagesPagerActivity extends AppCompatActivity {
         } else {
             // getSerializableExtra doesnt work correctly for lists at least of 1000 items - it's terrible :(((
             mTrackPhotos = new ArrayList<>();
-            mTrackPhotos.addAll(FlickrHolder.get().getFlickrPhotos());
+            if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos())) {
+                mTrackPhotos.addAll(FlickrHolder.get().getFlickrPhotos());
+            }
         }
         mPhotoToSelectName= getIntent().getStringExtra(EXTRA_PHOTO_TO_SELECT);
 
