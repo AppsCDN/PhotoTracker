@@ -5,6 +5,7 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -55,7 +56,10 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskCompleted, GoogleMap.OnMarkerClickListener {
     private static final String TAG = "PhotoTracker";
-
+    private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT1 = "SAVED_PARAM_CURRENT_BOUNDS_LAT1";
+    private static final String SAVED_PARAM_CURRENT_BOUNDS_LON1 = "SAVED_PARAM_CURRENT_BOUNDS_LON1";
+    private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT2 = "SAVED_PARAM_CURRENT_BOUNDS_LAT2";
+    private static final String SAVED_PARAM_CURRENT_BOUNDS_LON2 = "SAVED_PARAM_CURRENT_BOUNDS_LON2";
     // Main menu:
     Drawer mMenu;
     // menu items id's:
@@ -75,7 +79,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
     private SupportMapFragment mapFragment = null;
     private List<FlickrPhoto> mFlickrPhotos = null;
-    LatLngBounds mCurrentBounds;
+    LatLngBounds mCurrentBounds = null;
 
     public static StartScreenFragment newInstance() {
         return new StartScreenFragment();
@@ -84,6 +88,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mCurrentBounds = new LatLngBounds.Builder()
+                    .include(new LatLng(savedInstanceState.getDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT1), savedInstanceState.getDouble(SAVED_PARAM_CURRENT_BOUNDS_LON1))) // Northeast
+                    .include(new LatLng(savedInstanceState.getDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT2), savedInstanceState.getDouble(SAVED_PARAM_CURRENT_BOUNDS_LON2))) // Southwest
+                    .build();
+        }
         // app permissions - check and grant if need it
         Permissions permissions = new Permissions(this);
         if (!permissions.hasPermissions()){
@@ -138,30 +148,42 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 GoogleMapUtils.initMapControls(mapFragment);
-                Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
-                if (!Utils.isNull(location)){
-                    LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES/2);
-                    LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES/2);
-                    LatLngBounds bounds = new LatLngBounds.Builder()
-                            .include(minPoint)
-                            .include(maxPoint)
-                            .build();
-                    int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-                    int width = getResources().getDisplayMetrics().widthPixels;
-                    int height = getResources().getDisplayMetrics().heightPixels;
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+                if (Utils.isNull(mCurrentBounds)) {
+                    Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+                    if (!Utils.isNull(location)) {
+                        LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2);
+                        LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2);
+                        mCurrentBounds = new LatLngBounds.Builder()
+                                .include(minPoint)
+                                .include(maxPoint)
+                                .build();
+                    }
                 }
+                int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+                int width = getResources().getDisplayMetrics().widthPixels;
+                int height = getResources().getDisplayMetrics().heightPixels;
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mCurrentBounds, width, height, margin));
                 googleMap.setOnMarkerClickListener(thisForCallback);
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
-                        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
-                        if (!bounds.equals(mCurrentBounds)) {
-                            mCurrentBounds = bounds;
-                            new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
-                        }
+                        startFlickrSearch();
                     }
                 });
+            }
+        });
+    }
+
+    private void startFlickrSearch(){
+        final StartScreenFragment thisForCallback = this;
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+                if (!bounds.equals(mCurrentBounds)) {
+                    mCurrentBounds = bounds;
+                    new FlickrSearchTask(getActivity(), thisForCallback).execute(bounds.southwest, bounds.northeast);
+                }
             }
         });
     }
@@ -267,7 +289,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         super.onResume();
         updateTrackListCounterUI();
         checkNotEndedTrackAndUpdateUI();
-        updatMapAsyncInit();
+        startFlickrSearch();
     }
 
     /**
@@ -389,5 +411,14 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         Intent intent = TrackImagesPagerActivity.newIntentFlickr(getActivity(), null, (ArrayList<FlickrPhoto>) mFlickrPhotos, marker.getSnippet());
         startActivity(intent);
         return false;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT1, mCurrentBounds.northeast.latitude);
+        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON1, mCurrentBounds.northeast.longitude);
+        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LAT2, mCurrentBounds.southwest.latitude);
+        outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON2, mCurrentBounds.southwest.longitude);
+        super.onSaveInstanceState(outState);
     }
 }
