@@ -32,7 +32,7 @@ public class FlickrSearchTask extends AsyncTask<LatLng, Void, Void> {
         LatLng maxPoint = params[1];
 
         mPhotos = null;
-        List<FlickrPhoto> items = FlickrFetchr.searchPhotos(minPoint, maxPoint);
+        List<FlickrPhoto> items = FlickrFetchr.searchPhotos(minPoint, maxPoint, mContext);
         if (items.size() > 0){
             mPhotos = items;
         }

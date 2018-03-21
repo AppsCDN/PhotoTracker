@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v14.preference.SwitchPreference;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.SeekBarPreference;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +46,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Preference pref = findPreference("runkeeper_access_token");
+        final Preference pref = findPreference(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN);
         pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             @Override
@@ -76,6 +78,18 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
                 runAuthRunkeeper();
                 return false;
+            }
+        });
+
+        final SeekBarPreference flickrPercent = (SeekBarPreference)findPreference(Settings.KEY_MAP_FLICKR_PHOTOS_PERCENT);
+        flickrPercent.setEnabled(Settings.get(getActivity()).isFlickrPhotos());
+
+        final SwitchPreference flickrSwitch = (SwitchPreference)findPreference(Settings.KEY_MAP_FLICKR_PHOTOS_SWITCH);
+        flickrSwitch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                flickrPercent.setEnabled(((boolean)newValue));
+                return true;
             }
         });
     }

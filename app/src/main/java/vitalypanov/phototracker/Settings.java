@@ -12,9 +12,11 @@ import vitalypanov.phototracker.utilities.Utils;
  */
 
 public class Settings {
-    private static final String KEY_MAP_PERFOMANCE_SWITCH = "map_performance_switch";
-    private static final String KEY_MAP_FLICKR_PHOTOS_SWITCH = "flickr_switch";
-    private static final String KEY_MAP_RUNKEEPER_ACCESS_TOKEN = "runkeeper_access_token";
+    public static final String KEY_MAP_PERFOMANCE_SWITCH = "map_performance_switch";
+    public static final String KEY_MAP_FLICKR_PHOTOS_SWITCH = "flickr_switch";
+    public static final String KEY_MAP_FLICKR_PHOTOS_PERCENT = "flickr_photos_percent";
+    public static final String KEY_MAP_RUNKEEPER_ACCESS_TOKEN = "runkeeper_access_token";
+
     private static Settings mSettings;
     private Context mContext;
 
@@ -26,13 +28,20 @@ public class Settings {
     }
 
     public boolean isMapPerformance(){
-        Boolean defaultVale = mContext.getResources().getBoolean(R.bool.map_perfromance_default_false);
-        return getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH, defaultVale);
+        Boolean defaultValue = mContext.getResources().getBoolean(R.bool.map_perfromance_default);
+        return getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH, defaultValue);
     }
 
     public boolean isFlickrPhotos(){
-        Boolean defaultVale = mContext.getResources().getBoolean(R.bool.flickr_photos_default_true);
-        return getBoolean(Settings.KEY_MAP_FLICKR_PHOTOS_SWITCH, defaultVale);
+        Boolean defaultValue = mContext.getResources().getBoolean(R.bool.flickr_photos_default);
+        return getBoolean(Settings.KEY_MAP_FLICKR_PHOTOS_SWITCH, defaultValue);
+    }
+
+    public int getFlickrPhotosPercent(){
+        int defaultValue = mContext.getResources().getInteger(R.integer.flickr_photos_percent_default);
+        int maxValue = mContext.getResources().getInteger(R.integer.flickr_photos_percent_max);
+        int value = getInt(Settings.KEY_MAP_FLICKR_PHOTOS_PERCENT, defaultValue);
+        return (int)((float)value/(float)maxValue *100) ;
     }
 
     public String getRunkeeperAccessToken(){
@@ -42,6 +51,8 @@ public class Settings {
     public void setRunkeeperAccessToken(String accessToken){
         setString(Settings.KEY_MAP_RUNKEEPER_ACCESS_TOKEN, accessToken);
     }
+
+
 
     private Settings(Context context) {
         mContext = context.getApplicationContext();
@@ -56,6 +67,18 @@ public class Settings {
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(mContext);
         Boolean value = sharedPref.getBoolean(sKey, defaultValue);
+        return value;
+    }
+
+    /**
+     * Get int value preference
+     * @param sKey
+     * @return
+     */
+    private int getInt(String sKey, int defaultValue){
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(mContext);
+        int value = sharedPref.getInt(sKey, defaultValue);
         return value;
     }
 

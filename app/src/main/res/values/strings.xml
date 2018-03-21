@@ -77,4 +77,6 @@
     <string name="menu_action_runkeeper">Upload to RunKeeper</string>
     <string name="setting_flickr_photos_switch">Flickr photos</string>
     <string name="setting_flickr_photos_hint">Show photos of other users from flickr.com</string>
+    <string name="setting_flickr_photos_percent">Flickr density of photos</string>
+    <string name="setting_flickr_photos_percent_hint">Slide from min to max to get more photos from flickr on map. (Use carefully thus it decrease perfomance of maps)</string>
 </resources>

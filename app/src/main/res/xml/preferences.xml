@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:title="@string/setting_group_performance">
         <SwitchPreference
-            android:defaultValue="@bool/map_perfromance_default_false"
+            android:defaultValue="@bool/map_perfromance_default"
             android:title="@string/setting_map_performance_switch"
             android:maxLines="3"
             android:key="map_performance_switch"
             android:summary="@string/setting_map_performance_hint" />
         <SwitchPreference
-            android:defaultValue="@bool/flickr_photos_default_true"
+            android:defaultValue="@bool/flickr_photos_default"
             android:title="@string/setting_flickr_photos_switch"
             android:maxLines="3"
             android:key="flickr_switch"
             android:summary="@string/setting_flickr_photos_hint" />
+        <SeekBarPreference
+            android:defaultValue="@integer/flickr_photos_percent_default"
+            android:min="@integer/flickr_photos_percent_default"
+            android:max="@integer/flickr_photos_percent_max"
+            app:showSeekBarValue="false"
+            android:title="@string/setting_flickr_photos_percent"
+            android:maxLines="4"
+            android:key="flickr_photos_percent"
+            android:summary="@string/setting_flickr_photos_percent_hint" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/setting_group_export">

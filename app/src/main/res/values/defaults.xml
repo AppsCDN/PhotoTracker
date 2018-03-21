@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="map_perfromance_default">false</bool>
+    <bool name="flickr_photos_default">true</bool>
+    <integer name="flickr_photos_percent_default">0</integer>
+    <integer name="flickr_photos_percent_max">5</integer>
+</resources>

@@ -1,5 +1,6 @@
 package vitalypanov.phototracker.flickr;
 
+import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
@@ -18,6 +19,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import vitalypanov.phototracker.Settings;
 
 /**
  * Created by Vitaly on 22.08.2017.
@@ -96,10 +99,12 @@ public class FlickrFetchr {
      * @param maxPoint
      * @return
      */
-    public static List<FlickrPhoto> searchPhotos(LatLng minPoint, LatLng maxPoint){
+    public static List<FlickrPhoto> searchPhotos(LatLng minPoint, LatLng maxPoint, Context context){
         List<FlickrPhoto> resultItems = new ArrayList<>();
         try {
+            // first page show always
             int page = 1;
+
             String url = buildUrl(minPoint, maxPoint, page);
             String jsonString = getUrlString(url);
             JSONObject jsonBody = new JSONObject(jsonString);
@@ -108,6 +113,10 @@ public class FlickrFetchr {
             List<FlickrPhoto> items = new ArrayList<>();
             parseItems(items, jsonBody);
             resultItems.addAll(items);
+
+            // calculate number of photo pages which we will show to user:
+            pages = 1 + (int)((pages-1)*((double)Settings.get(context).getFlickrPhotosPercent()) / 100.) ;
+
             for (page = 2; page <= pages; page++){
                 url = buildUrl(minPoint, maxPoint, page);
                 jsonString = getUrlString(url);
