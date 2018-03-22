@@ -46,6 +46,7 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public abstract class TrackerSupportMapFragment extends Fragment implements GoogleMap.OnMarkerClickListener, OnFlickrSearchTaskCompleted {
     private static final String TAG = "PhotoTracker";
+    // Bounds of map:
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT1 = "SAVED_PARAM_CURRENT_BOUNDS_LAT1";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LON1 = "SAVED_PARAM_CURRENT_BOUNDS_LON1";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT2 = "SAVED_PARAM_CURRENT_BOUNDS_LAT2";
@@ -59,10 +60,26 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     private ProgressBar mLoadingProgressbar;
     FlickrSearchTask mFlickrSearchTask = null;
 
+    /**
+     * Override this method to return correct track object or null
+     * @return Track object - can be null
+     */
     public abstract Track getTrack();
 
+    /**
+     * Override this method to set resource layout id of your fragment
+     * This template should be contain next controls id's:
+     *  RelativeLayout: google_map_loading_data_frame(Mandatory. frame which holds googlemap and progressbar) )
+     *  ProgressBar:    large_loading_progressbar   (Can be skipped.Large progressbar which show before googlemap will be loading, )
+     *  fragment:       google_map_fragment         (Mandatory.The main fragment for google map object. )
+     *  ProgressBar:    loading_progressbar         (Mandatory.Small progress bar for showing of flickr download progress. )
+     * @return Resource id
+     */
     public abstract int getLayoutResourceId();
 
+    /**
+     * Call this method in subclass if you want to force map update manually
+     */
     protected void startAssyncLoader(){
         AssyncLoaderTask assyncLoaderTask = new AssyncLoaderTask();
         assyncLoaderTask.execute();
@@ -104,13 +121,16 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         mLoadingFrame = (RelativeLayout) view.findViewById(R.id.google_map_loading_data_frame);
         mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
         mLoadingProgressbar.setVisibility(View.GONE);
-        updatMapAsyncPosCurrentLocation();
+        updatMapAsyncCurrentLocation();
         startAssyncLoader();
         return view;
     }
 
-    // TODO maybe some refactoring need in the method below
-    private void updatMapAsyncPosCurrentLocation(){
+    /**
+     * Get current location and move camera to this location
+     * Init - called only one time, when fragment is created. Next time bounds of map will save and restore.
+     */
+    private void updatMapAsyncCurrentLocation(){
         if (mMapFragment==null){
             return;
         }
@@ -139,6 +159,9 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         });
     }
 
+    /**
+     * Load track bitmaps in assync mode. And postexecute - update goggle map
+     */
     class AssyncLoaderTask extends AsyncTask<Void, Void, Void> {
 
         public AssyncLoaderTask() {
@@ -168,7 +191,6 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
             if (!Utils.isNull(mLoadingFrame)) {
                 mLoadingFrame.setVisibility(View.VISIBLE);
             }
-            //mMapFragment.getView().findViewById(View.GONE);
         }
 
         @Override
@@ -180,11 +202,6 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
     /**
      * Updating assync google map and save map object into local variable
      * for future drawing
@@ -193,18 +210,19 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         if (mMapFragment ==null){
             return;
         }
-        GoogleMapUtils.initMapControls(mMapFragment);
         final TrackerSupportMapFragment thisForCallback = this;
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 googleMap.setOnMarkerClickListener(thisForCallback);
                 if (!Utils.isNull(getTrack())) {
+                    // Draw Track data and Track bitmaps on google map...
                     GoogleMapUtils.drawTrackOnGoogleMap(googleMap, getTrack(), getContext(), mBitmapHashMap);
                 }
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
+                        // Start flickr.com search....
                         startFlickrSearch();
                     }
                 });
@@ -212,6 +230,10 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         });
     }
 
+    /**
+     * Drawing flickr's photo markers on google map
+     * First remove the old ones.
+     */
     private void updatFlickrMapAsync(){
         if (mMapFragment ==null){
             return;
@@ -274,6 +296,10 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         mLoadingProgressbar.setVisibility(View.GONE);
     }
 
+    /**
+     * Request flickr's photos.
+     * First cancel previous search if it's still running.
+     */
     private void startFlickrSearch(){
         final TrackerSupportMapFragment thisForCallback = this;
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
