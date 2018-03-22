@@ -68,11 +68,6 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
         return R.layout.fragment_start_screen;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -97,6 +92,7 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
                 startTrack(null);
             }
         });
+
         return view;
     }
 
@@ -170,8 +166,7 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
         if (ServiceUtils.isServiceRunning(
                   getActivity().getApplicationContext(),
                   TrackerGPSService.class)){
-            Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
-            startActivity(intent);
+            startActivity(RunningTrackPagerActivity.newIntent(getActivity()));
         };
     }
 
@@ -222,7 +217,6 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
             mTrackResume.setText(getResources().getText(R.string.action_resume) + ": " + DateUtils.getShortTimeFormatted(lastTimeStamp) + " " + mTrackToResume.getDistanceShortFormatted() + " " + getResources().getString(R.string.distance_metrics));
             mTrackResume.setVisibility(View.VISIBLE);
         }
-
     }
 
     /**
@@ -233,7 +227,6 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
         i.setType("message/rfc822");
         i.putExtra(Intent.EXTRA_EMAIL  , new String[]{getResources().getString(R.string.app_feedback_email_text)});
         i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_feedback_email_title));
-        //i.putExtra(Intent.EXTRA_TEXT   , "");
         try {
             startActivity(Intent.createChooser(i, getResources().getString(R.string.app_feedback_send_title)));
         } catch (android.content.ActivityNotFoundException ex) {
@@ -245,24 +238,21 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
      * Show Settings dialog
      */
     private void showSettingsDialog(){
-        Intent intent = SettingsActivity.newIntent(getActivity());
-        startActivity(intent);
+        startActivity(SettingsActivity.newIntent(getActivity()));
     }
 
     /**
      * Show About dialog
      */
     private void showAboutDialog(){
-        Intent intent = AboutDialogActivity.newIntent(getActivity());
-        startActivity(intent);
+        startActivity(AboutDialogActivity.newIntent(getActivity()));
     }
 
     /**
      * Show track list
      */
     private void showTrackList(){
-        Intent intent = TrackListActivity.newIntent(getActivity());
-        startActivity(intent);
+        startActivity(TrackListActivity.newIntent(getActivity()));
     }
 
     /**
@@ -283,8 +273,6 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
             i = TrackerGPSService.newIntent(getActivity(), trackUUID);
         }
         getActivity().startService(i);
-        Intent intent = RunningTrackPagerActivity.newIntent(getActivity());
-        startActivity(intent);
+        startActivity(RunningTrackPagerActivity.newIntent(getActivity()));
     }
-
 }
