@@ -81,6 +81,7 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
     private SupportMapFragment mapFragment = null;
     LatLngBounds mCurrentBounds = null;
+    FlickrSearchTask mFlickrSearchTask = null;
 
     public static StartScreenFragment newInstance() {
         return new StartScreenFragment();
@@ -202,7 +203,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
                 if (!bounds.equals(GoogleMapUtils.MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
                     mCurrentBounds = bounds;
                 }
-                new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                // if running previous - cancel it
+                if (!Utils.isNull(mFlickrSearchTask)){
+                    mFlickrSearchTask.cancel(true);
+                }
+                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar);
+                mFlickrSearchTask.execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }

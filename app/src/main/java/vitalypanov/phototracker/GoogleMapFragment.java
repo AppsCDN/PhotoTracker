@@ -52,6 +52,7 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
     private ProgressBar mLoadingProgressbar;
+    FlickrSearchTask mFlickrSearchTask = null;
 
     public static GoogleMapFragment newInstance(UUID uuid) {
         Bundle args = new Bundle();
@@ -145,7 +146,11 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
                         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
                         if (!bounds.equals(mCurrentBounds)) {
                             mCurrentBounds = bounds;
-                            new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar).execute(bounds.southwest, bounds.northeast);
+                            if (!Utils.isNull(mFlickrSearchTask)){
+                                mFlickrSearchTask.cancel(true);
+                            }
+                            mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar);
+                            mFlickrSearchTask.execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
                         }
                     }
                 });

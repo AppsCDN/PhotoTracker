@@ -54,4 +54,10 @@ public class FlickrSearchTask extends AsyncTask<LatLng, Void, Void> {
         mListener.onTaskCompleted(mPhotos);
         mProgressBar.setVisibility(View.GONE);
     }
+
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
+        //mProgressBar.setVisibility(View.GONE);
+    }
 }

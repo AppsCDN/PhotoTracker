@@ -49,6 +49,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
     private ProgressBar mLoadingProgressbar;
+    FlickrSearchTask mFlickrSearchTask = null;
 
     public static RunningTrackGoogleMapFragment newInstance() {
         return new RunningTrackGoogleMapFragment();
@@ -145,7 +146,11 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 if (!bounds.equals(GoogleMapUtils.MAP_ZERO_BOUNDS) && !bounds.equals(mCurrentBounds)) {
                     mCurrentBounds = bounds;
                 }
-                new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar).execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                if (!Utils.isNull(mFlickrSearchTask)){
+                    mFlickrSearchTask.cancel(true);
+                }
+                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar);
+                mFlickrSearchTask.execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
             }
         });
     }
