@@ -132,20 +132,22 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
         mLoadingProgressbar.setVisibility(View.GONE);
 
-        // first check location services
-        if (LocationServices.get(getActivity()).checkLocaionServices()){
-            updatMapAsyncInit();
-        }
+        updatMapAsyncInit();
+        updatMapAsyncPosCurrentLocation();
 
         return view;
     }
 
-    private void updatMapAsyncInit(){
+    /**
+     * Pos map to current location
+     */
+    private void updatMapAsyncPosCurrentLocation(){
         if (mapFragment==null){
             return;
         }
-
-        final StartScreenFragment thisForCallback = this;
+        if (!LocationServices.get(getActivity()).checkLocaionServices()) {
+            return;
+        }
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
@@ -164,6 +166,21 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
                 int width = getResources().getDisplayMetrics().widthPixels;
                 int height = getResources().getDisplayMetrics().heightPixels;
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mCurrentBounds, width, height, margin));
+            }
+        });
+    }
+
+    /**
+     * Init map listener
+     */
+    private void updatMapAsyncInit(){
+        if (mapFragment==null){
+            return;
+        }
+        final StartScreenFragment thisForCallback = this;
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
                 googleMap.setOnMarkerClickListener(thisForCallback);
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
