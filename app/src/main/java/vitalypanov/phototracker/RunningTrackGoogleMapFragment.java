@@ -42,10 +42,11 @@ import vitalypanov.phototracker.utilities.Utils;
 public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageUpdater, BindTrackerGPSService, GoogleMap.OnMarkerClickListener, OnFlickrSearchTaskCompleted {
     private static final String TAG = "PhotoTracker";
 
+    private TrackerGPSService mService;
+
     private SupportMapFragment mMapFragment = null;
     private RelativeLayout mLoadingFrame;
-    private HashMap<String, Bitmap> mBitmapHashMap;
-    private TrackerGPSService mService;
+    private HashMap <String, Bitmap> mBitmapHashMap = null;
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
     private ProgressBar mLoadingProgressbar;

@@ -30,6 +30,7 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -72,15 +73,15 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     private static final int MENU_ITEM_ABOUT = 6;
 
     private Button mTrackResume;    // Resume existing track button
-    private Track mTrackToResume;   // Track which will resume
-
     private Button mTrackStart;     // Start new track button
-    private ProgressBar mLoadingProgressbar;
+    private Track mTrackToResume;   // Track which will resume
 
     private ServiceConnection mConnection ; // Service of recording track
 
     private SupportMapFragment mapFragment = null;
     LatLngBounds mCurrentBounds = null;
+    ArrayList<Marker> mFlickerMarkers = null;
+    private ProgressBar mLoadingProgressbar;
     FlickrSearchTask mFlickrSearchTask = null;
 
     public static StartScreenFragment newInstance() {
@@ -227,9 +228,13 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-                googleMap.clear();
+                if (!Utils.isNull(mFlickerMarkers)){
+                    for (Marker marker : mFlickerMarkers){
+                        marker.remove();
+                    }
+                }
                 if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && !FlickrHolder.get().getFlickrPhotos().isEmpty()) {
-                   GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
                }
             }
         });

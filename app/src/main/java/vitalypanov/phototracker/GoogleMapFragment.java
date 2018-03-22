@@ -44,10 +44,10 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
     private static final String TAG = "PhotoTracker";
     private static final String EXTRA_TRACK_UUID = "phototracker.track_uuid";
 
+    private Track mTrack= null;
+
     private SupportMapFragment mMapFragment = null;
     private RelativeLayout mLoadingFrame;
-
-    private Track mTrack= null;
     private HashMap <String, Bitmap> mBitmapHashMap = null;
     LatLngBounds mCurrentBounds = null;
     ArrayList<Marker> mFlickerMarkers = null;
@@ -60,7 +60,6 @@ public class GoogleMapFragment extends Fragment implements GoogleMap.OnMarkerCli
         GoogleMapFragment googleMapFragment = new GoogleMapFragment();
         googleMapFragment.setArguments(args);
         return googleMapFragment;
-
     }
 
     @Override
