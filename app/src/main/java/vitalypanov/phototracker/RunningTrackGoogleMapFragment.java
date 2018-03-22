@@ -149,8 +149,9 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
                 if (!Utils.isNull(mFlickrSearchTask)){
                     mFlickrSearchTask.cancel(true);
                 }
-                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar);
+                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback);
                 mFlickrSearchTask.execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                mLoadingProgressbar.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -213,6 +214,7 @@ public class RunningTrackGoogleMapFragment extends Fragment implements ViewPageU
     public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
         FlickrHolder.get().setFlickrPhotos(flickrPhotos);
         updatFlickrMapAsync();
+        mLoadingProgressbar.setVisibility(View.GONE);
     }
 
 }

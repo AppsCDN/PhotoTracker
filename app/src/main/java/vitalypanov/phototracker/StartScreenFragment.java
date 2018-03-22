@@ -207,8 +207,9 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
                 if (!Utils.isNull(mFlickrSearchTask)){
                     mFlickrSearchTask.cancel(true);
                 }
-                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback, mLoadingProgressbar);
+                mFlickrSearchTask = new FlickrSearchTask(getActivity(), thisForCallback);
                 mFlickrSearchTask.execute(mCurrentBounds.southwest, mCurrentBounds.northeast);
+                mLoadingProgressbar.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -300,7 +301,6 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     public void onStart() {
         super.onStart();
         getActivity().invalidateOptionsMenu();
-        GoogleMapUtils.initMapControls(mapFragment);
         // if service already running we should start running activity above current
         if (ServiceUtils.isServiceRunning(
                   getActivity().getApplicationContext(),
@@ -312,7 +312,6 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
 
     @Override
     public void onStop() {
-        GoogleMapUtils.shutdownMapControls(mapFragment);
         super.onStop();
     }
 
@@ -321,7 +320,14 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
         super.onResume();
         updateTrackListCounterUI();
         checkNotEndedTrackAndUpdateUI();
+        GoogleMapUtils.initMapControls(mapFragment);
         startFlickrSearch();
+    }
+
+    @Override
+    public void onPause() {
+        GoogleMapUtils.shutdownMapControls(mapFragment);
+        super.onPause();
     }
 
     /**
@@ -430,12 +436,6 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
     }
 
     @Override
-    public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
-        FlickrHolder.get().setFlickrPhotos(flickrPhotos);
-        updatMapAsync();
-    }
-
-    @Override
     public boolean onMarkerClick(Marker marker) {
         if (Utils.isNull(FlickrHolder.get().getFlickrPhotos())) {
             return false;
@@ -454,5 +454,12 @@ public class StartScreenFragment extends Fragment implements OnFlickrSearchTaskC
             outState.putDouble(SAVED_PARAM_CURRENT_BOUNDS_LON2, mCurrentBounds.southwest.longitude);
         }
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
+        FlickrHolder.get().setFlickrPhotos(flickrPhotos);
+        updatMapAsync();
+        mLoadingProgressbar.setVisibility(View.GONE);
     }
 }

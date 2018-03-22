@@ -2,8 +2,6 @@ package vitalypanov.phototracker.flickr;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -19,18 +17,15 @@ public class FlickrSearchTask extends AsyncTask<LatLng, Void, Void> {
     private Context mContext;
     private OnFlickrSearchTaskCompleted mListener;    // callback interface, to signal that search task is completed
     private List<FlickrPhoto> mPhotos;          // search result
-    private ProgressBar mProgressBar;
 
-    public FlickrSearchTask(Context context, OnFlickrSearchTaskCompleted listener, ProgressBar progressBar){
+    public FlickrSearchTask(Context context, OnFlickrSearchTaskCompleted listener){
         this.mContext = context;
         this.mListener = listener;
-        this.mProgressBar = progressBar;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -52,12 +47,10 @@ public class FlickrSearchTask extends AsyncTask<LatLng, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         mListener.onTaskCompleted(mPhotos);
-        mProgressBar.setVisibility(View.GONE);
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        //mProgressBar.setVisibility(View.GONE);
     }
 }
