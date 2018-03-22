@@ -10,6 +10,7 @@ import vitalypanov.phototracker.model.BasePhoto;
 import vitalypanov.phototracker.utilities.StringUtils;
 
 /**
+ * Photo item of flickr.com search result
  * Created by Vitaly on 22.08.2017.
  */
 
@@ -76,13 +77,9 @@ public class FlickrPhoto implements Serializable, BasePhoto {
     }
 
     public String getUrl() {
+        // from large to smallest available photo
         return StringUtils.coalesce(mUrl_c, mUrl_m, mUrl_s);
     }
-
-    /*public void setUrl(String mUrl) {
-        this.mUrl = mUrl;
-    }
-    */
 
     public String getOwner() {
         return mOwner;

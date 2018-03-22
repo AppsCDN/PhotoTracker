@@ -1,7 +1,6 @@
 package vitalypanov.phototracker.flickr;
 
 import android.content.Context;
-import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
 
@@ -37,10 +36,8 @@ import vitalypanov.phototracker.Settings;
  */
 
 public class FlickrFetchr {
-
     private static final String TAG = "FlickFetcher";
     private static final String API_KEY = "4f721bbafa75bf6d2cb5af54f937bb70";
-    private static final String FETCH_RECENT_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
     private static final Uri END_POINT = Uri
             .parse("https://api.flickr.com/services/rest/")
@@ -50,47 +47,6 @@ public class FlickrFetchr {
             .appendQueryParameter("nojsoncallback", "1")
             .appendQueryParameter("extras", "url_s,geo")
             .build();
-
-    public static byte[] getUrlBytes(String urlSpec) throws IOException {
-        URL url = new URL(urlSpec);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            InputStream in = connection.getInputStream();
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK){
-                throw new IOException(connection.getResponseMessage() + ": with" + urlSpec);
-            }
-            int bytesRead = 0;
-            byte [] buffer = new byte[1024];
-            while ((bytesRead = in.read(buffer)) >0 ){
-                out.write(buffer, 0, bytesRead);
-            }
-            out.close();
-            return out.toByteArray();
-
-        } finally {
-            connection.disconnect();
-        }
-    }
-
-    public static String getUrlString(String urlSpec) throws IOException {
-        return new String(getUrlBytes(urlSpec));
-    }
-
-    public static List<FlickrPhoto> fetchRecentPhotos(){
-        String url = buildUrl(FETCH_RECENT_METHOD, null);
-        return downloadPhotoHeaders(url);
-    }
-
-    public static List<FlickrPhoto> searchPhotos(String query){
-        String url = buildUrl(SEARCH_METHOD, query);
-        return downloadPhotoHeaders(url);
-    }
-
-    public static List<FlickrPhoto> searchPhotos(Location location){
-        String url = buildUrl(location);
-        return downloadPhotoHeaders(url);
-    }
 
     /**
      * Download photo headers
@@ -135,40 +91,41 @@ public class FlickrFetchr {
     }
 
     /**
-     * Download photo headers
-     * ONLY FIRST RESULT PAGE
-     * @param url
-     * @return
+     * Load bytes from url
+     * @param urlSpec
+     * @return  Bitmap byte array
+     * @throws IOException
      */
-    private static List<FlickrPhoto> downloadPhotoHeaders(String url){
-        List<FlickrPhoto> items = new ArrayList<>();
+    public static byte[] getUrlBytes(String urlSpec) throws IOException {
+        URL url = new URL(urlSpec);
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
         try {
-            String jsonString = getUrlString(url);
-            JSONObject jsonBody = new JSONObject(jsonString);
-            parseItems(items, jsonBody);
-        } catch (IOException ex){
-            Log.e(TAG, "Failed to fetch items " + ex.toString());
-        } catch (JSONException ex) {
-            Log.e(TAG, "Failed to parse JSON " + ex.toString());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            InputStream in = connection.getInputStream();
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK){
+                throw new IOException(connection.getResponseMessage() + ": with" + urlSpec);
+            }
+            int bytesRead = 0;
+            byte [] buffer = new byte[1024];
+            while ((bytesRead = in.read(buffer)) >0 ){
+                out.write(buffer, 0, bytesRead);
+            }
+            out.close();
+            return out.toByteArray();
+
+        } finally {
+            connection.disconnect();
         }
-        return items;
     }
 
-    private static String buildUrl(String method, String query){
-        Uri.Builder uriBuilder = END_POINT.buildUpon()
-                .appendQueryParameter("method", method);
-        if (method.equals(SEARCH_METHOD)){
-            uriBuilder.appendQueryParameter("text", query);
-        }
-        return uriBuilder.build().toString();
-    }
-
-    private static String buildUrl(Location location){
-        Uri.Builder uriBuilder = END_POINT.buildUpon()
-                .appendQueryParameter("method", SEARCH_METHOD)
-                .appendQueryParameter("lat", ""+ location.getLatitude())
-                .appendQueryParameter("lon", ""+ location.getLongitude());
-        return uriBuilder.build().toString();
+    /**
+     * Get bytes from url
+     * @param urlSpec
+     * @return
+     * @throws IOException
+     */
+    private static String getUrlString(String urlSpec) throws IOException {
+        return new String(getUrlBytes(urlSpec));
     }
 
     /**
@@ -186,7 +143,13 @@ public class FlickrFetchr {
         return uriBuilder.build().toString();
     }
 
-
+    /**
+     * Parse from json to list
+     * @param items     Result  - list of photo items
+     * @param jsonBody  Source  - json from flickr.com
+     * @throws IOException
+     * @throws JSONException
+     */
     private static void parseItems(List<FlickrPhoto> items, JSONObject jsonBody) throws IOException, JSONException {
         Gson gson = new Gson(); // got gson parsing
         JSONObject photosJsonObject =jsonBody.getJSONObject("photos");
@@ -198,5 +161,4 @@ public class FlickrFetchr {
             items.add(item);
         }
     }
-
 }

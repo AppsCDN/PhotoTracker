@@ -3,6 +3,8 @@ package vitalypanov.phototracker.flickr;
 import java.util.List;
 
 /**
+ * Singleton for holding search result of flickr.com engine
+ * Need to have for transferring photos between fragments.
  * Created by Vitaly on 21.03.2018.
  */
 

@@ -10,13 +10,14 @@ import java.util.List;
 import vitalypanov.phototracker.Settings;
 
 /**
+ * Assync search in flickr.com
  * Created by Vitaly on 20.03.2018.
  */
 
 public class FlickrSearchTask extends AsyncTask<LatLng, Void, Void> {
     private Context mContext;
-    private OnFlickrSearchTaskCompleted mListener;    // callback interface, to signal that search task is completed
-    private List<FlickrPhoto> mPhotos;          // search result
+    private OnFlickrSearchTaskCompleted mListener;  // to signal that search task is completed
+    private List<FlickrPhoto> mPhotos;              // search result
 
     public FlickrSearchTask(Context context, OnFlickrSearchTaskCompleted listener){
         this.mContext = context;
