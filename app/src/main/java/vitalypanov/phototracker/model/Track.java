@@ -1,5 +1,7 @@
 package vitalypanov.phototracker.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,6 +84,14 @@ public class Track {
 
     public List<TrackLocation> getTrackData() {
         return mTrackData;
+    }
+
+    public List<LatLng> getTrackDataAsLatLng() {
+        List<LatLng> points = new ArrayList<LatLng>();
+        for(TrackLocation loc : mTrackData) {
+            points.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
+        }
+        return points;
     }
 
     public void setTrackData(List<TrackLocation> data) {

@@ -51,6 +51,8 @@
     <string name="setting_group_performance">Performance</string>
     <string name="setting_map_performance_switch">Map performance improve</string>
     <string name="setting_map_performance_hint">Show simple icons instead of photos on maps</string>
+    <string name="setting_map_smooth_track_switch">Smooth track on map</string>
+    <string name="setting_map_smooth_track_hint">Set this option to show more smooth route on the map</string>
     <string name="setting_group_account">Accounts</string>
     <string name="setting_runkeeper" translatable="false">RunKeeper</string>
     <string name="setting_runkeeper_hint">Please touch to configure</string>

@@ -13,6 +13,7 @@ import vitalypanov.phototracker.utilities.Utils;
 
 public class Settings {
     public static final String KEY_MAP_PERFOMANCE_SWITCH = "map_performance_switch";
+    public static final String KEY_MAP_SMOOTH_TRACK_SWITCH = "map_smooth_track_switch";
     public static final String KEY_MAP_FLICKR_PHOTOS_SWITCH = "flickr_switch";
     public static final String KEY_MAP_FLICKR_PHOTOS_PERCENT = "flickr_photos_percent";
     public static final String KEY_MAP_RUNKEEPER_ACCESS_TOKEN = "runkeeper_access_token";
@@ -30,6 +31,11 @@ public class Settings {
     public boolean isMapPerformance(){
         Boolean defaultValue = mContext.getResources().getBoolean(R.bool.map_perfromance_default);
         return getBoolean(Settings.KEY_MAP_PERFOMANCE_SWITCH, defaultValue);
+    }
+
+    public boolean isMapSmoothTrack(){
+        Boolean defaultValue = mContext.getResources().getBoolean(R.bool.map_smooth_track_default);
+        return getBoolean(Settings.KEY_MAP_SMOOTH_TRACK_SWITCH, defaultValue);
     }
 
     public boolean isFlickrPhotos(){

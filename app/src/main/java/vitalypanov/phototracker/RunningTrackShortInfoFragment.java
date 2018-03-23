@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vitalypanov.phototracker.activity.SettingsActivity;
 import vitalypanov.phototracker.activity.StartScreenActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
@@ -232,7 +233,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         mSetingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                showSettingsDialog();
             }
         });
 
@@ -436,5 +437,12 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 mCommentEditText.setText(mService.getCurrentTrack().getComment());
             }
         });
+    }
+
+    /**
+     * Show Settings dialog
+     */
+    private void showSettingsDialog(){
+        startActivity(SettingsActivity.newIntent(getActivity()));
     }
 }

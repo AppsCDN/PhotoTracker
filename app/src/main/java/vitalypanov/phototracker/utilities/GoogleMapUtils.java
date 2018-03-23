@@ -98,31 +98,17 @@ public class GoogleMapUtils {
      Draw track data and track bitmaps on google map
      */
     public static void drawTrackOnGoogleMap(final GoogleMap googleMap, final Track track, final Context context, HashMap<String, Bitmap> bitmapHashMap){
+
         if (Utils.isNull(googleMap )|| Utils.isNull(track)){
             return;
         }
 
         // getting current gps track from service
-        List<TrackLocation> trackData = track.getTrackData();
-        if (trackData == null || trackData.isEmpty()) {
+        if (Utils.isNull(track.getTrackData()) || track.getTrackData().isEmpty()) {
             return;
         }
-        LatLng itemPoint = new LatLng(
-                ListUtils.getFirst(trackData).getLatitude(), ListUtils.getFirst(trackData).getLongitude());
-        LatLng myPoint = new LatLng(
-                ListUtils.getLast(trackData).getLatitude(), ListUtils.getLast(trackData).getLongitude());
 
         googleMap.clear();
-
-        // start point marker
-        MarkerOptions itemMarker = new MarkerOptions()
-                .position(itemPoint);
-        googleMap.addMarker(itemMarker);
-
-        // end(current) point marker
-        MarkerOptions myMarker = new MarkerOptions()
-                .position(myPoint);
-        googleMap.addMarker(myMarker);
 
         Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
         bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_SMALL_SAMPLE_SIZE);
@@ -156,12 +142,28 @@ public class GoogleMapUtils {
 
         }
 
-        PolylineOptions lines = new PolylineOptions();
-        for(TrackLocation loc : trackData){
-            lines.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
-        }
-        googleMap.addPolyline(lines);
+        // prepare track data for showing on google map: convert to LatLng array
+        List<LatLng> points = track.getTrackDataAsLatLng();
+        // smooth track if need
+        points = Settings.get(context).isMapSmoothTrack()? smoothTrack(points) : points;
 
+        // add polyline to map
+        PolylineOptions polylineOptions = new PolylineOptions().addAll(points);
+        googleMap.addPolyline(polylineOptions);
+
+        // Start and End point markers set...
+        LatLng itemPoint = new LatLng(
+                ListUtils.getFirst(points).latitude, ListUtils.getFirst(points).longitude);
+        LatLng myPoint = new LatLng(
+                ListUtils.getLast(points).latitude, ListUtils.getLast(points).longitude);
+        MarkerOptions itemMarker = new MarkerOptions()
+                .position(itemPoint);
+        googleMap.addMarker(itemMarker);
+        MarkerOptions myMarker = new MarkerOptions()
+                .position(myPoint);
+        googleMap.addMarker(myMarker);
+
+        // Calculate view map bounds regarding max and min coordinates of track data
         TrackLocation minLocation = track.getMinTrackLocation();
         TrackLocation maxTrackLocation = track.getMaxTrackLocation();
         LatLng minPoint = new LatLng(minLocation.getLatitude(), minLocation.getLongitude());
@@ -194,6 +196,54 @@ public class GoogleMapUtils {
                     }
                 });
         */
+    }
+
+    /**
+     * Make track data more snooth (by adding new points)
+     * @param poly
+     * @return
+     */
+    public static List<LatLng> smoothTrack(List<LatLng> poly) {
+
+        if (poly.get(0).latitude != poly.get(poly.size()-1).latitude || poly.get(0).longitude != poly.get(poly.size()-1).longitude){
+            poly.add(new LatLng(poly.get(0).latitude,poly.get(0).longitude));
+        }
+        else{
+            poly.remove(poly.size()-1);
+        }
+        poly.add(0,new LatLng(poly.get(poly.size()-1).latitude,poly.get(poly.size()-1).longitude));
+        poly.add(new LatLng(poly.get(1).latitude,poly.get(1).longitude));
+
+        Double[] lats = new Double[poly.size()];
+        Double[] lons = new Double[poly.size()];
+
+        for (int i=0;i<poly.size();i++){
+            lats[i] = poly.get(i).latitude;
+            lons[i] = poly.get(i).longitude;
+        }
+
+        double ax, ay, bx, by, cx, cy, dx, dy, lat, lon;
+        float t;
+        int i;
+        List<LatLng> points = new ArrayList<>();
+        // For every point
+        for (i = 2; i < lats.length - 2; i++) {
+            for (t = 0; t < 1; t += 0.2) {
+                ax = (-lats[i - 2] + 3 * lats[i - 1] - 3 * lats[i] + lats[i + 1]) / 6;
+                ay = (-lons[i - 2] + 3 * lons[i - 1] - 3 * lons[i] + lons[i + 1]) / 6;
+                bx = (lats[i - 2] - 2 * lats[i - 1] + lats[i]) / 2;
+                by = (lons[i - 2] - 2 * lons[i - 1] + lons[i]) / 2;
+                cx = (-lats[i - 2] + lats[i]) / 2;
+                cy = (-lons[i - 2] + lons[i]) / 2;
+                dx = (lats[i - 2] + 4 * lats[i - 1] + lats[i]) / 6;
+                dy = (lons[i - 2] + 4 * lons[i - 1] + lons[i]) / 6;
+                lat = ax * Math.pow(t + 0.1, 3) + bx * Math.pow(t + 0.1, 2) + cx * (t + 0.1) + dx;
+                lon = ay * Math.pow(t + 0.1, 3) + by * Math.pow(t + 0.1, 2) + cy * (t + 0.1) + dy;
+                points.add(new LatLng(lat, lon));
+            }
+        }
+        return points;
+
     }
 
     public static ArrayList<Marker> addFlickrPhotosOnGoogleMap(final GoogleMap googleMap, final List<FlickrPhoto> flickrPhotos, final Context context){
