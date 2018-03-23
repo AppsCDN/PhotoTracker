@@ -16,9 +16,10 @@
             android:key="flickr_switch"
             android:summary="@string/setting_flickr_photos_hint" />
         <SeekBarPreference
-            android:defaultValue="@integer/flickr_photos_percent_default"
             android:min="@integer/flickr_photos_percent_default"
             android:max="@integer/flickr_photos_percent_max"
+            android:defaultValue="@integer/flickr_photos_percent_default"
+            android:icon="@mipmap/ic_flickr"
             app:showSeekBarValue="false"
             android:title="@string/setting_flickr_photos_percent"
             android:maxLines="4"
