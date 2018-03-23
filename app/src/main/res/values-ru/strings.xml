@@ -63,7 +63,7 @@
     <string name="runkeeper_upload_confirm_title">Выгрузка маршрута</string>
     <string name="loading">Загрузка...</string>
     <string name="setting_runkeeper_hint">Пожалуйста коснитесь для настройки</string>
-    <string name="setting_group_export">Экспорт</string>
+    <string name="setting_group_account">Учетные записи</string>
     <string name="setting_group_performance">Производительность</string>
     <string name="track_continue_tooltip">Продолжить записывание последнего не завершенного маршрута</string>
     <string name="menu_action_runkeeper">Загрузить на RunKeeper</string>

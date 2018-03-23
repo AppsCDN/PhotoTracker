@@ -27,7 +27,7 @@
             android:summary="@string/setting_flickr_photos_percent_hint" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/setting_group_export">
+        android:title="@string/setting_group_account">
         <Preference
             android:key="runkeeper_access_token"
             android:title="@string/setting_runkeeper"
