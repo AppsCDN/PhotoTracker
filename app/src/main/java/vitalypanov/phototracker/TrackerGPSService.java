@@ -271,7 +271,7 @@ public class TrackerGPSService extends Service{
      */
     private void putCurrentGPSLocation() {
         // processing location...
-        Location location = LocationServices.get(this).getCurrentGPSLocation();
+        Location location = TrackLocationServices.getCurrentGPSLocation(this);
         TrackLocation trackLocation = new TrackLocation(location.getLongitude(), location.getLatitude(),
                 location.getAltitude(), Calendar.getInstance().getTime());
         processLocation(trackLocation);

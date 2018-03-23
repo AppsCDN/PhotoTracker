@@ -137,14 +137,14 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         if (mMapFragment==null){
             return;
         }
-        if (!LocationServices.get(getActivity()).checkLocaionServices()) {
+        if (!TrackLocationServices.checkLocaionServices(getActivity())) {
             return;
         }
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 if (Utils.isNull(mCurrentBounds)) {
-                    Location location = LocationServices.get(getActivity()).getCurrentGPSLocation();
+                    Location location = TrackLocationServices.getCurrentGPSLocation(getActivity());
                     if (!Utils.isNull(location)) {
                         LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2);
                         LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2);

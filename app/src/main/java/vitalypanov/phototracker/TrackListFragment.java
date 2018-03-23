@@ -119,7 +119,7 @@ public class TrackListFragment  extends Fragment {
         private RelativeLayout mLoadingPanel;
         private TextView mCommentTextView;
 
-        public TrackHolder(View itemView ){
+        public TrackHolder(final View itemView ){
             super(itemView);
             itemView.setOnClickListener(this);
             mStartDateTextView = (TextView)itemView.findViewById(R.id.list_item_start_date_text_view);
@@ -142,7 +142,7 @@ public class TrackListFragment  extends Fragment {
                     // Run service within existing track object
 
                     // first check location services
-                    if (!LocationServices.get(getActivity()).checkLocaionServices()){
+                    if (!TrackLocationServices.checkLocaionServices(getContext())){
                         return;
                     }
                     // show warning message before continue recording of the track

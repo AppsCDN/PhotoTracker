@@ -261,7 +261,7 @@ public class StartScreenFragment extends TrackerSupportMapFragment {
      */
     private void startTrack(UUID trackUUID) {
         // first check location services
-        if (!LocationServices.get(getActivity()).checkLocaionServices()){
+        if (!TrackLocationServices.checkLocaionServices(getActivity())){
             return;
         }
         Intent i = null;
