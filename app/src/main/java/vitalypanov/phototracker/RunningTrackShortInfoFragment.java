@@ -390,6 +390,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     @Override
     public void onPageSelected() {
         updateUI();
+        updatePhotoUI();
     }
 
     @Override

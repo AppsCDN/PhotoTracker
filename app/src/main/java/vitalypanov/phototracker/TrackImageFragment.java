@@ -54,11 +54,6 @@ public class TrackImageFragment extends Fragment implements ViewPageUpdater {
         return v;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
     private void updatePhotoUI(){
         Point size = new Point();
         getActivity().getWindowManager().getDefaultDisplay().getSize(size);

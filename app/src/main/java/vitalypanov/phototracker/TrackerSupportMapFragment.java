@@ -1,5 +1,6 @@
 package vitalypanov.phototracker;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -51,6 +52,8 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LON1 = "SAVED_PARAM_CURRENT_BOUNDS_LON1";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LAT2 = "SAVED_PARAM_CURRENT_BOUNDS_LAT2";
     private static final String SAVED_PARAM_CURRENT_BOUNDS_LON2 = "SAVED_PARAM_CURRENT_BOUNDS_LON2";
+    // show and may be modify photos of the track
+    private static final int REQUEST_CODE_IMAGES_PAGER = 0;
 
     private SupportMapFragment mMapFragment = null;
     private RelativeLayout mLoadingFrame;
@@ -80,7 +83,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     /**
      * Call this method in subclass if you want to force map update manually
      */
-    protected void startAssyncLoader(){
+    protected void updatePhotoUI(){
         AssyncLoaderTask assyncLoaderTask = new AssyncLoaderTask();
         assyncLoaderTask.execute();
     }
@@ -122,7 +125,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
         mLoadingProgressbar.setVisibility(View.GONE);
         updatMapAsyncCurrentLocation();
-        startAssyncLoader();
+        updatePhotoUI();
         return view;
     }
 
@@ -198,7 +201,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
             if (!Utils.isNull(mLoadingFrame)) {
                 mLoadingFrame.setVisibility(View.GONE);
             }
-            updatMapAsync();
+            updateTrackDataUI();
         }
     }
 
@@ -206,7 +209,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
      * Updating assync google map and save map object into local variable
      * for future drawing
      */
-    private void updatMapAsync(){
+    private void updateTrackDataUI(){
         if (mMapFragment ==null){
             return;
         }
@@ -234,7 +237,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
      * Drawing flickr's photo markers on google map
      * First remove the old ones.
      */
-    private void updatFlickrMapAsync(){
+    private void updatePhotoFlickrUI(){
         if (mMapFragment ==null){
             return;
         }
@@ -280,19 +283,38 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
                 startActivity(intent);
             }
         } else {
-            // local photos of the track
+            // local photos of the track (can modify it)
             if (!Utils.isNull(getTrack()) && !Utils.isNull(getTrack().getPhotoFiles()) && !getTrack().getPhotoFiles().isEmpty()) {
                 Intent intent = TrackImagesPagerActivity.newIntent(getActivity(), getTrack().getUUID(), (ArrayList<TrackPhoto>) getTrack().getPhotoFiles(), photoName);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_IMAGES_PAGER);
             }
         }
         return false;
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+        switch (requestCode){
+            case REQUEST_CODE_IMAGES_PAGER:
+                if(!Utils.isNull(getTrack()) && !Utils.isNull(data)) {
+                    getTrack().setPhotoFiles(TrackImagesPagerActivity.getTrackPhotos(data));
+                    updatePhotoUI();
+                    setActivityResultOK(); // say other activities in stack: need to update
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);;
+        }
+    }
+
+
+    @Override
     public void onTaskCompleted(List<FlickrPhoto> flickrPhotos) {
         FlickrHolder.get().setFlickrPhotos(flickrPhotos);
-        updatFlickrMapAsync();
+        updatePhotoFlickrUI();
         mLoadingProgressbar.setVisibility(View.GONE);
     }
 
@@ -320,5 +342,13 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
                 }
             }
         });
+    }
+
+    /**
+     * Save result OK for this activity.
+     * It means that we need update some data in parent activity.
+     */
+    private void setActivityResultOK(){
+        getActivity().setResult(getActivity().RESULT_OK);
     }
 }

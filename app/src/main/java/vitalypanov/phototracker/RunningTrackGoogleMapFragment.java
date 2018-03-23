@@ -29,7 +29,7 @@ public class RunningTrackGoogleMapFragment extends TrackerSupportMapFragment imp
     @Override
     public void onPageSelected() {
         // update photo bitmaps fo and redraw map when selecting tab
-        super.startAssyncLoader();
+        super.updatePhotoUI();
     }
 
     @Override

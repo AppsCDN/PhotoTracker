@@ -1,6 +1,9 @@
 package vitalypanov.phototracker;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.UUID;
 
@@ -36,5 +39,10 @@ public class GoogleMapFragment extends TrackerSupportMapFragment {
     @Override
     public int getLayoutResourceId() {
         return R.layout.fragment_map_track;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
+        return super.onCreateView(layoutInflater, container, bundle);
     }
 }

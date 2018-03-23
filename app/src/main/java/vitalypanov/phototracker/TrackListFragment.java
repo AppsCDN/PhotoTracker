@@ -46,6 +46,7 @@ import vitalypanov.phototracker.utilities.Utils;
 public class TrackListFragment  extends Fragment {
     private static final String TAG = "PhotoTracker";
     private static final int REQUEST_CODE_IMAGES_PAGER = 0;
+    private static final int REQUEST_CODE_MAP_PAGER = 1;
     private RecyclerView mTrackRecyclerView;
     private TrackAdapter mAdapter;
     private Callbacks mCallbacks;
@@ -130,7 +131,7 @@ public class TrackListFragment  extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Intent intent = GoogleMapActivity.newIntent(getActivity(), mTrack.getUUID());
-                    startActivity(intent);
+                    startActivityForResult(intent,REQUEST_CODE_MAP_PAGER);
                 }
             });
 
@@ -388,8 +389,12 @@ public class TrackListFragment  extends Fragment {
                 mAdapter.setTracks(TrackDbHelper.get(getActivity()).getTracks());
                 mAdapter.notifyDataSetChanged();
                 break;
+            case REQUEST_CODE_MAP_PAGER:
+                mAdapter.setTracks(TrackDbHelper.get(getActivity()).getTracks());
+                mAdapter.notifyDataSetChanged();
+                break;
             default:
-                super.onActivityResult(requestCode, resultCode, data);;
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
