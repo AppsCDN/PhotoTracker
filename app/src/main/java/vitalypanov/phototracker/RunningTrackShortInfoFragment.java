@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -296,7 +298,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     }
 
     /**
-     * Assync update image after take photo
+     * Assync save and update image after take photo
      *
      */
     private class AssyncUpdatePhotoAfterTakePhotoTask extends AsyncTask<Void, Void, Void> {
@@ -318,15 +320,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         @Override
         protected Void doInBackground(Void... voids) {
             // wait for service and Activity correct objects
-            while (mService == null
-                    || mService.getCurrentTrack() == null
-                    || getActivity() == null) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            waitForServiceIsUp();
             if (mService!= null && mService.getCurrentTrack() != null) {
                 // check for null service is needed because after take photo the fragment can not exists
                 File currentPhotoFile = FileUtils.getPhotoFile(getActivity(), mCurrentPhotoFileName);
@@ -341,43 +335,97 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             return null;
         }
 
+        /**
+         * Wait for service and Activity correct objects
+         */
+        private void waitForServiceIsUp(){
+
+            while (mService == null
+                    || mService.getCurrentTrack() == null
+                    || getActivity() == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
 
     }
 
-    private void updatePhotoUI(){
-        if (Utils.isNull(mService)
-                || Utils.isNull(mService.getCurrentTrack())
-                || Utils.isNull(mTrackPhotoImage)){
-            return;
+    /**
+     * Assync update image after take photo
+     *
+     */
+    private class AssyncUpdatePhotoUI extends AsyncTask<Void, Void, Void> {
+        Bitmap mBitmap;
+        String mPhotoFileName;
+
+        public AssyncUpdatePhotoUI() {
         }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // wait for service and Activity correct objects
+            //waitForServiceIsUp();
+            if (Utils.isNull(mService) || Utils.isNull(mService.getCurrentTrack()) || Utils.isNull(getActivity())){
+                return null;
+            }
+            Track currentTrack = mService.getCurrentTrack();
+            mBitmap = null;
+            mPhotoFileName = null;
+            DisplayMetrics metrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            if (!Utils.isNull(currentTrack.getLastPhotoItem())){
+                mBitmap = BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), metrics.widthPixels);
+                mPhotoFileName = currentTrack.getLastPhotoItem().getPhotoFileName();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // update bitmap
+            if (Utils.isNull(mTrackPhotoImage)){
+                return;
+            }
+            mTrackPhotoImage.post(new Runnable() {
+                @Override
+                public void run() {
+                    // Need post method here due to mTrackPhotoImage.getWidth() using. Before post - it always is 0.
+                    mTrackPhotoImage.setImageBitmap(mBitmap);
+                    mTrackPhotoImage.setTag(mPhotoFileName);
+                }
+            });
+            updatePhotoCounter();
+        }
+    }
+
+    /**
+     * Update photo counter
+     */
+    private void updatePhotoCounter(){
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final Track currentTrack = mService.getCurrentTrack();
-                // update bitmap
-                mTrackPhotoImage.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Need post method here due to mTrackPhotoImage.getWidth() using. Before post - it always is 0.
-                            if (Utils.isNull(currentTrack.getLastPhotoItem())){
-                                mTrackPhotoImage.setImageBitmap(null);
-                                mTrackPhotoImage.setTag(null);
-                            } else {
-                                if (mTrackPhotoImage.getWidth() > 0) {
-                                    mTrackPhotoImage.setImageBitmap(BitmapHandler.get(getContext()).getBitmapScaleToFitWidth(currentTrack.getLastPhotoItem().getPhotoFileName(), mTrackPhotoImage.getWidth()));
-                                    mTrackPhotoImage.setTag(currentTrack.getLastPhotoItem().getPhotoFileName());
-                                }
-                            }
-
-                    }
-                });
-
-                // update photo counter
-                mPhotoCounterTextView.setVisibility(currentTrack.getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
-                mPhotoCounterTextView.setText(" " + String.valueOf(currentTrack.getPhotoFiles().size()) + " ");
+                if (Utils.isNull(mService) || Utils.isNull(mService.getCurrentTrack())){
+                    return;
+                }
+                mPhotoCounterTextView.setVisibility(mService.getCurrentTrack().getPhotoFiles().size() > 0 ? View.VISIBLE : View.GONE);
+                mPhotoCounterTextView.setText(" " + String.valueOf(mService.getCurrentTrack().getPhotoFiles().size()) + " ");
                 mPhotoCounterTextView.bringToFront();
             }
         });
+    }
+
+    /**
+     * Update photo in UI
+     */
+    private void updatePhotoUI(){
+        AssyncUpdatePhotoUI assyncUpdatePhotoUI = new AssyncUpdatePhotoUI();
+        assyncUpdatePhotoUI.execute();
     }
 
     /**
