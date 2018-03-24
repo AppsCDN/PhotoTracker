@@ -83,7 +83,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     /**
      * Call this method in subclass if you want to force map update manually
      */
-    protected void updatePhotoUI(){
+    protected void startUpdateUI(){
         AssyncLoaderTask assyncLoaderTask = new AssyncLoaderTask();
         assyncLoaderTask.execute();
     }
@@ -125,7 +125,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
         mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
         mLoadingProgressbar.setVisibility(View.GONE);
         updatMapAsyncCurrentLocation();
-        updatePhotoUI();
+        startUpdateUI();
         return view;
     }
 
@@ -165,7 +165,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     }
 
     /**
-     * Load track bitmaps in assync mode. And postexecute - update goggle map
+     * Load track bitmaps in assync mode. And postexecute - update goggle map track data
      */
     class AssyncLoaderTask extends AsyncTask<Void, Void, Void> {
 
@@ -263,7 +263,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     public void onResume() {
         super.onResume();
         GoogleMapUtils.initMapControls(mMapFragment);
-        startFlickrSearch();
+        startUpdateUI();
     }
 
     @Override
@@ -303,7 +303,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
             case REQUEST_CODE_IMAGES_PAGER:
                 if(!Utils.isNull(getTrack()) && !Utils.isNull(data)) {
                     getTrack().setPhotoFiles(TrackImagesPagerActivity.getTrackPhotos(data));
-                    updatePhotoUI();
+                    startUpdateUI();
                     setActivityResultOK(); // say other activities in stack: need to update
                 }
                 break;
