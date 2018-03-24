@@ -204,7 +204,10 @@ public class GoogleMapUtils {
      * @return
      */
     public static List<LatLng> smoothTrack(List<LatLng> poly) {
-
+        if (Utils.isNull(poly) || poly.size() < 3 ){
+            // if source is null or less than three points - nothing to smooth - return source
+            return poly;
+        }
         if (poly.get(0).latitude != poly.get(poly.size()-1).latitude || poly.get(0).longitude != poly.get(poly.size()-1).longitude){
             poly.add(new LatLng(poly.get(0).latitude,poly.get(0).longitude));
         }

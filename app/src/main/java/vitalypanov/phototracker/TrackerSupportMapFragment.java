@@ -144,20 +144,22 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 if (Utils.isNull(mCurrentBounds)) {
-                    Location location = TrackLocationServices.getCurrentGPSLocation(getActivity());
-                    if (!Utils.isNull(location)) {
-                        LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2);
-                        LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2);
-                        mCurrentBounds = new LatLngBounds.Builder()
-                                .include(minPoint)
-                                .include(maxPoint)
-                                .build();
-                    }
+                        Location location = TrackLocationServices.getCurrentGPSLocation(getActivity());
+                        if (!Utils.isNull(location)) {
+                            LatLng minPoint = new LatLng(location.getLatitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() - GoogleMapUtils.MAP_SIZE_DEGREES / 2);
+                            LatLng maxPoint = new LatLng(location.getLatitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2, location.getLongitude() + GoogleMapUtils.MAP_SIZE_DEGREES / 2);
+                            mCurrentBounds = new LatLngBounds.Builder()
+                                    .include(minPoint)
+                                    .include(maxPoint)
+                                    .build();
+                        }
                 }
-                int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-                int width = getResources().getDisplayMetrics().widthPixels;
-                int height = getResources().getDisplayMetrics().heightPixels;
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mCurrentBounds, width, height, margin));
+                if (!Utils.isNull(mCurrentBounds)) {
+                    int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+                    int width = getResources().getDisplayMetrics().widthPixels;
+                    int height = getResources().getDisplayMetrics().heightPixels;
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mCurrentBounds, width, height, margin));
+                }
             }
         });
     }
