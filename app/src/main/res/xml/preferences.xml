@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
-        android:title="@string/setting_group_performance">
+        android:title="@string/setting_group_general">
         <SwitchPreference
             android:defaultValue="@bool/map_perfromance_default"
             android:title="@string/setting_map_performance_switch"
@@ -28,7 +28,6 @@
             android:icon="@mipmap/ic_flickr"
             app:showSeekBarValue="false"
             android:title="@string/setting_flickr_photos_percent"
-            android:maxLines="4"
             android:key="flickr_photos_percent"
             android:summary="@string/setting_flickr_photos_percent_hint" />
     </PreferenceCategory>

@@ -308,13 +308,7 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
         @Override
         protected void onPreExecute() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mTrackPhotoImage.setImageBitmap(null);
-                    mTrackPhotoImage.setTag(null);
-                }
-            });
+            clearPhotoUI();
         }
 
         @Override
@@ -330,9 +324,13 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 } else {
                     mCurrentPhotoFileName = null;
                 }
-                updatePhotoUI();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            updatePhotoUI();
         }
 
         /**
@@ -407,6 +405,9 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
      * Update photo counter
      */
     private void updatePhotoCounter(){
+        if (Utils.isNull(getActivity())){
+            return;
+        }
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -426,6 +427,19 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
     private void updatePhotoUI(){
         AssyncUpdatePhotoUI assyncUpdatePhotoUI = new AssyncUpdatePhotoUI();
         assyncUpdatePhotoUI.execute();
+    }
+
+    /**
+     * Clear photo in UI
+     */
+    private void clearPhotoUI(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTrackPhotoImage.setImageBitmap(null);
+                mTrackPhotoImage.setTag(null);
+            }
+        });
     }
 
     /**
