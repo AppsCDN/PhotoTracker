@@ -28,6 +28,7 @@ public class TrackListActivity  extends SingleFragmentActivity {
     public void onBackPressed() {
         super.onBackPressed();
         this.finish();
+        startActivity(StartScreenActivity.newIntent(this)); // need this call, some times after service was crashed
     }
 
     @Override

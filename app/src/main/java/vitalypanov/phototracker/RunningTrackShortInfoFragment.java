@@ -45,6 +45,7 @@ import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.FileUtils;
 import vitalypanov.phototracker.utilities.MessageUtils;
+import vitalypanov.phototracker.utilities.ServiceUtils;
 import vitalypanov.phototracker.utilities.Utils;
 
 /**
@@ -506,5 +507,18 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
      */
     private void showSettingsDialog(){
         startActivity(SettingsActivity.newIntent(getActivity()));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // if service is not running - back press
+        if (!ServiceUtils.isServiceRunning(
+                getActivity().getApplicationContext(),
+                TrackerGPSService.class)){
+            getActivity().finish();
+            startActivity(StartScreenActivity.newIntent(getActivity()));
+            return;
+        };
     }
 }

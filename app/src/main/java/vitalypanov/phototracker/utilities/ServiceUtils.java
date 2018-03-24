@@ -21,7 +21,9 @@ public class ServiceUtils {
         for (RunningServiceInfo runningServiceInfo : services) {
             Log.d(LOG_TAG, String.format("Service:%s", runningServiceInfo.service.getClassName()));
             if (runningServiceInfo.service.getClassName().equals(serviceClass.getName())){
-                return true;
+                if(runningServiceInfo.foreground) {
+                    return true;
+                }
             }
         }
         return false;
