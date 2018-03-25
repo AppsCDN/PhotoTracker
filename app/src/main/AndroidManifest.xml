@@ -12,9 +12,9 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
         android:allowBackup="true"
@@ -51,6 +51,10 @@
         <activity android:name=".export.utilities.OAuth2Activity"
             android:theme="@style/NoTitleThemeSettings">
         </activity>
+        <activity android:name=".activity.CameraActivity"
+            android:theme="@style/FullScreenTheme">
+        </activity>
+
         <service
             android:name=".TrackerGPSService"
             android:enabled="true"></service>

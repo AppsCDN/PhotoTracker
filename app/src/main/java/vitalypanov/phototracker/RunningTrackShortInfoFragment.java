@@ -28,6 +28,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -38,12 +40,14 @@ import vitalypanov.phototracker.activity.StartScreenActivity;
 import vitalypanov.phototracker.activity.TrackImagesPagerActivity;
 import vitalypanov.phototracker.database.TrackDbHelper;
 import vitalypanov.phototracker.model.Track;
+import vitalypanov.phototracker.model.TrackLocation;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.others.BindTrackerGPSService;
 import vitalypanov.phototracker.others.GenericFileProvider;
 import vitalypanov.phototracker.others.ViewPageUpdater;
 import vitalypanov.phototracker.utilities.BitmapHandler;
 import vitalypanov.phototracker.utilities.FileUtils;
+import vitalypanov.phototracker.utilities.GeoTagUtils;
 import vitalypanov.phototracker.utilities.MessageUtils;
 import vitalypanov.phototracker.utilities.ServiceUtils;
 import vitalypanov.phototracker.utilities.Utils;
@@ -76,6 +80,10 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
 
     private Timer timer;
     private TimerTask timerTask;
+
+    private void initCamera(){
+
+    }
 
     public void startTimer() {
         //set a new Timer
@@ -261,13 +269,22 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             return;
         }
 
+        // Intent variant:
         final Intent capturePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         mCurrentPhotoFileName = mService.getCurrentTrack().getNewPhotoFileName();
         File currentPhotoFile = FileUtils.getPhotoFile(getContext(),mCurrentPhotoFileName);
         Uri uri = GenericFileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".vitalypanov.phototracker.provider", currentPhotoFile);
         capturePhoto.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(capturePhoto, REQUEST_PHOTO);
+
+        /*
+        // Camera API variant:
+        TrackHolder.get().setTrack(mService.getCurrentTrack());
+        Intent intent = CameraActivity.newIntent(getActivity(), TrackHolder.get().getTrack().getUUID());
+        startActivityForResult(intent, REQUEST_PHOTO);
+        */
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -276,8 +293,20 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
         }
         switch (requestCode){
             case REQUEST_PHOTO:
+
+                // Intent variant:
                 AssyncUpdatePhotoAfterTakePhotoTask assyncUpdatePhotoAfterTakePhotoTask = new AssyncUpdatePhotoAfterTakePhotoTask();
                 assyncUpdatePhotoAfterTakePhotoTask.execute();
+
+                /*
+                // Camera API variant:
+                if (Utils.isNull(data)) {
+                    return;
+                }
+                mService.getCurrentTrack().getPhotoFiles().addAll(CameraActivity.getTrackPhotos(data));
+                AssyncUpdatePhotoAfterTakePhotoTask assyncUpdatePhotoAfterTakePhotoTask = new AssyncUpdatePhotoAfterTakePhotoTask();
+                assyncUpdatePhotoAfterTakePhotoTask.execute();
+                */
                 break;
             case REQUEST_CODE_IMAGES_PAGER:
                 if (Utils.isNull(data)) {
@@ -317,14 +346,24 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
             // wait for service and Activity correct objects
             waitForServiceIsUp();
             if (mService!= null && mService.getCurrentTrack() != null) {
-                // check for null service is needed because after take photo the fragment can not exists
+                // Intent variant:
+                // check for null service is needed because after take photo the fragment can be not existed
                 File currentPhotoFile = FileUtils.getPhotoFile(getActivity(), mCurrentPhotoFileName);
                 if (currentPhotoFile != null && currentPhotoFile.exists()) {
-                    mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, mService.getCurrentTrack().getLastTrackItem());
+                    // forcelly geo tagging recieved photo
+                    TrackLocation trackLocation = mService.getCurrentTrack().getLastTrackItem();
+                    GeoTagUtils.setGeoTag(currentPhotoFile, new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()));
+                    // save link of created photo to the track
+                    mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, trackLocation);
                     TrackDbHelper.get(getActivity()).updateTrack(mService.getCurrentTrack());
                 } else {
                     mCurrentPhotoFileName = null;
                 }
+
+                /*
+                // Camera API variant:
+                TrackDbHelper.get(getActivity()).updateTrack(mService.getCurrentTrack());
+                */
             }
             return null;
         }

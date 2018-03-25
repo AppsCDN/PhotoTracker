@@ -16,7 +16,8 @@ public class Permissions {
     private static String[] PHOTO_TRACKER_PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,       // GPS
             Manifest.permission.ACCESS_COARSE_LOCATION,     // GPS approximate location
-            Manifest.permission.WRITE_EXTERNAL_STORAGE      // Writing photo into public media directory
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,      // Writing photo into public media directory
+            Manifest.permission.CAMERA                       // Camera
     };
 
     public Permissions(Fragment context) {
