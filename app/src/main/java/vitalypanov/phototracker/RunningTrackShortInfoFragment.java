@@ -28,8 +28,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -352,7 +350,8 @@ public class RunningTrackShortInfoFragment  extends Fragment implements ViewPage
                 if (currentPhotoFile != null && currentPhotoFile.exists()) {
                     // forcelly geo tagging recieved photo
                     TrackLocation trackLocation = mService.getCurrentTrack().getLastTrackItem();
-                    GeoTagUtils.setGeoTag(currentPhotoFile, new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()));
+                    currentPhotoFile.setWritable(true);
+                    GeoTagUtils.setGeoTag(currentPhotoFile, trackLocation);
                     // save link of created photo to the track
                     mService.getCurrentTrack().addPhotoItem(mCurrentPhotoFileName, trackLocation);
                     TrackDbHelper.get(getActivity()).updateTrack(mService.getCurrentTrack());

@@ -62,11 +62,15 @@ import vitalypanov.phototracker.model.TrackHolder;
 import vitalypanov.phototracker.model.TrackPhoto;
 import vitalypanov.phototracker.utilities.FileUtils;
 
+/**
+ * Camera2 API variant of taking photo
+ * instead of using camera intent may be in future :)
+ */
 public class CameraFragment extends Fragment
         implements View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String EXTRA_PHOTO_LIST = "phototracker.photo_list";
-    private static final int MAX_IMAGES_COUNT = 10;
+    private static final int MAX_IMAGES_COUNT = 10; // TODO What this value exactly means....
     private HashMap<String, TrackPhoto> mResultPhotos = new HashMap<String, TrackPhoto>();
 
     /**
@@ -998,7 +1002,4 @@ public class CameraFragment extends Fragment
         outState.putSerializable(EXTRA_PHOTO_LIST, mResultPhotos);
         super.onSaveInstanceState(outState);
     }
-
-
-
 }
