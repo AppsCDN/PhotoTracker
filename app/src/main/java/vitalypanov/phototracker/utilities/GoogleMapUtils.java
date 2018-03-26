@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public class GoogleMapUtils {
      * Zoom in/out buttons
      * @param mapFragment
      */
-    public static void initMapControls(final SupportMapFragment mapFragment){
+    public static void initMapControls(final SupportMapFragment mapFragment, final ImageButton customButton){
         if (Utils.isNull(mapFragment)){
             return;
         }
@@ -74,6 +76,19 @@ public class GoogleMapUtils {
                         if (!Utils.isNull(mapFragment) && !Utils.isNull(mapFragment.getView())){
                             View locationView = mapFragment.getView().findViewWithTag(GoogleMapUtils.GOOGLEMAP_MYLOCATION_BUTTON);
                             GoogleMapUtils.moveZoomControls(mapFragment.getView(), locationView.getLeft(), locationView.getHeight() + locationView.getTop() * 2, -1, -1, false, false);
+                            if (!Utils.isNull(customButton)) {
+                                View zoomIn = mapFragment.getView().findViewWithTag(GOOGLEMAP_ZOOMIN_BUTTON);
+                                View zoomInOut = (View) zoomIn.getParent();
+
+                                RelativeLayout.LayoutParams locParams = (RelativeLayout.LayoutParams)locationView.getLayoutParams();
+                                RelativeLayout.LayoutParams zoomParams = (RelativeLayout.LayoutParams)zoomInOut.getLayoutParams();
+                                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)customButton.getLayoutParams();
+                                params.rightMargin=locParams.rightMargin;
+                                params.topMargin=zoomParams.topMargin + zoomInOut.getHeight() + locationView.getTop();
+                                params.width = locationView.getWidth();
+                                params.height = locationView.getHeight();
+                                customButton.setLayoutParams(params);
+                            }
                         }
                     }
                 });
@@ -81,6 +96,10 @@ public class GoogleMapUtils {
         });
     }
 
+    /**
+     * Turn off map controls
+     * @param mapFragment
+     */
     public static void shutdownMapControls(final SupportMapFragment mapFragment){
         if (Utils.isNull(mapFragment)){
             return;
@@ -95,21 +114,98 @@ public class GoogleMapUtils {
     }
 
     /**
-     Draw track data and track bitmaps on google map
+     * Clear map
+     * @param googleMap
      */
-    public static void drawTrackOnGoogleMap(final GoogleMap googleMap, final Track track, final Context context, HashMap<String, Bitmap> bitmapHashMap){
+    public static void clearGoogleMap(final GoogleMap googleMap){
+        if (Utils.isNull(googleMap )){
+            return;
+        }
+        googleMap.clear();
+    }
+    /**
+     * Draw track data and track bitmaps on google map
+     * @param googleMap
+     * @param track
+     * @param context
+     */
+    public static Polyline addTrackDataGoogleMap(final GoogleMap googleMap, final Track track, final Context context){
+        if (Utils.isNull(googleMap )|| Utils.isNull(track)){
+            return null;
+        }
+        // getting current gps track from service
+        if (Utils.isNull(track.getTrackData()) || track.getTrackData().isEmpty()) {
+            return null;
+        }
+        // prepare track data for showing on google map: convert to LatLng array
+        List<LatLng> points = track.getTrackDataAsLatLng();
+        // smooth track if need
+        points = Settings.get(context).isMapSmoothTrack()? smoothTrack(points) : points;
 
+        // add polyline to map
+        PolylineOptions polylineOptions = new PolylineOptions().addAll(points);
+        Polyline resPolyline = googleMap.addPolyline(polylineOptions);
+
+        // Start and End point markers set...
+        LatLng itemPoint = new LatLng(
+                ListUtils.getFirst(points).latitude, ListUtils.getFirst(points).longitude);
+        LatLng myPoint = new LatLng(
+                ListUtils.getLast(points).latitude, ListUtils.getLast(points).longitude);
+        MarkerOptions itemMarker = new MarkerOptions()
+                .position(itemPoint);
+        googleMap.addMarker(itemMarker);
+        MarkerOptions myMarker = new MarkerOptions()
+                .position(myPoint);
+        googleMap.addMarker(myMarker);
+
+        return resPolyline; // to have possibility to remove separately in future
+    }
+
+    /**
+     * Move map camera to area of the added track route
+     * @param googleMap
+     * @param track
+     * @param context
+     */
+    public static void moveCameraToTrackDataGoogleMap(final GoogleMap googleMap, final Track track, final Context context){
         if (Utils.isNull(googleMap )|| Utils.isNull(track)){
             return;
         }
-
         // getting current gps track from service
         if (Utils.isNull(track.getTrackData()) || track.getTrackData().isEmpty()) {
             return;
         }
 
-        googleMap.clear();
+        // Calculate view map bounds regarding max and min coordinates of track data
+        TrackLocation minLocation = track.getMinTrackLocation();
+        TrackLocation maxTrackLocation = track.getMaxTrackLocation();
+        LatLng minPoint = new LatLng(minLocation.getLatitude(), minLocation.getLongitude());
+        LatLng maxPoint = new LatLng(maxTrackLocation.getLatitude(), maxTrackLocation.getLongitude());
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(minPoint)
+                .include(maxPoint)
+                .build();
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        int height = context.getResources().getDisplayMetrics().heightPixels;
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
 
+    }
+
+
+    /**
+     * Add track photo markers to google map
+     * @param googleMap
+     * @param track
+     * @param bitmapHashMap
+     * @param context
+     * @return
+     */
+    public static ArrayList<Marker> addTrackPhotosGoogleMap(final GoogleMap googleMap, final Track track, final HashMap<String, Bitmap> bitmapHashMap, final Context context){
+        if (Utils.isNull(googleMap )|| Utils.isNull(track) || Utils.isNull(bitmapHashMap)){
+            return null;
+        }
+        ArrayList<Marker> markers = new ArrayList<Marker>();
         Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
         bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_SMALL_SAMPLE_SIZE);
 
@@ -138,64 +234,62 @@ public class GoogleMapUtils {
                     .position(new LatLng(trackLocation.getLatitude(), trackLocation.getLongitude()))
                     .icon(itemBitmap)
                     .snippet(trackPhoto.getPhotoFileName());
-            googleMap.addMarker(photoMarker);
+            markers.add(googleMap.addMarker(photoMarker));
 
         }
+        return markers;
 
-        // prepare track data for showing on google map: convert to LatLng array
-        List<LatLng> points = track.getTrackDataAsLatLng();
-        // smooth track if need
-        points = Settings.get(context).isMapSmoothTrack()? smoothTrack(points) : points;
+    }
 
-        // add polyline to map
-        PolylineOptions polylineOptions = new PolylineOptions().addAll(points);
-        googleMap.addPolyline(polylineOptions);
+    /**
+     * Add flickr photo markers to google map
+     * @param googleMap
+     * @param flickrPhotos
+     * @param context
+     * @return
+     */
+    public static ArrayList<Marker> addFlickrPhotosGoogleMap(final GoogleMap googleMap, final List<FlickrPhoto> flickrPhotos, final Context context){
+        if (Utils.isNull(googleMap)|| Utils.isNull(flickrPhotos)){
+            return null;
+        }
+        ArrayList<Marker> markers = new ArrayList<Marker>();
+        Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
+        bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_FLICKR_SMALL_SAMPLE_SIZE);
+        BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmapDefault);
+        for (FlickrPhoto flickrPhoto:  flickrPhotos){
+            MarkerOptions photoMarker = new MarkerOptions()
+                    .position(new LatLng(flickrPhoto.getLatitude(), flickrPhoto.getLongitude()))
+                    .icon(itemBitmap)
+                    .snippet(flickrPhoto.getUrl());
+            markers.add(googleMap.addMarker(photoMarker));
+        }
+        return markers;
 
-        // Start and End point markers set...
-        LatLng itemPoint = new LatLng(
-                ListUtils.getFirst(points).latitude, ListUtils.getFirst(points).longitude);
-        LatLng myPoint = new LatLng(
-                ListUtils.getLast(points).latitude, ListUtils.getLast(points).longitude);
-        MarkerOptions itemMarker = new MarkerOptions()
-                .position(itemPoint);
-        googleMap.addMarker(itemMarker);
-        MarkerOptions myMarker = new MarkerOptions()
-                .position(myPoint);
-        googleMap.addMarker(myMarker);
+    }
 
-        // Calculate view map bounds regarding max and min coordinates of track data
-        TrackLocation minLocation = track.getMinTrackLocation();
-        TrackLocation maxTrackLocation = track.getMaxTrackLocation();
-        LatLng minPoint = new LatLng(minLocation.getLatitude(), minLocation.getLongitude());
-        LatLng maxPoint = new LatLng(maxTrackLocation.getLatitude(), maxTrackLocation.getLongitude());
-        LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(minPoint)
-                .include(maxPoint)
-                .build();
-        int margin = context.getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
-        int width = context.getResources().getDisplayMetrics().widthPixels;
-        int height = context.getResources().getDisplayMetrics().heightPixels;
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, margin));
+    /**
+     * Change position of the map control
+     * @param mapView
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param horizontal
+     * @param vertical
+     */
+    private static void moveZoomControls(View mapView, int left, int top, int right, int bottom, boolean horizontal, boolean vertical) {
 
-        // other variants:
+        assert mapView != null;
 
-        /*
-        // 1. This is crashed variant:
-        final CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, margin);
-        googleMap.moveCamera(update);
-        */
+        View zoomIn = mapView.findViewWithTag(GOOGLEMAP_ZOOMIN_BUTTON);
 
-        /*
-        // 2. This is work variant but show world wide map first, and only then move camera:
-        googleMap.setOnMapLoadedCallback(
-                new GoogleMap.OnMapLoadedCallback() {
-                    @Override
-                    public void onMapLoaded() {
-                        //mMap.animateCamera(update);
-                        googleMap.moveCamera(update);
-                    }
-                });
-        */
+        // we need the parent view of the zoomin/zoomout buttons - it didn't have a tag
+        // so we must get the parent reference of one of the zoom buttons
+        View zoomInOut = (View) zoomIn.getParent();
+
+        if (zoomInOut != null) {
+            moveView(zoomInOut,left,top,right,bottom,horizontal,vertical);
+        }
     }
 
     /**
@@ -203,7 +297,7 @@ public class GoogleMapUtils {
      * @param poly
      * @return
      */
-    public static List<LatLng> smoothTrack(List<LatLng> poly) {
+    private static List<LatLng> smoothTrack(List<LatLng> poly) {
         if (Utils.isNull(poly) || poly.size() < 3 ){
             // if source is null or less than three points - nothing to smooth - return source
             return poly;
@@ -247,41 +341,6 @@ public class GoogleMapUtils {
         }
         return points;
 
-    }
-
-    public static ArrayList<Marker> addFlickrPhotosOnGoogleMap(final GoogleMap googleMap, final List<FlickrPhoto> flickrPhotos, final Context context){
-        ArrayList<Marker> markers = new ArrayList<Marker>();
-        if (Utils.isNull(googleMap)|| Utils.isNull(flickrPhotos)){
-            return null;
-        }
-
-        Bitmap bitmapDefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.picture_map);
-        bitmapDefault =BitmapUtils.scaleToFitHeight(bitmapDefault, GoogleMapUtils.SCALE_FLICKR_SMALL_SAMPLE_SIZE);
-        BitmapDescriptor itemBitmap = BitmapDescriptorFactory.fromBitmap(bitmapDefault);
-        for (FlickrPhoto flickrPhoto:  flickrPhotos){
-            MarkerOptions photoMarker = new MarkerOptions()
-                    .position(new LatLng(flickrPhoto.getLatitude(), flickrPhoto.getLongitude()))
-                    .icon(itemBitmap)
-                    .snippet(flickrPhoto.getUrl());
-            markers.add(googleMap.addMarker(photoMarker));
-        }
-        return markers;
-
-    }
-
-    public static void moveZoomControls(View mapView, int left, int top, int right, int bottom, boolean horizontal, boolean vertical) {
-
-        assert mapView != null;
-
-        View zoomIn = mapView.findViewWithTag(GOOGLEMAP_ZOOMIN_BUTTON);
-
-        // we need the parent view of the zoomin/zoomout buttons - it didn't have a tag
-        // so we must get the parent reference of one of the zoom buttons
-        View zoomInOut = (View) zoomIn.getParent();
-
-        if (zoomInOut != null) {
-            moveView(zoomInOut,left,top,right,bottom,horizontal,vertical);
-        }
     }
 
     /**

@@ -23,8 +23,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.google.android.gms.maps.SupportMapFragment"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        />
+        android:name="com.google.android.gms.maps.SupportMapFragment">
+    </fragment>
     <ProgressBar
         android:id="@+id/loading_progressbar"
         android:layout_marginLeft="5dp"
@@ -34,4 +34,17 @@
         android:layout_alignParentBottom="true"
         style="?android:attr/progressBarStyleSmall"
         />
+    <ImageButton
+        android:id="@+id/move_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_move_camera"
+        android:tint="#75FFFFFF"
+        android:padding="5dp"
+        android:background="@drawable/button_googlemap_shadow">
+        <!-- android:tint="#75FFFFFF" is 46% as recommended in material design in google :) -->
+    </ImageButton>
 </RelativeLayout>

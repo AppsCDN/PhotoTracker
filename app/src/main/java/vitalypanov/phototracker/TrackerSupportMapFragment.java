@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -62,7 +63,8 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     ArrayList<Marker> mFlickerMarkers = null;
     private ProgressBar mLoadingProgressbar;
     FlickrSearchTask mFlickrSearchTask = null;
-
+    boolean mMoveMapCamera = true;
+    ImageButton mCustomMoveCameraGoogleMapButton = null;
     /**
      * Override this method to return correct track object or null
      * @return Track object - can be null
@@ -120,12 +122,33 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle bundle) {
         View view = layoutInflater.inflate(getLayoutResourceId(), container, false);
+
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.google_map_fragment);
+
         mLoadingFrame = (RelativeLayout) view.findViewById(R.id.google_map_loading_data_frame);
+
         mLoadingProgressbar = (ProgressBar) view.findViewById(R.id.loading_progressbar);
         mLoadingProgressbar.setVisibility(View.GONE);
+
+        mCustomMoveCameraGoogleMapButton = (ImageButton) view.findViewById(R.id.move_camera);
+        if (!Utils.isNull(mCustomMoveCameraGoogleMapButton)) {
+            mCustomMoveCameraGoogleMapButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                        @Override
+                        public void onMapReady(final GoogleMap googleMap) {
+                            GoogleMapUtils.moveCameraToTrackDataGoogleMap(googleMap, getTrack(), getContext());
+                        }
+                    });
+                }
+            });
+        }
+
         updatMapAsyncCurrentLocation();
+
         startUpdateUI();
+
         return view;
     }
 
@@ -193,17 +216,17 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
 
         @Override
         protected void onPreExecute() {
-            if (!Utils.isNull(mLoadingFrame)) {
-                mLoadingFrame.setVisibility(View.VISIBLE);
+            if (!Utils.isNull(mLoadingProgressbar)) {
+                mLoadingProgressbar.setVisibility(View.VISIBLE);
             }
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (!Utils.isNull(mLoadingFrame)) {
-                mLoadingFrame.setVisibility(View.GONE);
-            }
             updateTrackDataUI();
+            if (!Utils.isNull(mLoadingProgressbar)) {
+                mLoadingProgressbar.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -221,8 +244,17 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
             public void onMapReady(final GoogleMap googleMap) {
                 googleMap.setOnMarkerClickListener(thisForCallback);
                 if (!Utils.isNull(getTrack())) {
-                    // Draw Track data and Track bitmaps on google map...
-                    GoogleMapUtils.drawTrackOnGoogleMap(googleMap, getTrack(), getContext(), mBitmapHashMap);
+                    // Clear google map
+                    GoogleMapUtils.clearGoogleMap(googleMap);
+                    // Draw Track data on google map...
+                    GoogleMapUtils.addTrackDataGoogleMap(googleMap, getTrack(), getContext());
+                    // move camera only first time after fragment was created, next time - we have special moveCamera button
+                    if (mMoveMapCamera) {
+                        GoogleMapUtils.moveCameraToTrackDataGoogleMap(googleMap, getTrack(), getContext());
+                        mMoveMapCamera = false;
+                    }
+                    // Draw Track bitmaps on google map...
+                    GoogleMapUtils.addTrackPhotosGoogleMap(googleMap, getTrack(), mBitmapHashMap, getContext());
                 }
                 googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
@@ -252,7 +284,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
                     }
                 }
                 if (!Utils.isNull(FlickrHolder.get().getFlickrPhotos()) && FlickrHolder.get().getFlickrPhotos().size() >0) {
-                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosOnGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
+                    mFlickerMarkers = GoogleMapUtils.addFlickrPhotosGoogleMap(googleMap, FlickrHolder.get().getFlickrPhotos(), getContext());
                 }
             }
         });
@@ -262,7 +294,7 @@ public abstract class TrackerSupportMapFragment extends Fragment implements Goog
     @Override
     public void onResume() {
         super.onResume();
-        GoogleMapUtils.initMapControls(mMapFragment);
+        GoogleMapUtils.initMapControls(mMapFragment, mCustomMoveCameraGoogleMapButton);
         startUpdateUI();
     }
 
